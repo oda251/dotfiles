@@ -1,0 +1,10 @@
+theme = TokyoNight
+maximize = true
+font-family = PlemolJP Console NF
+background-opacity = 0.8
+macos-titlebar-style = tabs
+background-blur = true
+adjust-cell-height = 2
+font-thicken = true
+window-inherit-working-directory = true
+shell-integration = detect
