@@ -1,0 +1,34 @@
+[mgr]
+ratio = [ 0, 1, 2 ]
+
+[opener]
+# エディタ（Neovim）: block = true でターミナルを占有
+edit = [
+	{ run = 'nvim "$@"', block = true, desc = "Neovim" }
+]
+# 画像ビューア: MacOSなら 'open'、Linuxなら 'xdg-open' や 'imv' など
+image = [
+	{ run = 'open "$@"', desc = "Open Image" }
+]
+# ブラウザ（HTMLなど）
+web = [
+	{ run = 'open "$@"', desc = "Open in Browser" }
+]
+
+[open]
+rules = [
+	# 画像ファイル
+	{ mime = "image/*", use = [ "image", "edit" ] },
+	# テキスト・コード
+	{ mime = "text/*",  use = "edit" },
+	{ mime = "application/javascript", use = "edit" },
+	{ mime = "application/json", use = "edit" },
+	# HTML
+	{ name = "*.html",  use = [ "web", "edit" ] },
+	# それ以外全部 Neovim
+	{ name = "*", use = "edit" }
+]
+
+[flavor]
+dark = "catppuccin-mocha"
+
