@@ -3,10 +3,17 @@
 # Homebrew (Apple Silicon Mac) - prioritize
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
-# nvm
+# nvm (lazy loading for faster startup)
 export NVM_DIR="$HOME/.nvm"
-[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && . "/opt/homebrew/opt/nvm/nvm.sh"
-[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && . "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
+nvm() {
+  unset -f nvm node npm npx
+  [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && . "/opt/homebrew/opt/nvm/nvm.sh"
+  [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && . "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
+  nvm "$@"
+}
+node() { nvm && node "$@"; }
+npm() { nvm && npm "$@"; }
+npx() { nvm && npx "$@"; }
 
 # Wasmer
 export WASMER_DIR="/Users/$USER/.wasmer"
@@ -24,8 +31,8 @@ export PATH="/Users/$USER/.antigravity/antigravity/bin:$PATH"
 # Amp
 export PATH="/Users/$USER/.amp/bin:$PATH"
 
-# gem (Ruby)
-export PATH="$(gem environment gemdir)/bin:$PATH"
+# gem (Ruby) - hardcoded path for speed
+export PATH="/Library/Ruby/Gems/2.6.0/bin:$PATH"
 
 # SDKMAN - THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="$HOME/.sdkman"

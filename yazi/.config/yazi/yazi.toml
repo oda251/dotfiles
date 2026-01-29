@@ -17,15 +17,19 @@ web = [
 
 [open]
 rules = [
-	# 画像ファイル
+	# 1. HTML専用ルール（一番上に持ってくるのが安全）
+	{ name = "*.html", use = [ "web", "edit" ] },
+	{ mime = "text/html", use = [ "web", "edit" ] },
+
+	# 2. 画像ファイル
 	{ mime = "image/*", use = [ "image", "edit" ] },
-	# テキスト・コード
-	{ mime = "text/*",  use = "edit" },
+
+	# 3. テキスト・コード（HTMLより下に配置）
+	{ mime = "text/*", use = "edit" },
 	{ mime = "application/javascript", use = "edit" },
 	{ mime = "application/json", use = "edit" },
-	# HTML
-	{ name = "*.html",  use = [ "web", "edit" ] },
-	# それ以外全部 Neovim
+
+	# 4. それ以外（フォールバック）
 	{ name = "*", use = "edit" }
 ]
 
