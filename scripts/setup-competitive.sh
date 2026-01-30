@@ -1,4 +1,57 @@
-#!/bin/bash
+##!/bin/bash
+# Setup script for GCC and AtCoder Library (ac-library)
+# Optimized for C++ competitive programming.
+
+set -euo pipefail
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+echo -e "${YELLOW}=== AtCoder C++ Environment Setup ===${NC}"
+
+# Detect OS
+OS=$(uname -s)
+
+if [ "$OS" = "Darwin" ]; then
+  echo -e "${GREEN}✓ Detected macOS (Darwin)${NC}"
+  if ! command -v brew &> /dev/null; then
+    echo -e "${RED}✗ Homebrew is not installed${NC}"
+    exit 1
+  fi
+  # pythonを削除し、C++開発に必要な最小限に
+  echo "Installing GCC and CMake via Homebrew..."
+  brew install gcc cmake git --quiet
+  
+elif [ "$OS" = "Linux" ]; then
+  echo -e "${GREEN}✓ Detected Linux${NC}"
+  echo "Installing build-essential via apt-get..."
+  sudo apt-get update -qq
+  sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    build-essential cmake git > /dev/null 2>&1
+else
+  echo -e "${RED}✗ Unsupported operating system: $OS${NC}"
+  exit 1
+fi
+
+# Clone ac-library
+AC_LIBRARY_PATH="$HOME/atcoder/ac-library"
+if [ ! -d "$AC_LIBRARY_PATH" ]; then
+  echo "Cloning AtCoder Library..."
+  mkdir -p "$HOME/atcoder"
+  git clone https://github.com/atcoder/ac-library "$AC_LIBRARY_PATH" > /dev/null 2>&1
+fi
+
+echo -e "\n${GREEN}=== Setup Complete ===${NC}\n"
+
+# 自動include設定の案内
+SHELL_CONFIG=""
+echo -e "${GREEN}export CPATH=\"\$CPATH:$AC_LIBRARY_PATH\"${NC}"
+echo ""
+echo "追記後、'source $SHELL_CONFIG' を実行すると、"
+echo "g++ mycode.cpp だけで ACL が include できるようになります。"!/bin/bash
 # Setup script for GCC and AtCoder Library (ac-library)
 # This script is idempotent and detects the operating system to install required tools.
 
@@ -83,3 +136,4 @@ echo "     cmake --version"
 echo "     python3 --version"
 echo "     git --version"
 echo ""
+
