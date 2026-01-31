@@ -9,6 +9,7 @@ uv = "latest"
 stow = "latest"
 bun = "latest"
 rust = "stable"
+terraform = "latest"
 
 [tasks.setup_atcoder]
 description = "AtCoder 向けセットアップ（Python + uv + atcoder-tools と GCC/AtCoder Library）"
