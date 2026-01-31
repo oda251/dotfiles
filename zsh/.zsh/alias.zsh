@@ -9,6 +9,7 @@ alias grep='rg'
 # Applications
 alias chrome="open -a 'Google Chrome'"
 alias idea="open -a 'IntelliJ IDEA'"
+alias copilot="copilot --allow-all-tools"
 
 # Git
 alias pwb="git rev-parse --abbrev-ref HEAD | pbcopy"

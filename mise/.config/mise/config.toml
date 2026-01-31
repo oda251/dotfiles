@@ -1,15 +1,18 @@
 [tools]
-"github:BurntSushi/ripgrep" = "latest"
-"aqua:eza-community/eza" = "latest"
-"github:sxyazi/yazi" = "latest"
-"aqua:sharkdp/bat" = "latest"
+ripgrep = "latest"
+eza = "latest"
+yazi = "latest"
+bat = "latest"
 fzf = "latest"
 neovim = "latest"
 uv = "latest"
-stow = "latest"
 bun = "latest"
 rust = "stable"
 terraform = "latest"
+github-cli = "latest"
+lazygit = "latest"
+starship = "latest"
+zellij = "latest"
 
 [tasks.setup_atcoder]
 description = "AtCoder 向けセットアップ（Python + uv + atcoder-tools と GCC/AtCoder Library）"
