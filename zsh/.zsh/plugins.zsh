@@ -10,7 +10,7 @@ source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 eval "$(starship init zsh)"
 
 # mise prompt
-eval "$(mise activate bash)"
+eval "$(mise activate zsh)"
 
 # Zellij terminal multiplexer
 if [[ -z "$ZELLIJ" ]]; then

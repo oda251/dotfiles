@@ -13,6 +13,8 @@ github-cli = "latest"
 lazygit = "latest"
 starship = "latest"
 zellij = "latest"
+node = "latest"
+npm = "latest"
 
 [tasks.setup_atcoder]
 description = "AtCoder 向けセットアップ（Python + uv + atcoder-tools と GCC/AtCoder Library）"
