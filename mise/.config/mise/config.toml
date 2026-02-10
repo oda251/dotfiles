@@ -15,6 +15,7 @@ starship = "latest"
 zellij = "latest"
 node = "latest"
 npm = "latest"
+opencode = "latest"
 
 [tasks.setup_atcoder]
 description = "AtCoder 向けセットアップ（Python + uv + atcoder-tools と GCC/AtCoder Library）"
