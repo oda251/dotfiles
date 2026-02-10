@@ -21,7 +21,7 @@ description = "AtCoder 向けセットアップ（Python + uv + atcoder-tools �
 run = [
   "uv pip install --upgrade pip",
   "uv pip install atcoder-tools",
-  "bash /Users/oda_yuya/dotfiles/scripts/setup-competitive.sh",
+  "bash /Users/oda_yuya/dotfiles/.scripts/setup-competitive.sh",
 ]
 
 [tasks.gh_dash]
@@ -36,7 +36,7 @@ description = "全セットアップをまとめて実行: setup_atcoder → gh_
 run = [
   "uv pip install --upgrade pip",
   "uv pip install atcoder-tools",
-  "bash /Users/oda_yuya/dotfiles/scripts/setup-competitive.sh",
+  "bash /Users/oda_yuya/dotfiles/.scripts/setup-competitive.sh",
   "if ! command -v gh >/dev/null 2>&1; then echo 'gh CLI が見つかりません。先に gh をインストールしてください。' && exit 1; fi",
   "if gh extension list | grep -q 'gh-dash'; then echo 'gh-dash は既にインストールされています'; else gh extension install dlvhdr/gh-dash; fi",
 ]
