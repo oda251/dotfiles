@@ -1,3 +1,6 @@
+# 概要
+個人用dotfiles。TUIに注力した。
+
 # 前提
 - chezmoi
 
