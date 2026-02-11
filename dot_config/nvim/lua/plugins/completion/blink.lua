@@ -34,7 +34,7 @@ return {
 
     completion = {
       menu = { auto_show = true },
-      ghost_text = { enabled = true },
+      ghost_text = { enabled = false },
       documentation = { auto_show = false },
       trigger = {
         show_delay_ms = 20,
