@@ -14,8 +14,7 @@ fi
 
 eval "$(mise activate bash)"
 
-uv pip install --upgrade pip
-uv pip install atcoder-tools
+uv tool install atcoder-tools --force
 
 AC_LIBRARY_PATH="$HOME/atcoder/ac-library"
 if [ ! -d "$AC_LIBRARY_PATH" ]; then
