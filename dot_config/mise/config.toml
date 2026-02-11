@@ -28,3 +28,8 @@ zellij = "latest"
 neovim = "latest"
 "github:anomalyco/opencode" = "latest"
 bottom = "latest"
+
+k9s = "latest"
+kubectl = "latest"
+kubectx = "latest"
+kubens = "latest"
