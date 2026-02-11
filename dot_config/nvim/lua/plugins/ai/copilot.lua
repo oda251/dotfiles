@@ -5,7 +5,10 @@ return {
   config = function()
     require("copilot").setup({
       copilot_node_command = vim.fn.expand("~/.local/share/mise/installs/node/latest/bin/node"),
-      suggestion = { enabled = false },
+      suggestion = {
+        enabled = false,
+        debounce = 0,
+      },
       panel = { enabled = false },
       filetypes = {
         markdown = true,
