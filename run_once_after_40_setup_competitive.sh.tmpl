@@ -1,0 +1,23 @@
+#!/bin/bash
+
+{{ if eq .chezmoi.os "darwin" -}}
+if [[ -f "/opt/homebrew/bin/brew" ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+{{ else if eq .chezmoi.os "linux" -}}
+if [[ -d "/home/linuxbrew/.linuxbrew" ]]; then
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+fi
+{{ end -}}
+
+# Ensure mise is in PATH and tools are available
+eval "$(mise activate bash)"
+
+uv pip install --upgrade pip
+uv pip install atcoder-tools
+
+AC_LIBRARY_PATH="$HOME/atcoder/ac-library"
+if [ ! -d "$AC_LIBRARY_PATH" ]; then
+    mkdir -p "$HOME/atcoder"
+    git clone https://github.com/atcoder/ac-library "$AC_LIBRARY_PATH"
+fi

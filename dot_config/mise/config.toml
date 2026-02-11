@@ -1,0 +1,6 @@
+[tools]
+uv = "latest"
+bun = "latest"
+rust = "stable"
+terraform = "latest"
+node = "latest"

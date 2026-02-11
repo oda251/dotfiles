@@ -1,18 +1,14 @@
-# Plugins & UI
-
-# zsh-autosuggestions (hardcoded path for speed)
+{{- if eq .chezmoi.os "darwin" }}
 source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-
-# zsh-syntax-highlighting (hardcoded path for speed)
 source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+{{- else if eq .chezmoi.os "linux" }}
+source /home/linuxbrew/.linuxbrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+source /home/linuxbrew/.linuxbrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+{{- end }}
 
-# Starship prompt
+eval "$(mise activate zsh)"
 eval "$(starship init zsh)"
 
-# mise prompt
-eval "$(mise activate zsh)"
-
-# Zellij terminal multiplexer
 if [[ -z "$ZELLIJ" ]]; then
     if [[ "$ZELLIJ_AUTO_ATTACH" == "true" ]]; then
         zellij attach -c || zellij

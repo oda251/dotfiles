@@ -1,0 +1,8 @@
+.gitignore
+.chezmoiconfig.toml
+.chezmoistate
+.git
+README.md
+LICENSE
+scripts/
+docs/

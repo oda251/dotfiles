@@ -1,2 +1,8 @@
-zsh/.zsh/local.zsh
+.DS_Store
 .zcompdump*
+.chezmoidata/
+.chezmoistate/
+.chezmoitemp/
+*.swp
+*.bak
+*~
