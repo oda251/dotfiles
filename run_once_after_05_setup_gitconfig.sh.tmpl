@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Ensure git loads the shared gitconfig when chezmoi runs setup
+if command -v git >/dev/null 2>&1; then
+  git config --global include.path "$HOME/.gitconfig_shared"
+fi
