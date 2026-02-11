@@ -12,7 +12,6 @@ elif [[ -d "$HOME/.linuxbrew" ]]; then
 fi
 {{ end -}}
 
-# Ensure mise is in PATH and tools are available
 eval "$(mise activate bash)"
 
 uv pip install --upgrade pip
@@ -22,4 +21,6 @@ AC_LIBRARY_PATH="$HOME/atcoder/ac-library"
 if [ ! -d "$AC_LIBRARY_PATH" ]; then
     mkdir -p "$HOME/atcoder"
     git clone https://github.com/atcoder/ac-library "$AC_LIBRARY_PATH"
+else
+    cd "$AC_LIBRARY_PATH" && git pull
 fi
