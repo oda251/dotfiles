@@ -23,6 +23,7 @@ return {
     keymap = {
       preset = 'default',
       ['<C-l>'] = { 'accept', 'fallback' },
+      ['<M-l>'] = { 'accept', 'fallback' },
     },
 
     appearance = {
