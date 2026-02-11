@@ -22,8 +22,28 @@ return {
     -- See :h blink-cmp-config-keymap for defining your own keymap
     keymap = {
       preset = 'default',
-      ['<C-l>'] = { 'accept', 'fallback' },
-      ['<M-l>'] = { 'accept', 'fallback' },
+      ['<C-l>'] = {
+        function(cmp)
+          if cmp.is_visible() then
+            return cmp.accept()
+          elseif require("copilot.suggestion").is_visible() then
+            require("copilot.suggestion").accept()
+            return true
+          end
+        end,
+        'fallback',
+      },
+      ['<M-l>'] = {
+        function(cmp)
+          if cmp.is_visible() then
+            return cmp.accept()
+          elseif require("copilot.suggestion").is_visible() then
+            require("copilot.suggestion").accept()
+            return true
+          end
+        end,
+        'fallback',
+      },
     },
 
     appearance = {
