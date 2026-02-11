@@ -23,7 +23,7 @@ return {
     keymap = {
       preset = 'default',
       ['<Tab>'] = { 'accept', 'fallback' },
-      ['<M-l>'] = { 'accept', 'fallback' },
+      ['<C-l>'] = { 'accept', 'fallback' },
     },
 
     appearance = {

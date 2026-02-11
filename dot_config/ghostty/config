@@ -8,3 +8,4 @@ adjust-cell-height = 2
 font-thicken = true
 window-inherit-working-directory = true
 shell-integration = detect
+macos-option-as-alt = left
