@@ -9,11 +9,8 @@ export WASMER_DIR="$HOME/.wasmer"
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 export PATH="$PATH:$HOME/.lmstudio/bin"
-
 export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
-
 export PATH="$HOME/.amp/bin:$PATH"
-
 export PATH="/Library/Ruby/Gems/2.6.0/bin:$PATH"
 
 {{- else if eq .chezmoi.os "linux" }}
@@ -23,6 +20,10 @@ elif [[ -d "$HOME/.linuxbrew" ]]; then
     eval "$($HOME/.linuxbrew/bin/brew shellenv)"
 fi
 
+export PATH=$PATH:/usr/local/go/bin
 {{- end }}
+
+export SDKMAN_DIR="$HOME/.sdkman"
+[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 eval "$(zoxide init zsh)"
