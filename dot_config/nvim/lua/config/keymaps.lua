@@ -30,4 +30,4 @@ keymap("n", "<leader>w", ":w<CR>", { desc = "Save file" })
 keymap("n", "<leader>q", ":q<CR>", { desc = "Quit" })
 
 -- インサートモードでの通常のTab入力（Alt+Tab）
-keymap("i", "<M-Tab>", "<Tab>", { noremap = true, silent = true, desc = "Insert tab" })
+keymap("i", "<M-Tab>", "<C-v><Tab>", { noremap = true, silent = true, desc = "Insert tab" })
