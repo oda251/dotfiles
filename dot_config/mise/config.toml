@@ -7,6 +7,9 @@ uv = "latest"
 bun = "latest"
 rust = "stable"
 terraform = "latest"
+prettier = "latest"
+biome = "latest"
+
 
 # Modern CLI Tools
 fzf = "latest"
