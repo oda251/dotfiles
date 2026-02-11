@@ -10,7 +10,7 @@ return {
     local lspconfig = require("lspconfig")
 
     require("mason-lspconfig").setup({
-      ensure_installed = { "lua_ls", "vtsls", "tailwindcss" },
+      ensure_installed = { "lua_ls", "vtsls", "tailwindcss", "clangd", "rust_analyzer", "pyright" },
       handlers = {
         function(server_name)
           lspconfig[server_name].setup({ capabilities = capabilities })
