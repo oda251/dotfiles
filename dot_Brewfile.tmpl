@@ -1,12 +1,19 @@
 brew "git"
 brew "zsh"
 brew "mise"
+brew "k9s"
+brew "kubectl"
+brew "awscli"
+brew "kubectx"
 
 {{- if eq .chezmoi.os "darwin" }}
 cask "google-chrome"
 cask "visual-studio-code"
 cask "ghostty"
 cask "antigravity"
+cask "font-plemol-jp"
 {{- else if eq .chezmoi.os "linux" }}
 brew "gcc"
+brew "unzip"
+brew "fontconfig"
 {{- end }}
