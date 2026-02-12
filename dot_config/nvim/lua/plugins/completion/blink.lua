@@ -56,9 +56,6 @@ return {
       menu = { auto_show = true },
       ghost_text = { enabled = false },
       documentation = { auto_show = false },
-      trigger = {
-        show_delay_ms = 20,
-      },
     },
 
     -- Default list of enabled providers defined so that you can extend it
