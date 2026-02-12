@@ -9,3 +9,8 @@ font-thicken = true
 window-inherit-working-directory = true
 shell-integration = detect
 macos-option-as-alt = left
+copy-on-select = true
+quick-terminal-position = "top"
+quick-terminal-screen = "main"
+quick-terminal-animation-duration = 0.3
+keybind = "global:cmd+shift+t=toggle_quick_terminal"

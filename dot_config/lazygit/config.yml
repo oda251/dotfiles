@@ -4,3 +4,6 @@ gui:
   pagers:
     colorArg: always
     pager: delta --dark --paging=never
+merging:
+  manualCommit: false
+  editorCommand: 'nvim -d -c "wincmd J" "$LOCAL" "$MERGED" "$REMOTE"'
