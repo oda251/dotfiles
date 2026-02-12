@@ -27,14 +27,14 @@
         zsh-autosuggestions
         zsh-syntax-highlighting
         diskonaut
-        ghostty.packages.${system}.default
       ];
+      ghosttyPkgs = if isLinux system then [ ghostty.packages.${system}.default ] else [];
       linuxExtras = with pkgs; [
         gcc
         unzip
         fontconfig
       ];
-    in base ++ (if isLinux system then linuxExtras else []);
+    in base ++ ghosttyPkgs ++ (if isLinux system then linuxExtras else []);
 
     homeModuleFor = system: { pkgs, ... }: {
       home.stateVersion = "24.11";
