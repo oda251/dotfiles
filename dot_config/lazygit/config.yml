@@ -1,8 +1,6 @@
-git:
-  paging:
-    colorArg: always
-    pager: delta --dark --paging=never
-
 gui:
   editor:
     command: nvim
+  pagers:
+    colorArg: always
+    pager: delta --dark --paging=never
