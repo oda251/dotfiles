@@ -1,10 +1,15 @@
-{{- if eq .chezmoi.os "darwin" }}
-source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-{{- else if eq .chezmoi.os "linux" }}
-source /home/linuxbrew/.linuxbrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-source /home/linuxbrew/.linuxbrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-{{- end }}
+# zsh plugins are managed by nix; source from nix profile
+if [[ -f "$HOME/.nix-profile/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
+  source "$HOME/.nix-profile/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+elif [[ -f "/nix/var/nix/profiles/per-user/$USER/profile/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
+  source "/nix/var/nix/profiles/per-user/$USER/profile/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+fi
+
+if [[ -f "$HOME/.nix-profile/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
+  source "$HOME/.nix-profile/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+elif [[ -f "/nix/var/nix/profiles/per-user/$USER/profile/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
+  source "/nix/var/nix/profiles/per-user/$USER/profile/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+fi
 
 eval "$(mise activate zsh)"
 eval "$(zoxide init zsh)"

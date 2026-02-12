@@ -9,6 +9,7 @@ rust = "stable"
 terraform = "latest"
 prettier = "latest"
 biome = "latest"
+java = "latest"
 
 
 # Modern CLI Tools

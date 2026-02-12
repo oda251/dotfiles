@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Source nix daemon if available
+nix_daemon="/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
+if [[ -f "$nix_daemon" ]]; then
+  # shellcheck disable=SC1090
+  source "$nix_daemon"
+fi
+
+if ! command -v nix >/dev/null 2>&1; then
+  echo "nix not installed yet; run 'chezmoi apply' once to install nix, then reopen your shell and reapply." >&2
+  exit 0
+fi
+
+export NIX_CONFIG="experimental-features = nix-command flakes"
+
+source_dir="${CHEZMOI_SOURCE_DIR:-$HOME/.local/share/chezmoi}"
+flake_path="$source_dir/flake.nix"
+
+if [[ ! -f "$flake_path" ]]; then
+  echo "flake.nix not found at $flake_path; skipping home-manager switch" >&2
+  exit 0
+fi
+
+system=$(nix eval --raw --impure --expr 'builtins.currentSystem')
+nix run home-manager -- switch --flake "$source_dir#$system"

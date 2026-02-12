@@ -1,4 +1,7 @@
+[[ -f "$HOME/.zsh/local.zsh" ]] && source "$HOME/.zsh/local.zsh"
+
 export XDG_CONFIG_HOME="$HOME/.config"
+
 {{- if eq .chezmoi.os "darwin" }}
 if [[ -f "/opt/homebrew/bin/brew" ]]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -6,23 +9,21 @@ fi
 
 export WASMER_DIR="$HOME/.wasmer"
 [ -s "$WASMER_DIR/wasmer.sh" ] && source "$WASMER_DIR/wasmer.sh"
-
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
-export PATH="$PATH:$HOME/.lmstudio/bin"
+export PATH="$HOME/.lmstudio/bin:$PATH"
 export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
 export PATH="$HOME/.amp/bin:$PATH"
 export PATH="/Library/Ruby/Gems/2.6.0/bin:$PATH"
-
 {{- else if eq .chezmoi.os "linux" }}
 if [[ -d "/home/linuxbrew/.linuxbrew" ]]; then
-    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 elif [[ -d "$HOME/.linuxbrew" ]]; then
-    eval "$($HOME/.linuxbrew/bin/brew shellenv)"
+  eval "$($HOME/.linuxbrew/bin/brew shellenv)"
 fi
-
-export PATH=$PATH:/usr/local/go/bin
+export PATH="$PATH:/usr/local/go/bin"
 {{- end }}
 export PATH="$HOME/.local/bin:$PATH"
 
-
+source "$HOME/.zsh/plugins.zsh"
+source "$HOME/.zsh/alias.zsh"

@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Source nix if already installed (multi-user daemon path)
+nix_daemon="/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
+if [[ -f "$nix_daemon" ]]; then
+  # shellcheck disable=SC1090
+  source "$nix_daemon"
+fi
+
+# Install nix only if truly absent
+if ! command -v nix >/dev/null 2>&1; then
+  if ! command -v curl >/dev/null 2>&1; then
+    echo "curl is required to install Nix" >&2
+    exit 1
+  fi
+  curl -fsSL https://nixos.org/nix/install | sh -s -- --daemon
+  # Source again after fresh install
+  if [[ -f "$nix_daemon" ]]; then
+    # shellcheck disable=SC1090
+    source "$nix_daemon"
+  fi
+fi
+
+# Enable flakes for this session
+export NIX_CONFIG="experimental-features = nix-command flakes"
+
+source_dir="${CHEZMOI_SOURCE_DIR:-$HOME/.local/share/chezmoi}"
+flake_path="$source_dir/flake.nix"
+
+if [[ -f "$flake_path" ]] && command -v nix >/dev/null 2>&1; then
+  system=$(nix eval --raw --impure --expr 'builtins.currentSystem' 2>/dev/null || true)
+  if [[ -n "$system" ]]; then
+    nix run home-manager -- switch --flake "$source_dir#$system"
+  fi
+fi
