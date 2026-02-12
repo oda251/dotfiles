@@ -1,0 +1,13 @@
+#!/bin/bash
+
+{{- if eq .chezmoi.os "linux" }}
+set -euo pipefail
+
+if ! command -v ghostty >/dev/null 2>&1; then
+  if ! command -v snap >/dev/null 2>&1; then
+    sudo apt-get update -qq >/dev/null 2>&1
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y snapd >/dev/null 2>&1
+  fi
+  sudo snap install ghostty --classic --edge >/dev/null 2>&1
+fi
+{{- end }}
