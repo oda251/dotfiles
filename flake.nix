@@ -7,9 +7,10 @@
       url = "github:nix-community/home-manager/release-24.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    ghostty.url = "github:ghostty-org/ghostty";
   };
 
-  outputs = { self, nixpkgs, home-manager }: let
+  outputs = { self, nixpkgs, home-manager, ghostty }: let
     supportedSystems = [ "x86_64-darwin" "aarch64-darwin" "x86_64-linux" "aarch64-linux" ];
     isLinux = system: builtins.elem system [ "x86_64-linux" "aarch64-linux" ];
 
@@ -26,7 +27,7 @@
         zsh-autosuggestions
         zsh-syntax-highlighting
         diskonaut
-        ghostty
+        ghostty.packages.${system}.default
       ];
       linuxExtras = with pkgs; [
         gcc
