@@ -8,6 +8,16 @@ if [[ -f "$nix_daemon" ]]; then
   source "$nix_daemon"
 fi
 
+# Archive existing shell configs so Home Manager can take over
+backup_dir="$HOME/.local/share/chezmoi/nix-backups"
+mkdir -p "$backup_dir"
+for file in "$HOME/.zshrc" "$HOME/.zshenv"; do
+  if [[ -e "$file" && ! -L "$file" ]]; then
+    timestamp=$(date -u +%Y%m%d%H%M%S)
+    mv "$file" "$backup_dir/$(basename "$file").$timestamp"
+  fi
+done
+
 if ! command -v nix >/dev/null 2>&1; then
   echo "nix not installed yet; run 'chezmoi apply' once to install nix, then reopen your shell and reapply." >&2
   exit 0

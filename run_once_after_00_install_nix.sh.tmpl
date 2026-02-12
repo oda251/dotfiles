@@ -8,6 +8,16 @@ if [[ -f "$nix_daemon" ]]; then
   source "$nix_daemon"
 fi
 
+# Move existing shell configs out of the way so Home Manager can manage them
+backup_dir="$HOME/.local/share/chezmoi/nix-backups"
+mkdir -p "$backup_dir"
+for file in "$HOME/.zshrc" "$HOME/.zshenv"; do
+  if [[ -e "$file" && ! -L "$file" ]]; then
+    timestamp=$(date -u +%Y%m%d%H%M%S)
+    mv "$file" "$backup_dir/$(basename "$file").$timestamp"
+  fi
+done
+
 # Install nix only if truly absent
 if ! command -v nix >/dev/null 2>&1; then
   if ! command -v curl >/dev/null 2>&1; then
