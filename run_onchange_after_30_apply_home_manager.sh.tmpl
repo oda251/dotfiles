@@ -25,13 +25,16 @@ fi
 
 export NIX_CONFIG="experimental-features = nix-command flakes"
 
-target_dir="$HOME"
-flake_path="$target_dir/flake.nix"
+flake_path="$HOME/flake.nix"
+flake_dir="$HOME/.local/share/chezmoi-flake"
 
 if [[ ! -f "$flake_path" ]]; then
   echo "flake.nix not found at $flake_path; skipping home-manager switch" >&2
   exit 0
 fi
 
+mkdir -p "$flake_dir"
+cp "$flake_path" "$flake_dir/flake.nix"
+
 system=$(nix eval --raw --impure --expr 'builtins.currentSystem')
-nix run home-manager -- switch --flake "$target_dir#$system"
+nix run home-manager -- switch --flake "$flake_dir#$system"
