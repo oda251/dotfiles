@@ -12,10 +12,7 @@ elif [[ -d "$HOME/.linuxbrew" ]]; then
 fi
 {{ end -}}
 
-AC_LIBRARY_PATH="$HOME/atcoder/ac-library"
-if [ ! -d "$AC_LIBRARY_PATH" ]; then
-    mkdir -p "$HOME/atcoder"
-    git clone https://github.com/atcoder/ac-library "$AC_LIBRARY_PATH"
-else
-    cd "$AC_LIBRARY_PATH" && git pull
-fi
+eval "$(mise activate bash)"
+
+uv tool install pre-commit --force
+uv tool install atcoder-tools --force

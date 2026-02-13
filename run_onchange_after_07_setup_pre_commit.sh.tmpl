@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# pre-commit config hash: {{ include ".pre-commit-config.yaml" | sha256sum }}
+
+source_dir="${CHEZMOI_SOURCE_DIR:-$HOME/.local/share/chezmoi}"
+config_path="$source_dir/.pre-commit-config.yaml"
+
+if [[ ! -f "$config_path" ]]; then
+  echo "pre-commit config not found at $config_path; skipping install" >&2
+  exit 0
+fi
+
+if command -v mise >/dev/null 2>&1; then
+  eval "$(mise activate bash)"
+fi
+
+if ! command -v uv >/dev/null 2>&1; then
+  echo "uv not found; run mise install before pre-commit setup" >&2
+  exit 0
+fi
+
+cd "$source_dir"
+uv tool run pre-commit install
