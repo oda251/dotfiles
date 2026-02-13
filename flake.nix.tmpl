@@ -54,10 +54,8 @@
       modules = [
         (homeModuleFor system)
         {
-          home.username = "oda_yuya";
-          home.homeDirectory =
-            if isLinux system then "/home/oda_yuya"
-            else "/Users/oda_yuya";
+          home.username = "{{ .chezmoi.username }}";
+          home.homeDirectory = "{{ .chezmoi.homeDir }}";
         }
       ];
     };

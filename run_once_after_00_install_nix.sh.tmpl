@@ -35,12 +35,12 @@ fi
 # Enable flakes for this session
 export NIX_CONFIG="experimental-features = nix-command flakes"
 
-source_dir="${CHEZMOI_SOURCE_DIR:-$HOME/.local/share/chezmoi}"
-flake_path="$source_dir/flake.nix"
+target_dir="$HOME"
+flake_path="$target_dir/flake.nix"
 
 if [[ -f "$flake_path" ]] && command -v nix >/dev/null 2>&1; then
   system=$(nix eval --raw --impure --expr 'builtins.currentSystem' 2>/dev/null || true)
   if [[ -n "$system" ]]; then
-    nix run home-manager -- switch --flake "$source_dir#$system"
+    nix run home-manager -- switch --flake "$target_dir#$system"
   fi
 fi
