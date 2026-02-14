@@ -9,11 +9,11 @@ keybinds {
         // Cmd+w to close tab
         bind "Super w" { CloseTab; SwitchToMode "Normal"; }
         
-        // Cmd+Shift+{ to go to previous tab
-        bind "Super Shift Left" { GoToPreviousTab; SwitchToMode "Normal"; }
+        // Cmd+Shift+[ to go to previous tab
+        bind "Super Shift BracketLeft" { GoToPreviousTab; SwitchToMode "Normal"; }
         
-        // Cmd+Shift+} to go to next tab
-        bind "Super Shift Right" { GoToNextTab; SwitchToMode "Normal"; }
+        // Cmd+Shift+] to go to next tab
+        bind "Super Shift BracketRight" { GoToNextTab; SwitchToMode "Normal"; }
     }
 }
 

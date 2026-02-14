@@ -21,7 +21,7 @@
                 "guid": "{2c4de342-38b7-51cf-b940-2309a097f518}",
                 "name": "WSL (Zellij)",
                 "source": "Windows.Terminal.Wsl",
-                "commandline": "wsl.exe ~ -e zsh -c 'zellij attach -c || zellij'",
+                "commandline": "wsl.exe -e zsh -c 'zellij attach -c || zellij'",
                 "colorScheme": "Tokyo Night Storm",
                 "icon": "🐧"
             },

@@ -29,5 +29,5 @@ Windows環境ではWSLとWindows Terminalを利用します：
 ## macOS
 
 - **Ghostty**: メインターミナル（Zellij連携）
-- **Zellij**: タブ操作はCmd+t/w/Shift+{/}でGhosttyから制御
+- **Zellij**: タブ操作はCmd+t（新規タブ）、Cmd+w（閉じる）、Cmd+Shift+[/]（タブ切替）でGhosttyから制御
 - **設定場所**: `.config/ghostty/config`, `.config/zellij/config.kdl`
