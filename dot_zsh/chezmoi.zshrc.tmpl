@@ -22,6 +22,9 @@ elif [[ -d "$HOME/.linuxbrew" ]]; then
   eval "$($HOME/.linuxbrew/bin/brew shellenv)"
 fi
 export PATH="$PATH:/usr/local/go/bin"
+{{- else if eq .chezmoi.os "windows" }}
+# Windows-specific PATH configuration
+# No brew, nix, or mise on Windows
 {{- end }}
 export PATH="$HOME/.local/bin:$PATH"
 
