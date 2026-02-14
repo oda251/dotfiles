@@ -1,0 +1,28 @@
+// Zellij configuration
+// Tab operation keybindings to work with Ghostty
+
+keybinds {
+    normal {
+        // Cmd+t for new tab (Super key on macOS)
+        bind "Super t" { NewTab; SwitchToMode "Normal"; }
+        
+        // Cmd+w to close tab
+        bind "Super w" { CloseTab; SwitchToMode "Normal"; }
+        
+        // Cmd+Shift+{ to go to previous tab
+        bind "Super Shift Left" { GoToPreviousTab; SwitchToMode "Normal"; }
+        
+        // Cmd+Shift+} to go to next tab
+        bind "Super Shift Right" { GoToNextTab; SwitchToMode "Normal"; }
+    }
+}
+
+// UI configuration
+ui {
+    pane_frames {
+        rounded_corners true
+    }
+}
+
+// Theme
+theme "tokyo-night-storm"

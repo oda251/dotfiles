@@ -1,0 +1,82 @@
+{
+    "$help": "https://aka.ms/terminal-documentation",
+    "$schema": "https://aka.ms/terminal-profiles-schema",
+    "defaultProfile": "{2c4de342-38b7-51cf-b940-2309a097f518}",
+    "copyOnSelect": true,
+    "profiles": {
+        "defaults": {
+            "colorScheme": "Tokyo Night Storm",
+            "font": {
+                "face": "PlemolJP Console NF",
+                "size": 12,
+                "weight": "medium"
+            },
+            "useAcrylic": true,
+            "acrylicOpacity": 0.8,
+            "cursorShape": "bar",
+            "startingDirectory": "%USERPROFILE%"
+        },
+        "list": [
+            {
+                "guid": "{2c4de342-38b7-51cf-b940-2309a097f518}",
+                "name": "WSL (Zellij)",
+                "source": "Windows.Terminal.Wsl",
+                "commandline": "wsl.exe ~ -e zsh -c 'zellij attach -c || zellij'",
+                "colorScheme": "Tokyo Night Storm",
+                "icon": "🐧"
+            },
+            {
+                "guid": "{58ad8b0c-3ef8-5f4d-bc6f-13e4c00f2530}",
+                "name": "WSL",
+                "source": "Windows.Terminal.Wsl",
+                "colorScheme": "Tokyo Night Storm"
+            }
+        ]
+    },
+    "schemes": [
+        {
+            "name": "Tokyo Night Storm",
+            "background": "#24283B",
+            "foreground": "#A9B1D6",
+            "cursorColor": "#C0CAF5",
+            "selectionBackground": "#414868",
+            "black": "#414868",
+            "red": "#F7768E",
+            "green": "#73DACA",
+            "yellow": "#E0AF68",
+            "blue": "#7AA2F7",
+            "purple": "#BB9AF7",
+            "cyan": "#7DCFFF",
+            "white": "#C0CAF5",
+            "brightBlack": "#565F89",
+            "brightRed": "#F76373",
+            "brightGreen": "#87FFEC",
+            "brightYellow": "#FFC776",
+            "brightBlue": "#448CFF",
+            "brightPurple": "#9F6DFF",
+            "brightCyan": "#4AD4FF",
+            "brightWhite": "#D6DEFF"
+        }
+    ],
+    "actions": [
+        {
+            "command": "unbound",
+            "keys": "ctrl+t"
+        },
+        {
+            "command": "unbound",
+            "keys": "ctrl+w"
+        },
+        {
+            "command": "unbound",
+            "keys": "ctrl+shift+["
+        },
+        {
+            "command": "unbound",
+            "keys": "ctrl+shift+]"
+        }
+    ],
+    "initialCols": 120,
+    "initialRows": 30,
+    "launchMode": "maximized"
+}

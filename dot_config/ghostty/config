@@ -14,3 +14,10 @@ quick-terminal-position = "top"
 quick-terminal-screen = "main"
 quick-terminal-animation-duration = 0.3
 keybind = "global:alt+`=toggle_quick_terminal"
+
+# Zellij tab operations - unbind Ghostty's native tab shortcuts
+# so they get sent directly to Zellij
+keybind = cmd+t=unbind
+keybind = cmd+w=unbind
+keybind = cmd+shift+braceleft=unbind
+keybind = cmd+shift+braceright=unbind
