@@ -14,6 +14,44 @@ elif [[ -d "$HOME/.linuxbrew" ]]; then
 fi
 {{ end -}}
 
+{{ if eq .chezmoi.os "linux" -}}
+has_libatomic=false
+if command -v ldconfig >/dev/null 2>&1; then
+  if ldconfig -p 2>/dev/null | grep -q "libatomic.so.1"; then
+    has_libatomic=true
+  fi
+elif ls /usr/lib*/libatomic.so.1 /lib*/libatomic.so.1 >/dev/null 2>&1; then
+  has_libatomic=true
+fi
+
+if [[ "$has_libatomic" != "true" ]]; then
+  if command -v apt-get >/dev/null 2>&1; then
+    sudo apt-get update -y && sudo apt-get install -y libatomic1 || {
+      echo "failed to install libatomic1 via apt-get" >&2
+      exit 1
+    }
+  elif command -v dnf >/dev/null 2>&1; then
+    sudo dnf install -y libatomic || {
+      echo "failed to install libatomic via dnf" >&2
+      exit 1
+    }
+  elif command -v pacman >/dev/null 2>&1; then
+    sudo pacman -Sy --noconfirm libatomic || {
+      echo "failed to install libatomic via pacman" >&2
+      exit 1
+    }
+  elif command -v zypper >/dev/null 2>&1; then
+    sudo zypper --non-interactive install libatomic1 || {
+      echo "failed to install libatomic1 via zypper" >&2
+      exit 1
+    }
+  else
+    echo "libatomic.so.1 not found; install libatomic (libatomic1) with your package manager." >&2
+    exit 1
+  fi
+fi
+{{ end -}}
+
 mise install node npm
 eval "$(mise activate bash)"
 mise install
