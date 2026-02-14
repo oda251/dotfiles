@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# mise config hash: {{ include "dot_config/mise/config.toml" | sha256sum }}
+# mise config hash: {{ include "dot_config/mise/config.toml.tmpl" | sha256sum }}
 
 {{ if eq .chezmoi.os "darwin" -}}
 if [[ -f "/opt/homebrew/bin/brew" ]]; then
@@ -52,6 +52,9 @@ if [[ "$has_libatomic" != "true" ]]; then
 fi
 {{ end -}}
 
+{{ if ne .chezmoi.os "windows" -}}
+# Mac/Linux: Install node/npm first for npm-based tools
 mise install node npm
+{{ end -}}
 eval "$(mise activate bash)"
 mise install

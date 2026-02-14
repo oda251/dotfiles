@@ -11,15 +11,14 @@ if [[ -f "$HOME/.nix-profile/share/zsh-syntax-highlighting/zsh-syntax-highlighti
 elif [[ -f "/nix/var/nix/profiles/per-user/$USER/profile/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
   source "/nix/var/nix/profiles/per-user/$USER/profile/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 fi
+{{- end }}
 
-eval "$(mise activate zsh)"
-eval "$(zoxide init zsh)"
-eval "$(starship init zsh)"
-{{- else }}
-# Windows: starship and zoxide need to be installed separately (e.g., via winget or scoop)
+# mise is used on all platforms (CLI tools only on Windows)
+command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"
+
+# zoxide and starship - installed via mise on all platforms
 command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init zsh)"
 command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
-{{- end }}
 
 if command -v zsh >/dev/null 2>&1; then
   export SHELL="$(command -v zsh)"

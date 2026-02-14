@@ -10,6 +10,8 @@ docs/
 # Windows-specific configs (ignore on non-Windows systems)
 {{ if ne .chezmoi.os "windows" }}
 AppData/
+Documents/PowerShell/
+Documents/WindowsPowerShell/
 {{ end }}
 
 # macOS-specific configs (ignore on non-macOS systems)
@@ -19,20 +21,16 @@ AppData/
 
 # Mac/Linux-specific configs (ignore on Windows)
 {{ if eq .chezmoi.os "windows" }}
-# Nix, Homebrew, mise installation scripts
+# Nix, Homebrew installation scripts (but NOT mise - Windows uses mise for CLI tools)
 run_once_before_00_install_homebrew.sh.tmpl
 run_once_after_00_install_nix.sh.tmpl
 run_onchange_after_10_install_packages.sh.tmpl
-run_onchange_after_20_install_mise_tools.sh.tmpl
 run_onchange_after_30_apply_home_manager.sh.tmpl
 
 # Nix and Homebrew configuration files
 flake.nix.tmpl
 flake.lock
 dot_Brewfile.tmpl
-
-# mise configuration
-.config/mise/
 
 # Other Unix-specific scripts
 run_once_after_15_change_shell.sh.tmpl
