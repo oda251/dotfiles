@@ -23,7 +23,7 @@ CLIツールは `flake.nix` + Home Manager で管理し、GUIアプリ（cask）
 Windows環境ではWSLとWindows Terminalを利用します：
 
 - **Windows Terminal**: Ghostty環境を再現（Tokyo Nightテーマ、フォント設定、透過効果）
-- **Zellij**: タブ管理に使用
+- **Zellij**: タブ管理に使用（Ctrl+t/w/Shift+[/]でタブ操作）
 - **設定場所**: `AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json`
 
 ## macOS

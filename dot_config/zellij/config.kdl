@@ -1,19 +1,31 @@
 // Zellij configuration
-// Tab operation keybindings to work with Ghostty
+// Tab operation keybindings to work with Ghostty (macOS) and Windows Terminal
 
 keybinds {
     normal {
-        // Cmd+t for new tab (Super key on macOS)
+        // macOS: Cmd+t for new tab (Super key maps to Cmd on macOS)
         bind "Super t" { NewTab; SwitchToMode "Normal"; }
         
-        // Cmd+w to close tab
+        // Windows/Linux: Ctrl+t for new tab
+        bind "Ctrl t" { NewTab; SwitchToMode "Normal"; }
+        
+        // macOS: Cmd+w to close tab
         bind "Super w" { CloseTab; SwitchToMode "Normal"; }
         
-        // Cmd+Shift+[ to go to previous tab
+        // Windows/Linux: Ctrl+w to close tab
+        bind "Ctrl w" { CloseTab; SwitchToMode "Normal"; }
+        
+        // macOS: Cmd+Shift+[ to go to previous tab
         bind "Super Shift BracketLeft" { GoToPreviousTab; SwitchToMode "Normal"; }
         
-        // Cmd+Shift+] to go to next tab
+        // Windows/Linux: Ctrl+Shift+[ to go to previous tab
+        bind "Ctrl Shift BracketLeft" { GoToPreviousTab; SwitchToMode "Normal"; }
+        
+        // macOS: Cmd+Shift+] to go to next tab
         bind "Super Shift BracketRight" { GoToNextTab; SwitchToMode "Normal"; }
+        
+        // Windows/Linux: Ctrl+Shift+] to go to next tab
+        bind "Ctrl Shift BracketRight" { GoToNextTab; SwitchToMode "Normal"; }
     }
 }
 
