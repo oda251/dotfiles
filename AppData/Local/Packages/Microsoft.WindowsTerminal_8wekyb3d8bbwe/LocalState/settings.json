@@ -60,19 +60,31 @@
     ],
     "actions": [
         {
-            "command": "unbound",
+            "command": {
+                "action": "sendInput",
+                "input": "zellij action new-tab\n"
+            },
             "keys": "ctrl+t"
         },
         {
-            "command": "unbound",
+            "command": {
+                "action": "sendInput",
+                "input": "zellij action close-tab\n"
+            },
             "keys": "ctrl+w"
         },
         {
-            "command": "unbound",
+            "command": {
+                "action": "sendInput",
+                "input": "zellij action go-to-previous-tab\n"
+            },
             "keys": "ctrl+shift+oem_4"
         },
         {
-            "command": "unbound",
+            "command": {
+                "action": "sendInput",
+                "input": "zellij action go-to-next-tab\n"
+            },
             "keys": "ctrl+shift+oem_6"
         }
     ],
