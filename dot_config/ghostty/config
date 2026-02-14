@@ -14,3 +14,9 @@ quick-terminal-position = "top"
 quick-terminal-screen = "main"
 quick-terminal-animation-duration = 0.3
 keybind = "global:alt+`=toggle_quick_terminal"
+
+# Zellij tab operations - send Zellij keybinding sequences
+keybind = cmd+t=text:\x02n
+keybind = cmd+w=text:\x02x
+keybind = cmd+shift+bracketleft=text:\x02[
+keybind = cmd+shift+bracketright=text:\x02]

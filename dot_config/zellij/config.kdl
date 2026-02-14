@@ -1,0 +1,13 @@
+// Zellij configuration
+// Keybindings are handled by terminal emulator (Ghostty/Windows Terminal)
+// They send Zellij CLI commands directly
+
+// UI configuration
+ui {
+    pane_frames {
+        rounded_corners true
+    }
+}
+
+// Theme
+theme "tokyo-night-storm"
