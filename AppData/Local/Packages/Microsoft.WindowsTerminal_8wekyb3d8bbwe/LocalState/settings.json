@@ -69,11 +69,11 @@
         },
         {
             "command": "unbound",
-            "keys": "ctrl+shift+["
+            "keys": "ctrl+shift+oem_4"
         },
         {
             "command": "unbound",
-            "keys": "ctrl+shift+]"
+            "keys": "ctrl+shift+oem_6"
         }
     ],
     "initialCols": 120,

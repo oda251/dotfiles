@@ -19,5 +19,5 @@ keybind = "global:alt+`=toggle_quick_terminal"
 # so they get sent directly to Zellij
 keybind = cmd+t=unbind
 keybind = cmd+w=unbind
-keybind = cmd+shift+braceleft=unbind
-keybind = cmd+shift+braceright=unbind
+keybind = cmd+shift+bracketleft=unbind
+keybind = cmd+shift+bracketright=unbind
