@@ -17,3 +17,30 @@ AppData/
 .config/ghostty/
 {{ end }}
 
+# Mac/Linux-specific configs (ignore on Windows)
+{{ if eq .chezmoi.os "windows" }}
+# Nix, Homebrew, mise installation scripts
+run_once_before_00_install_homebrew.sh.tmpl
+run_once_after_00_install_nix.sh.tmpl
+run_onchange_after_10_install_packages.sh.tmpl
+run_onchange_after_20_install_mise_tools.sh.tmpl
+run_onchange_after_30_apply_home_manager.sh.tmpl
+
+# Nix and Homebrew configuration files
+flake.nix.tmpl
+flake.lock
+dot_Brewfile.tmpl
+
+# mise configuration
+.config/mise/
+
+# Other Unix-specific scripts
+run_once_after_15_change_shell.sh.tmpl
+run_once_after_30_setup_gh_extensions.sh.tmpl
+run_once_after_35_setup_uv_tools.sh.tmpl
+run_once_after_40_setup_competitive.sh.tmpl
+run_once_after_45_install_fonts_linux.sh.tmpl
+run_onchange_after_07_setup_pre_commit.sh.tmpl
+run_once_after_05_setup_gitconfig.sh.tmpl
+{{ end }}
+

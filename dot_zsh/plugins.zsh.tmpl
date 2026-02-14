@@ -1,3 +1,4 @@
+{{- if ne .chezmoi.os "windows" }}
 # zsh plugins are managed by nix; source from nix profile
 if [[ -f "$HOME/.nix-profile/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
   source "$HOME/.nix-profile/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
@@ -14,6 +15,11 @@ fi
 eval "$(mise activate zsh)"
 eval "$(zoxide init zsh)"
 eval "$(starship init zsh)"
+{{- else }}
+# Windows: starship and zoxide need to be installed separately (e.g., via winget or scoop)
+command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init zsh)"
+command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
+{{- end }}
 
 if command -v zsh >/dev/null 2>&1; then
   export SHELL="$(command -v zsh)"
