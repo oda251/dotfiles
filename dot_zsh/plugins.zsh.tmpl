@@ -15,6 +15,10 @@ eval "$(mise activate zsh)"
 eval "$(zoxide init zsh)"
 eval "$(starship init zsh)"
 
+if command -v zsh >/dev/null 2>&1; then
+  export SHELL="$(command -v zsh)"
+fi
+
 if [[ -z "$ZELLIJ" ]]; then
     if [[ "$ZELLIJ_AUTO_ATTACH" == "true" ]]; then
         zellij attach -c || zellij

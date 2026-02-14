@@ -46,3 +46,26 @@ if [[ -f "$flake_path" ]] && command -v nix >/dev/null 2>&1; then
     nix run home-manager -- switch --flake "$flake_dir#$system"
   fi
 fi
+
+# Switch to zsh after Nix/Home Manager setup if available
+target_zsh=""
+if [[ -x "$HOME/.nix-profile/bin/zsh" ]]; then
+  target_zsh="$HOME/.nix-profile/bin/zsh"
+elif command -v zsh >/dev/null 2>&1; then
+  target_zsh="$(command -v zsh)"
+fi
+
+if [[ -n "$target_zsh" ]]; then
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    current_shell="$(dscl . -read /Users/$(whoami) UserShell | awk '{print $2}' || true)"
+  else
+    current_shell="$(getent passwd "$(whoami)" | cut -d: -f7 || true)"
+  fi
+
+  if [[ -n "$current_shell" && "$current_shell" != "$target_zsh" ]]; then
+    if ! grep -Fxq "$target_zsh" /etc/shells; then
+      echo "$target_zsh" | sudo tee -a /etc/shells >/dev/null
+    fi
+    chsh -s "$target_zsh"
+  fi
+fi
