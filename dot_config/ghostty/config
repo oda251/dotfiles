@@ -15,8 +15,8 @@ quick-terminal-screen = "main"
 quick-terminal-animation-duration = 0.3
 keybind = "global:alt+`=toggle_quick_terminal"
 
-# Zellij tab operations - send Zellij CLI commands directly
-keybind = cmd+t=text:zellij action new-tab\n
-keybind = cmd+w=text:zellij action close-tab\n
-keybind = cmd+shift+bracketleft=text:zellij action go-to-previous-tab\n
-keybind = cmd+shift+bracketright=text:zellij action go-to-next-tab\n
+# Zellij tab operations - send Zellij keybinding sequences
+keybind = cmd+t=text:\x02n
+keybind = cmd+w=text:\x02x
+keybind = cmd+shift+bracketleft=text:\x02[
+keybind = cmd+shift+bracketright=text:\x02]

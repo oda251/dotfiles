@@ -24,12 +24,12 @@ Windows環境ではWSLとWindows Terminalを利用します：
 
 - **Windows Terminal**: Ghostty環境を再現（Tokyo Nightテーマ、フォント設定、透過効果）
 - **Zellij**: タブ管理に使用
-- **キーバインド**: Windows TerminalからZellij CLIコマンドを直接送信（Ctrl+t/w/Shift+[/]）
+- **キーバインド**: Windows TerminalからZellijのキーシーケンスを送信（Ctrl+t → `Ctrl-t n`、Ctrl+w → `Ctrl-t x`、Ctrl+Shift+[/] → `Ctrl-t [`/`]`）
 - **設定場所**: `AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json`
 
 ## macOS
 
 - **Ghostty**: メインターミナル（Zellij連携）
 - **Zellij**: タブ管理に使用
-- **キーバインド**: GhosttyからZellij CLIコマンドを直接送信（Cmd+t/w/Shift+[/]）
+- **キーバインド**: GhosttyからZellijのキーシーケンスを送信（Cmd+t → `Ctrl-t n`、Cmd+w → `Ctrl-t x`、Cmd+Shift+[/] → `Ctrl-t [`/`]`）
 - **設定場所**: `.config/ghostty/config`, `.config/zellij/config.kdl`
