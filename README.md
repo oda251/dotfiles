@@ -20,14 +20,13 @@ chezmoi init --apply https://github.com/oda251/dotfiles.git
 
 ## mise で管理されるツール
 
-### 全プラットフォーム共通（CLIツール）
+### 全プラットフォーム共通
 
 - fzf, fd, ripgrep, bat, eza, zoxide, starship
 - yazi, lazygit, lazydocker, delta
 - gh, zellij, neovim, bottom
-- k9s, kubectl, kubectx, kubens
 
-### Mac/Linux のみ（言語ランタイム）
+### Mac/Linux のみ
 
 - node, npm, uv, bun, rust, terraform
 - prettier, biome, java
