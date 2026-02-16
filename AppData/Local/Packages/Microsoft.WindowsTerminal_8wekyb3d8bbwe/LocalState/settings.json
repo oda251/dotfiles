@@ -28,6 +28,16 @@
                 "hidden": false,
                 "icon": "C:\\Program Files\\PowerShell\\7\\assets\\Powershell_black.ico",
                 "name": "PowerShell 7"
+            },
+            {
+                "colorScheme": "Campbell",
+                "commandline": "C:\\WINDOWS\\system32\\wsl.exe -d Ubuntu",
+                "guid": "{62f8d00f-04a5-4b69-b353-59e34f4db2d1}",
+                "hidden": false,
+                "icon": "https://assets.ubuntu.com/v1/49a1a858-favicon-32x32.png",
+                "name": "Ubuntu",
+                "pathTranslationStyle": "wsl",
+                "startingDirectory": "~"
             }
         ]
     },
