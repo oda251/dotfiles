@@ -20,5 +20,9 @@ window-decoration = false
 # Zellij tab operations - send Zellij keybinding sequences
 keybind = "cmd+t=text:zellij action new-tab\n"
 keybind = "cmd+w=text:zellij action close-tab\n"
-keybind = "cmd+shift+bracketleft=text:zellij action previous-tab\n"
-keybind = "cmd+shift+bracketright=text:zellij action next-tab\n"
+keybind = "cmd+shift+bracket_left=text:zellij action go-to-previous-tab\n"
+keybind = "cmd+shift+bracket_right=text:zellij action go-to-next-tab\n"
+keybind = "ctrl+tab=text:zellij action go-to-next-tab\n"
+keybind = "ctrl+shift+tab=text:zellij action go-to-previous-tab\n"
+keybind = "alt+tab=text:zellij action go-to-next-pane\n"
+keybind = "alt+shift+tab=text:zellij action go-to-previous-pane\n"
