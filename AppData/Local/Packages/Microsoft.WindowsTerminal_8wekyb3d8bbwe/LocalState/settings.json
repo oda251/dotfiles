@@ -18,18 +18,16 @@
         },
         "list": [
             {
-                "guid": "{2c4de342-38b7-51cf-b940-2309a097f518}",
-                "name": "WSL (Zellij)",
-                "source": "Windows.Terminal.Wsl",
-                "commandline": "wsl.exe -e zsh -c 'zellij attach -c || zellij'",
-                "colorScheme": "Tokyo Night Storm",
-                "icon": "🐧"
+                "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
+                "hidden": false,
+                "name": "Command Prompt"
             },
             {
-                "guid": "{58ad8b0c-3ef8-5f4d-bc6f-13e4c00f2530}",
-                "name": "WSL",
-                "source": "Windows.Terminal.Wsl",
-                "colorScheme": "Tokyo Night Storm"
+                "commandline": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+                "guid": "{ed9a1a19-d869-4d1f-ab01-04a5d07cd10a}",
+                "hidden": false,
+                "icon": "C:\\Program Files\\PowerShell\\7\\assets\\Powershell_black.ico",
+                "name": "PowerShell 7"
             }
         ]
     },
