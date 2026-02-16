@@ -1,3 +1,4 @@
+{{ if ne .chezmoi.os "windows" -}}
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -69,3 +70,4 @@ if [[ -n "$target_zsh" ]]; then
     chsh -s "$target_zsh"
   fi
 fi
+{{ end -}}
