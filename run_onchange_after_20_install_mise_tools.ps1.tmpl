@@ -1,0 +1,8 @@
+{{ if eq .chezmoi.os "windows" -}}
+$ErrorActionPreference = "Stop"
+
+# mise config hash: {{ include "dot_config/mise/config.toml.tmpl" | sha256sum }}
+
+Write-Host "Installing mise tools..."
+mise install
+{{ end -}}
