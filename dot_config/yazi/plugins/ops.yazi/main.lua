@@ -164,7 +164,7 @@ local function run_zsh_command()
 
 	local ok = output.status.success
 	local title = string.format("Shell output (exit %d)", output.status.code)
-	local body = string.format("$ %s\n\n%s", value, merged)
+	local body = merged
 
 	notify(ok and "info" or "error", title, body)
 end
