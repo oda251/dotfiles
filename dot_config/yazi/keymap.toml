@@ -2,3 +2,23 @@
 on = [ "g", "i" ]
 run = "plugin lazygit"
 desc = "run lazygit"
+
+[[mgr.prepend_keymap]]
+on = [ "c", "a" ]
+run = "plugin ops -- copy-contents"
+desc = "copy file contents"
+
+[[mgr.prepend_keymap]]
+on = [ "c", "g" ]
+run = "plugin ops -- copy-github-link"
+desc = "copy GitHub link"
+
+[[mgr.prepend_keymap]]
+on = "<Space>"
+run = "plugin ops -- git-add"
+desc = "git add selected"
+
+[[mgr.prepend_keymap]]
+on = "`"
+run = "shell --block -- zsh"
+desc = "open zsh"
