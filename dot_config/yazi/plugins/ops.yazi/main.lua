@@ -139,22 +139,45 @@ local function run_zsh_command()
 	end
 
 	local cwd = current_cwd()
-	local permit = ui.hide and ui.hide() or ya.hide()
-	local output, err_code = Command("zsh")
+	local output, err = Command("zsh")
 		:cwd(cwd)
 		:arg({ "-lc", value })
-		:stdin(Command.INHERIT)
-		:stdout(Command.INHERIT)
+		:stdout(Command.PIPED)
 		:stderr(Command.PIPED)
-		:spawn()
-	if output and not err_code then
-		output, err_code = output:wait_with_output()
+		:output()
+
+	if not output then
+		return ya.confirm {
+			pos = { "center", w = 90, h = 18 },
+			title = "Shell error",
+			body = "Failed to run zsh: " .. tostring(err),
+		}
 	end
-	if err_code ~= nil then
-		notify("error", "Shell", "Failed to run zsh: " .. err_code)
-	elseif output and not output.status.success then
-		notify("error", "Shell", "zsh exited with code " .. output.status.code)
+
+	local stdout = trim(output.stdout or "")
+	local stderr = trim(output.stderr or "")
+	local merged = stdout
+	if stderr ~= "" then
+		merged = (merged == "" and stderr) or (merged .. "\n" .. stderr)
 	end
+	if #merged == 0 then
+		merged = "(no output)"
+	elseif #merged > 6000 then
+		merged = merged:sub(1, 6000) .. "\n... (truncated)"
+	end
+
+	local title
+	if output.status.success then
+		title = "Shell output (exit 0)"
+	else
+		title = string.format("Shell output (exit %d)", output.status.code)
+	end
+
+	ya.confirm {
+		pos = { "center", w = 90, h = 24 },
+		title = title,
+		body = merged,
+	}
 end
 
 local function copy_contents()
