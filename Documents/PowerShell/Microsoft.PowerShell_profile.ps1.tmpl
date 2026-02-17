@@ -32,6 +32,11 @@ if (Test-Path $LocalProfile) {
     . $LocalProfile
 }
 
+# Clipboard helper alias
+if (Get-Command wl-copy -ErrorAction SilentlyContinue) {
+    Set-Alias -Name copy -Value wl-copy -ErrorAction SilentlyContinue
+}
+
 # Aliases
 Set-Alias -Name vim -Value nvim -ErrorAction SilentlyContinue
 Set-Alias -Name v -Value nvim -ErrorAction SilentlyContinue

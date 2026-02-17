@@ -2,6 +2,7 @@
 alias chrome="open -a 'Google Chrome'"
 alias idea="open -a 'IntelliJ IDEA'"
 alias pwb="git rev-parse --abbrev-ref HEAD | pbcopy"
+alias copy='pbcopy'
 {{- else if eq .chezmoi.os "linux" }}
 if command -v xclip &> /dev/null; then
     alias pbcopy='xclip -selection clipboard'
@@ -11,6 +12,9 @@ elif command -v xsel &> /dev/null; then
     alias pbcopy='xsel --clipboard --input'
     alias pbpaste='xsel --clipboard --output'
     alias pwb="git rev-parse --abbrev-ref HEAD | xsel --clipboard --input"
+fi
+if command -v wl-copy &> /dev/null; then
+    alias copy='wl-copy'
 fi
 {{- end }}
 
