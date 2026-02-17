@@ -65,7 +65,13 @@ else
 fi
 
 if command -v ya >/dev/null 2>&1; then
-  ya pack -i
+  if ya --help 2>/dev/null | grep -q '\bpkg\b'; then
+    if ! ya pkg install; then
+      echo "ya pkg failed; skip yazi plugins" >&2
+    fi
+  else
+    echo "ya pkg not supported; update yazi to use plugins" >&2
+  fi
 else
   echo "ya not found; skip yazi plugins" >&2
 fi
