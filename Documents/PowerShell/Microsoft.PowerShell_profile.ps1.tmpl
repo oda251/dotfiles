@@ -37,6 +37,23 @@ if (Get-Command wl-copy -ErrorAction SilentlyContinue) {
     Set-Alias -Name copy -Value wl-copy -ErrorAction SilentlyContinue
 }
 
+function yz {
+    $tmp = New-TemporaryFile
+    try {
+        yazi @args --cwd-file $tmp.FullName
+        if (Test-Path $tmp.FullName) {
+            $cwd = Get-Content $tmp.FullName -Raw
+            if ($cwd -and $cwd -ne (Get-Location).Path) {
+                Set-Location $cwd
+            }
+        }
+    } finally {
+        if (Test-Path $tmp.FullName) {
+            Remove-Item $tmp.FullName -Force
+        }
+    }
+}
+
 # Aliases
 Set-Alias -Name vim -Value nvim -ErrorAction SilentlyContinue
 Set-Alias -Name v -Value nvim -ErrorAction SilentlyContinue

@@ -21,6 +21,16 @@ alias ls='eza --icons'
 alias cd='z'
 alias vim='nvim'
 alias dk='diskonaut'
+alias lg='lazygit'
 alias now="date '+%Y%m%d%H%M%S'"
 alias copilot='copilot --allow-all-tools'
 alias wt='git worktree'
+
+function yz() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
+	yazi "$@" --cwd-file="$tmp"
+	if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+		builtin cd -- "$cwd"
+	fi
+	rm -f -- "$tmp"
+}

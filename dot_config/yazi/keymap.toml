@@ -1,9 +1,4 @@
 [[mgr.prepend_keymap]]
-on = "<Esc>"
-run = "shell --block -- zsh"
-desc = "open zsh"
-
-[[mgr.prepend_keymap]]
 on = [ "g", "i" ]
 run = "plugin lazygit"
 desc = "run lazygit"

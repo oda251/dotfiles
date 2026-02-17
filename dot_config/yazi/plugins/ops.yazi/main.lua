@@ -314,6 +314,7 @@ local function git_add_selected()
 		end
 	end
 
+	ya.emit("reload", {})
 	notify("info", "Git stage", string.format("staged %d, unstaged %d", #to_stage, #to_unstage))
 end
 
