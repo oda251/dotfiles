@@ -1,4 +1,9 @@
 [[mgr.prepend_keymap]]
+on = "<Esc>"
+run = "shell --block -- zsh"
+desc = "open zsh"
+
+[[mgr.prepend_keymap]]
 on = [ "g", "i" ]
 run = "plugin lazygit"
 desc = "run lazygit"
@@ -16,9 +21,9 @@ desc = "copy GitHub link"
 [[mgr.prepend_keymap]]
 on = "<Space>"
 run = "plugin ops -- git-add"
-desc = "git add selected"
+desc = "toggle git stage"
 
 [[mgr.prepend_keymap]]
 on = "`"
-run = "shell --block -- zsh"
-desc = "open zsh"
+run = "plugin ops -- run-zsh-command"
+desc = "run zsh command"

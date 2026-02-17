@@ -127,7 +127,34 @@ local function open_shell()
 	elseif output and not output.status.success then
 		notify("error", "Shell", "zsh exited with code " .. output.status.code)
 	end
-	permit = permit
+end
+
+local function run_zsh_command()
+	local value, event = ya.input {
+		title = "zsh:",
+		pos = { "top-center", y = 3, w = 60 },
+	}
+	if event ~= 1 or value == "" then
+		return
+	end
+
+	local cwd = current_cwd()
+	local permit = ui.hide and ui.hide() or ya.hide()
+	local output, err_code = Command("zsh")
+		:cwd(cwd)
+		:arg({ "-lc", value })
+		:stdin(Command.INHERIT)
+		:stdout(Command.INHERIT)
+		:stderr(Command.PIPED)
+		:spawn()
+	if output and not err_code then
+		output, err_code = output:wait_with_output()
+	end
+	if err_code ~= nil then
+		notify("error", "Shell", "Failed to run zsh: " .. err_code)
+	elseif output and not output.status.success then
+		notify("error", "Shell", "zsh exited with code " .. output.status.code)
+	end
 end
 
 local function copy_contents()
@@ -301,6 +328,8 @@ return {
 			return git_add_selected()
 		elseif action == "open-shell" then
 			return open_shell()
+		elseif action == "run-zsh-command" then
+			return run_zsh_command()
 		end
 
 		notify("warn", "Ops", "Unknown action")
