@@ -70,30 +70,44 @@
         {
             "command": {
                 "action": "sendInput",
-                "input": "\u0002n"
+                "input": "zellij action new-tab\n"
             },
             "keys": "ctrl+t"
         },
         {
             "command": {
                 "action": "sendInput",
-                "input": "\u0002x"
+                "input": "zellij action close-tab\n"
             },
             "keys": "ctrl+w"
         },
         {
             "command": {
                 "action": "sendInput",
-                "input": "\u0002["
+                "input": "zellij action go-to-previous-tab\n"
             },
-            "keys": "ctrl+shift+oem_4"
+            "keys": "ctrl+shift+tab"
         },
         {
             "command": {
                 "action": "sendInput",
-                "input": "\u0002]"
+                "input": "zellij action go-to-next-tab\n"
             },
-            "keys": "ctrl+shift+oem_6"
+            "keys": "ctrl+tab"
+        },
+        {
+            "command": {
+                "action": "sendInput",
+                "input": "zellij action focus-next-pane\n"
+            },
+            "keys": "alt+tab"
+        },
+        {
+            "command": {
+                "action": "sendInput",
+                "input": "zellij action focus-previous-pane\n"
+            },
+            "keys": "alt+shift+tab"
         }
     ],
     "initialCols": 120,

@@ -5,4 +5,10 @@ $ErrorActionPreference = "Stop"
 
 Write-Host "Installing mise tools..."
 mise install
+
+if (Get-Command ya -ErrorAction SilentlyContinue) {
+    ya pack -i
+} else {
+    Write-Warning "ya not found; skip yazi plugins"
+}
 {{ end -}}

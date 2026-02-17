@@ -55,23 +55,3 @@ if (Get-Module -ListAvailable -Name PSReadLine) {
     Set-PSReadLineOption -EditMode Emacs
     Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
 }
-
-# Ghostty / Zellij keybindings (reference)
-# dot_config/ghostty/config と同じキー割り当てを参照用に記載しています。
-# Ghostty (macOS) keybinds:
-#   cmd+t                 => zellij action new-tab
-#   cmd+w                 => zellij action close-tab
-#   cmd+shift+[           => zellij action go-to-previous-tab
-#   cmd+shift+]           => zellij action go-to-next-tab
-#   ctrl+tab              => zellij action go-to-next-tab
-#   ctrl+shift+tab        => zellij action go-to-previous-tab
-#   alt+tab               => zellij action go-to-next-pane
-#   alt+shift+tab         => zellij action go-to-previous-pane
-#
-# Windows Terminal での同等例 (settings.json の "command": { "action": "sendInput", "input": "..." }):
-#   "input": "\\u0002n"   # Ctrl-t n -> new-tab
-#   "input": "\\u0002x"   # Ctrl-t x -> close-tab
-#   "input": "\\u0002["   # Ctrl-t [ -> previous-tab
-#   "input": "\\u0002]"   # Ctrl-t ] -> next-tab
-#
-# 注: これらは参照用の説明です。実際の端末/terminal emulator の設定は該当する設定ファイルに追記してください。

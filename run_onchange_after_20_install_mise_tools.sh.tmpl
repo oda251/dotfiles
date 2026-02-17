@@ -52,9 +52,20 @@ if [[ "$has_libatomic" != "true" ]]; then
 fi
 {{ end -}}
 
-{{ if ne .chezmoi.os "windows" -}}
 # Mac/Linux: Install node/npm first for npm-based tools
 mise install node npm
-{{ end -}}
 eval "$(mise activate bash)"
 mise install
+
+if command -v playwright-cli >/dev/null 2>&1; then
+  playwright-cli install --skills
+else
+  echo "playwright-cli not found; install via mise (npm:@playwright/cli) before running setup" >&2
+  exit 1
+fi
+
+if command -v ya >/dev/null 2>&1; then
+  ya pack -i
+else
+  echo "ya not found; skip yazi plugins" >&2
+fi
