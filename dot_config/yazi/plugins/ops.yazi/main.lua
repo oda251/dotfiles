@@ -130,20 +130,6 @@ local function open_shell()
 end
 
 local function run_zsh_command()
-	local function center_text(text, width)
-		local lines = {}
-		for line in (text .. "\n"):gmatch("([^\n]*)\n") do
-			local len = #line
-			if len >= width then
-				lines[#lines + 1] = line
-			else
-				local pad = math.floor((width - len) / 2)
-				lines[#lines + 1] = string.rep(" ", pad) .. line
-			end
-		end
-		return table.concat(lines, "\n")
-	end
-
 	local value, event = ya.input {
 		title = "zsh:",
 		pos = { "top-center", y = 3, w = 60 },
@@ -164,7 +150,7 @@ local function run_zsh_command()
 		return ya.confirm {
 			pos = { "center", w = 90, h = 18 },
 			title = ui.Span("Shell error"):style(ui.Style():fg("red"):bold()),
-			body = center_text("Failed to run zsh: " .. tostring(err), 84),
+			body = "Failed to run zsh: " .. tostring(err),
 		}
 	end
 
@@ -184,7 +170,6 @@ local function run_zsh_command()
 	local title = ui.Span(string.format("Shell output (exit %d)", output.status.code))
 		:style(ui.Style():fg(ok and "green" or "red"):bold())
 	local body = string.format("$ %s\n\n%s", value, merged)
-	body = center_text(body, 84)
 
 	ya.confirm {
 		pos = { "center", w = 90, h = 24 },
