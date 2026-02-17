@@ -24,6 +24,10 @@ require("lazy").setup({
     { import = "plugins.editor" },
     { import = "plugins.completion" },
   },
+  defaults = {
+    lazy = true,
+  },
   install = { colorscheme = { "catppuccin" } },
-  checker = { enabled = true },
+  checker = { enabled = false },
+  change_detection = { enabled = false, notify = false },
 })

@@ -1,6 +1,7 @@
 return {
   "catppuccin/nvim",
   name = "catppuccin",
+  lazy = false,
   priority = 1000, -- カラースキームは最優先で読み込む
   opts = {
     flavour = "mocha", -- latte, frappe, macchiato, mocha
