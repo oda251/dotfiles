@@ -163,7 +163,10 @@ local function run_zsh_command()
 	end
 
 	local ok = output.status.success
-	local title = string.format("Shell output (exit %d)", output.status.code)
+	local title = trim(value):match("^%S+") or "zsh"
+	if #title > 80 then
+		title = title:sub(1, 80) .. "..."
+	end
 	local body = merged
 
 	notify(ok and "info" or "error", title, body)
