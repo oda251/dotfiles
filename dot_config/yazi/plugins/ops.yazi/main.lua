@@ -147,11 +147,7 @@ local function run_zsh_command()
 		:output()
 
 	if not output then
-		return ya.confirm {
-			pos = { "center", w = 90, h = 18 },
-			title = ui.Span("Shell error"):style(ui.Style():fg("red"):bold()),
-			body = "Failed to run zsh: " .. tostring(err),
-		}
+		return notify("error", "Shell", "Failed to run zsh: " .. tostring(err))
 	end
 
 	local stdout = trim(output.stdout or "")
@@ -167,15 +163,10 @@ local function run_zsh_command()
 	end
 
 	local ok = output.status.success
-	local title = ui.Span(string.format("Shell output (exit %d)", output.status.code))
-		:style(ui.Style():fg(ok and "green" or "red"):bold())
+	local title = string.format("Shell output (exit %d)", output.status.code)
 	local body = string.format("$ %s\n\n%s", value, merged)
 
-	ya.confirm {
-		pos = { "center", w = 90, h = 24 },
-		title = title,
-		body = body,
-	}
+	notify(ok and "info" or "error", title, body)
 end
 
 local function copy_contents()

@@ -37,7 +37,7 @@ if (Get-Command wl-copy -ErrorAction SilentlyContinue) {
     Set-Alias -Name copy -Value wl-copy -ErrorAction SilentlyContinue
 }
 
-function yz {
+function y {
     $tmp = New-TemporaryFile
     try {
         yazi @args --cwd-file $tmp.FullName
