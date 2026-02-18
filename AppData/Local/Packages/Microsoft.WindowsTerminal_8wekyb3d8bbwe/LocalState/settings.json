@@ -26,7 +26,7 @@
       },
       {
                 "colorScheme": "Tokyo Night Storm",
-        "commandline": "C:\\WINDOWS\\system32\\wsl.exe -d Ubuntu",
+        "commandline": "C:\\WINDOWS\\system32\\wsl.exe -d Ubuntu --cd ~ zellij attach -c",
         "guid": "{62f8d00f-04a5-4b69-b353-59e34f4db2d1}",
         "hidden": false,
         "icon": "https://assets.ubuntu.com/v1/49a1a858-favicon-32x32.png",

@@ -4,13 +4,15 @@
 // UI configuration
 keybinds {
     normal {
+{{- if eq .chezmoi.os "darwin" }}
         // macOS-style bindings
         bind "Super t" { NewTab; }
         bind "Super w" { CloseTab; }
-
+{{- else }}
         // Windows/Linux-style bindings
         bind "Ctrl t" { NewTab; }
         bind "Ctrl w" { CloseTab; }
+{{- end }}
     }
     shared_except "locked" {
         // Keep navigation keys active across modes.

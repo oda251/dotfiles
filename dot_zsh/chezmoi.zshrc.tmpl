@@ -3,8 +3,13 @@
 export XDG_CONFIG_HOME="$HOME/.config"
 
 {{- if eq .chezmoi.os "darwin" }}
-if [[ -f "/opt/homebrew/bin/brew" ]]; then
-  eval "$(/opt/homebrew/bin/brew shellenv)"
+if [[ -x "/opt/homebrew/bin/brew" ]]; then
+  brew_shellenv_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/brew-shellenv.zsh"
+  mkdir -p "${brew_shellenv_cache:h}"
+  if [[ ! -s "$brew_shellenv_cache" || "/opt/homebrew/bin/brew" -nt "$brew_shellenv_cache" ]]; then
+    /opt/homebrew/bin/brew shellenv >| "$brew_shellenv_cache"
+  fi
+  source "$brew_shellenv_cache"
 fi
 
 export WASMER_DIR="$HOME/.wasmer"
@@ -17,9 +22,19 @@ export PATH="$HOME/.amp/bin:$PATH"
 export PATH="/Library/Ruby/Gems/2.6.0/bin:$PATH"
 {{- else if eq .chezmoi.os "linux" }}
 if [[ -d "/home/linuxbrew/.linuxbrew" ]]; then
-  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+  brew_shellenv_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/brew-shellenv.zsh"
+  mkdir -p "${brew_shellenv_cache:h}"
+  if [[ ! -s "$brew_shellenv_cache" || "/home/linuxbrew/.linuxbrew/bin/brew" -nt "$brew_shellenv_cache" ]]; then
+    /home/linuxbrew/.linuxbrew/bin/brew shellenv >| "$brew_shellenv_cache"
+  fi
+  source "$brew_shellenv_cache"
 elif [[ -d "$HOME/.linuxbrew" ]]; then
-  eval "$($HOME/.linuxbrew/bin/brew shellenv)"
+  brew_shellenv_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/brew-shellenv.zsh"
+  mkdir -p "${brew_shellenv_cache:h}"
+  if [[ ! -s "$brew_shellenv_cache" || "$HOME/.linuxbrew/bin/brew" -nt "$brew_shellenv_cache" ]]; then
+    "$HOME/.linuxbrew/bin/brew" shellenv >| "$brew_shellenv_cache"
+  fi
+  source "$brew_shellenv_cache"
 fi
 export PATH="$PATH:/usr/local/go/bin"
 {{- else if eq .chezmoi.os "windows" }}

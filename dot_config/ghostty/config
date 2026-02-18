@@ -8,12 +8,13 @@ adjust-cell-height = 2
 font-thicken = true
 window-inherit-working-directory = true
 shell-integration = detect
+command = /bin/zsh
 macos-option-as-alt = left
 copy-on-select = true
 quick-terminal-position = "top"
 quick-terminal-screen = "main"
 quick-terminal-animation-duration = 0.3
-keybind = "global:alt+`=toggle_quick_terminal"
+keybind = "global:ctrl+`=toggle_quick_terminal"
 macos-non-native-fullscreen = true
 window-decoration = false
 

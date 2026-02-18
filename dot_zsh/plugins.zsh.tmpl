@@ -14,11 +14,36 @@ fi
 {{- end }}
 
 # mise is used on all platforms (CLI tools only on Windows)
-command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"
+if command -v mise >/dev/null 2>&1; then
+  mise_bin="$(command -v mise)"
+  mise_init_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/mise-activate.zsh"
+  mkdir -p "${mise_init_cache:h}"
+  if [[ ! -s "$mise_init_cache" || "$mise_bin" -nt "$mise_init_cache" ]]; then
+    "$mise_bin" activate zsh >| "$mise_init_cache"
+  fi
+  source "$mise_init_cache"
+fi
 
 # zoxide and starship - installed via mise on all platforms
-command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init zsh)"
-command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
+if command -v zoxide >/dev/null 2>&1; then
+  zoxide_bin="$(command -v zoxide)"
+  zoxide_init_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zoxide-init.zsh"
+  mkdir -p "${zoxide_init_cache:h}"
+  if [[ ! -s "$zoxide_init_cache" || "$zoxide_bin" -nt "$zoxide_init_cache" ]]; then
+    "$zoxide_bin" init zsh >| "$zoxide_init_cache"
+  fi
+  source "$zoxide_init_cache"
+fi
+
+if command -v starship >/dev/null 2>&1; then
+  starship_bin="$(command -v starship)"
+  starship_init_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/starship-init.zsh"
+  mkdir -p "${starship_init_cache:h}"
+  if [[ ! -s "$starship_init_cache" || "$starship_bin" -nt "$starship_init_cache" ]]; then
+    "$starship_bin" init zsh >| "$starship_init_cache"
+  fi
+  source "$starship_init_cache"
+fi
 
 if command -v zsh >/dev/null 2>&1; then
   export SHELL="$(command -v zsh)"
