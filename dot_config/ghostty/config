@@ -17,12 +17,14 @@ keybind = "global:alt+`=toggle_quick_terminal"
 macos-non-native-fullscreen = true
 window-decoration = false
 
-# Zellij tab operations - send Zellij keybinding sequences
-keybind = "cmd+t=text:zellij action new-tab\n"
-keybind = "cmd+w=text:zellij action close-tab\n"
-keybind = "cmd+shift+bracket_left=text:zellij action go-to-previous-tab\n"
-keybind = "cmd+shift+bracket_right=text:zellij action go-to-next-tab\n"
-keybind = "ctrl+tab=text:zellij action go-to-next-tab\n"
-keybind = "ctrl+shift+tab=text:zellij action go-to-previous-tab\n"
-keybind = "alt+tab=text:zellij action focus-next-pane\n"
-keybind = "alt+shift+tab=text:zellij action focus-previous-pane\n"
+# Zellij operations via single key sends for better repeat stability
+# Send Alt+n/x/h/l and bind them directly in Zellij normal mode
+keybind = "cmd+t=text:\x1bn"
+keybind = "cmd+w=text:\x1bx"
+keybind = "cmd+shift+bracket_left=text:\x1bh"
+keybind = "cmd+shift+bracket_right=text:\x1bl"
+keybind = "ctrl+tab=text:\x1bl"
+keybind = "ctrl+shift+tab=text:\x1bh"
+# Pane navigation
+keybind = "ctrl+comma=text:\x1b,"
+keybind = "ctrl+period=text:\x1b."

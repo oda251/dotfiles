@@ -3,6 +3,18 @@
 // They send Zellij CLI commands directly
 
 // UI configuration
+keybinds {
+    normal {
+        // Terminal-side keybinds send these as single Alt chords.
+        bind "Alt n" { NewTab; }
+        bind "Alt x" { CloseTab; }
+        bind "Alt h" { GoToPreviousTab; }
+        bind "Alt l" { GoToNextTab; }
+        bind "Alt ," { FocusPreviousPane; }
+        bind "Alt ." { FocusNextPane; }
+    }
+}
+
 ui {
     pane_frames {
         rounded_corners true
