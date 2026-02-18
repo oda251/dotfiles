@@ -26,9 +26,25 @@ if (Test-Path $LocalProfile) {
     . $LocalProfile
 }
 
-# Clipboard helper alias
-if (Get-Command wl-copy -ErrorAction SilentlyContinue) {
-    Set-Alias -Name copy -Value wl-copy -ErrorAction SilentlyContinue
+# Clipboard helper for PowerShell/Windows
+function copy {
+    [CmdletBinding()]
+    param(
+        [Parameter(ValueFromRemainingArguments = $true)]
+        [string[]]$Text
+    )
+
+    if ($input) {
+        $input | Set-Clipboard
+        return
+    }
+
+    if ($Text -and $Text.Count -gt 0) {
+        ($Text -join " ") | Set-Clipboard
+        return
+    }
+
+    Write-Warning "No input to copy"
 }
 
 function y {
@@ -47,13 +63,6 @@ function y {
         }
     }
 }
-
-# Aliases
-Set-Alias -Name v -Value nvim -ErrorAction SilentlyContinue
-Set-Alias -Name lg -Value lazygit -ErrorAction SilentlyContinue
-Set-Alias -Name ld -Value lazydocker -ErrorAction SilentlyContinue
-Set-Alias -Name ls -Value eza -ErrorAction SilentlyContinue
-Set-Alias -Name find -Value fd -ErrorAction SilentlyContinue
 
 # PSReadLine configuration for better command line editing
 if (Get-Module -ListAvailable -Name PSReadLine) {
