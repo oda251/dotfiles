@@ -10,12 +10,6 @@ $env:LAZYGIT_EDITOR = $env:VISUAL
 # Add local bin to PATH
 $env:PATH = "$HOME\.local\bin;$env:PATH"
 
-# Initialize mise for CLI tool management (CLI tools only on Windows)
-if (Get-Command mise -ErrorAction SilentlyContinue) {
-    # mise activation for PowerShell
-    mise activate pwsh | Out-String | Invoke-Expression
-}
-
 # Initialize zoxide (smart cd)
 if (Get-Command zoxide -ErrorAction SilentlyContinue) {
     Invoke-Expression (& { (zoxide init powershell | Out-String) })

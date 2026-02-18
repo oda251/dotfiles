@@ -16,7 +16,7 @@ chezmoi init --apply https://github.com/oda251/dotfiles.git
 
 **Mac/Linux環境**: nix, mise, brew
 
-**Windows環境**: winget, mise
+**Windows環境**: winget
 
 ## mise で管理されるツール
 
