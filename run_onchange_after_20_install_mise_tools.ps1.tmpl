@@ -3,8 +3,43 @@ $ErrorActionPreference = "Stop"
 
 # mise config hash: {{ include "dot_config/mise/config.toml.tmpl" | sha256sum }}
 
+function Get-MisePath {
+    $cmd = Get-Command mise -ErrorAction SilentlyContinue
+    if ($cmd) {
+        return $cmd.Source
+    }
+
+    $candidates = @(
+        "$env:LOCALAPPDATA\Microsoft\WinGet\Links\mise.exe",
+        "$env:USERPROFILE\.local\bin\mise.exe",
+        "$env:USERPROFILE\scoop\shims\mise.exe"
+    )
+
+    foreach ($path in $candidates) {
+        if (Test-Path $path) {
+            return $path
+        }
+    }
+
+    return $null
+}
+
+$mise = Get-MisePath
+if (-not $mise) {
+    if (Get-Command winget -ErrorAction SilentlyContinue) {
+        Write-Host "mise not found. Installing with winget..."
+        & winget install --id jdx.mise --exact --accept-source-agreements --accept-package-agreements
+        $mise = Get-MisePath
+    }
+}
+
+if (-not $mise) {
+    Write-Warning "mise not found; skip tool installation"
+    exit 0
+}
+
 Write-Host "Installing mise tools..."
-mise install
+& $mise install
 
 if (Get-Command ya -ErrorAction SilentlyContinue) {
     $yaHelp = & ya --help 2>$null
