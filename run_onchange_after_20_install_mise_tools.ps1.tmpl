@@ -11,6 +11,7 @@ function Get-MisePath {
 
     $candidates = @(
         "$env:LOCALAPPDATA\Microsoft\WinGet\Links\mise.exe",
+        "$env:LOCALAPPDATA\Microsoft\WindowsApps\mise.exe",
         "$env:USERPROFILE\.local\bin\mise.exe",
         "$env:USERPROFILE\scoop\shims\mise.exe"
     )
@@ -29,6 +30,11 @@ if (-not $mise) {
     if (Get-Command winget -ErrorAction SilentlyContinue) {
         Write-Host "mise not found. Installing with winget..."
         & winget install --id jdx.mise --exact --accept-source-agreements --accept-package-agreements
+        # winget updates user PATH, but current process does not always inherit it.
+        $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+        if ($userPath) {
+            $env:Path = "$env:Path;$userPath"
+        }
         $mise = Get-MisePath
     }
 }
