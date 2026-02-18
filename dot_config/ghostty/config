@@ -17,17 +17,16 @@ keybind = "global:alt+`=toggle_quick_terminal"
 macos-non-native-fullscreen = true
 window-decoration = false
 
-# Zellij operations via single key sends for better repeat stability
-# Send Alt+n/x/h/l and bind them directly in Zellij normal mode
-keybind = "cmd+t=text:\x1bn"
-keybind = "cmd+w=text:\x1bx"
-keybind = "cmd+shift+bracket_left=text:\x1bh"
-keybind = "cmd+shift+bracket_right=text:\x1bl"
+# Let Zellij receive these keys directly.
+# Keep only unbinds that override Ghostty defaults.
+keybind = "super+t=unbind"
+keybind = "super+w=unbind"
+keybind = "super+shift+bracket_left=unbind"
+keybind = "super+shift+bracket_right=unbind"
 keybind = "ctrl+tab=text:\x1bl"
 keybind = "ctrl+shift+tab=text:\x1bh"
-# Pane navigation
-keybind = "ctrl+comma=text:\x1b,"
-keybind = "ctrl+period=text:\x1b."
+keybind = "ctrl+comma=unbind"
+keybind = "ctrl+period=unbind"
 
 # Improve readability for completion/secondary text while keeping TokyoNight base
 palette = 0=#24283b

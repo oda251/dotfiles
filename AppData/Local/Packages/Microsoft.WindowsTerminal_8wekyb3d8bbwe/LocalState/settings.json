@@ -68,59 +68,27 @@
   ],
   "actions": [
     {
-      "command": {
-        "action": "sendInput",
-        "input": "\u001bn"
-      },
+      "command": "unbound",
       "keys": "ctrl+t"
     },
     {
-      "command": {
-        "action": "sendInput",
-        "input": "\u001bx"
-      },
+      "command": "unbound",
       "keys": "ctrl+w"
     },
     {
-      "command": {
-        "action": "sendInput",
-        "input": "\u001bh"
-      },
+      "command": "unbound",
       "keys": "ctrl+shift+tab"
     },
     {
-      "command": {
-        "action": "sendInput",
-        "input": "\u001bl"
-      },
+      "command": "unbound",
       "keys": "ctrl+tab"
     },
     {
-      "command": {
-        "action": "sendInput",
-        "input": "\u001bl"
-      },
-      "keys": "alt+tab"
-    },
-    {
-      "command": {
-        "action": "sendInput",
-        "input": "\u001bh"
-      },
-      "keys": "alt+shift+tab"
-    },
-    {
-      "command": {
-        "action": "sendInput",
-        "input": "\u001b,"
-      },
+      "command": "unbound",
       "keys": "ctrl+comma"
     },
     {
-      "command": {
-        "action": "sendInput",
-        "input": "\u001b."
-      },
+      "command": "unbound",
       "keys": "ctrl+period"
     }
   ],

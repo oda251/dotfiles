@@ -1,17 +1,28 @@
 // Zellij configuration
-// Keybindings are handled by terminal emulator (Ghostty/Windows Terminal)
-// They send Zellij CLI commands directly
+// Keybindings are handled directly in Zellij.
 
 // UI configuration
 keybinds {
     normal {
-        // Terminal-side keybinds send these as single Alt chords.
-        bind "Alt n" { NewTab; }
-        bind "Alt x" { CloseTab; }
+        // macOS-style bindings
+        bind "Super t" { NewTab; }
+        bind "Super w" { CloseTab; }
+
+        // Windows/Linux-style bindings
+        bind "Ctrl t" { NewTab; }
+        bind "Ctrl w" { CloseTab; }
+    }
+    shared_except "locked" {
+        // Keep navigation keys active across modes.
+        bind "Ctrl Tab" { GoToNextTab; }
+        bind "Ctrl Shift Tab" { GoToPreviousTab; }
+        // Ghostty fallback for Ctrl+Tab combos.
         bind "Alt h" { GoToPreviousTab; }
         bind "Alt l" { GoToNextTab; }
-        bind "Alt ," { FocusPreviousPane; }
-        bind "Alt ." { FocusNextPane; }
+        bind "Super Shift [" { GoToPreviousTab; }
+        bind "Super Shift ]" { GoToNextTab; }
+        bind "Ctrl ," { FocusPreviousPane; }
+        bind "Ctrl ." { FocusNextPane; }
     }
 }
 
@@ -23,3 +34,6 @@ ui {
 
 // Theme
 theme "tokyo-night-storm"
+
+// Needed for reliable modified-key detection (eg. Ctrl+Tab) in compatible terminals.
+support_kitty_keyboard_protocol true
