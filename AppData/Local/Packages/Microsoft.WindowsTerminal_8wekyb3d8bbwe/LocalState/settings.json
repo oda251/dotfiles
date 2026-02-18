@@ -1,130 +1,130 @@
 {
-    "$help": "https://aka.ms/terminal-documentation",
-    "$schema": "https://aka.ms/terminal-profiles-schema",
-    "defaultProfile": "{2c4de342-38b7-51cf-b940-2309a097f518}",
-    "copyOnSelect": true,
-    "profiles": {
-        "defaults": {
-            "colorScheme": "Tokyo Night Storm",
-            "font": {
-                "face": "PlemolJP Console NF",
-                "size": 12,
-                "weight": "medium"
-            },
-            "useAcrylic": true,
-            "acrylicOpacity": 0.8,
-            "cursorShape": "bar",
-            "startingDirectory": "%USERPROFILE%"
-        },
-        "list": [
-            {
-                "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
-                "hidden": false,
-                "name": "Command Prompt"
-            },
-            {
-                "commandline": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
-                "guid": "{ed9a1a19-d869-4d1f-ab01-04a5d07cd10a}",
-                "hidden": false,
-                "icon": "C:\\Program Files\\PowerShell\\7\\assets\\Powershell_black.ico",
-                "name": "PowerShell 7"
-            },
-            {
-                "colorScheme": "Campbell",
-                "commandline": "C:\\WINDOWS\\system32\\wsl.exe -d Ubuntu",
-                "guid": "{62f8d00f-04a5-4b69-b353-59e34f4db2d1}",
-                "hidden": false,
-                "icon": "https://assets.ubuntu.com/v1/49a1a858-favicon-32x32.png",
-                "name": "Ubuntu",
-                "pathTranslationStyle": "wsl",
-                "startingDirectory": "~"
-            }
-        ]
+  "$help": "https://aka.ms/terminal-documentation",
+  "$schema": "https://aka.ms/terminal-profiles-schema",
+  "defaultProfile": "{2c4de342-38b7-51cf-b940-2309a097f518}",
+  "copyOnSelect": true,
+  "profiles": {
+    "defaults": {
+      "colorScheme": "Tokyo Night Storm",
+      "font": {
+        "face": "PlemolJP Console NF",
+        "size": 12,
+        "weight": "medium"
+      },
+      "useAcrylic": true,
+      "acrylicOpacity": 0.8,
+      "cursorShape": "bar",
+      "startingDirectory": "%USERPROFILE%"
     },
-    "schemes": [
-        {
-            "name": "Tokyo Night Storm",
-            "background": "#24283B",
-            "foreground": "#A9B1D6",
-            "cursorColor": "#C0CAF5",
-            "selectionBackground": "#414868",
-            "black": "#414868",
-            "red": "#F7768E",
-            "green": "#73DACA",
-            "yellow": "#E0AF68",
-            "blue": "#7AA2F7",
-            "purple": "#BB9AF7",
-            "cyan": "#7DCFFF",
-            "white": "#C0CAF5",
-            "brightBlack": "#565F89",
-            "brightRed": "#F76373",
-            "brightGreen": "#87FFEC",
-            "brightYellow": "#FFC776",
-            "brightBlue": "#448CFF",
-            "brightPurple": "#9F6DFF",
-            "brightCyan": "#4AD4FF",
-            "brightWhite": "#D6DEFF"
-        }
-    ],
-    "actions": [
-        {
-            "command": {
-                "action": "sendInput",
-                "input": "\u001bn"
-            },
-            "keys": "ctrl+t"
-        },
-        {
-            "command": {
-                "action": "sendInput",
-                "input": "\u001bx"
-            },
-            "keys": "ctrl+w"
-        },
-        {
-            "command": {
-                "action": "sendInput",
-                "input": "\u001bh"
-            },
-            "keys": "ctrl+shift+tab"
-        },
-        {
-            "command": {
-                "action": "sendInput",
-                "input": "\u001bl"
-            },
-            "keys": "ctrl+tab"
-        },
-        {
-            "command": {
-                "action": "sendInput",
-                "input": "\u001bl"
-            },
-            "keys": "alt+tab"
-        },
-        {
-            "command": {
-                "action": "sendInput",
-                "input": "\u001bh"
-            },
-            "keys": "alt+shift+tab"
-        },
-        {
-            "command": {
-                "action": "sendInput",
-                "input": "\u001b,"
-            },
-            "keys": "ctrl+comma"
-        },
-        {
-            "command": {
-                "action": "sendInput",
-                "input": "\u001b."
-            },
-            "keys": "ctrl+period"
-        }
-    ],
-    "initialCols": 120,
-    "initialRows": 30,
-    "launchMode": "maximized"
+    "list": [
+      {
+        "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
+        "hidden": false,
+        "name": "Command Prompt"
+      },
+      {
+        "commandline": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+        "guid": "{ed9a1a19-d869-4d1f-ab01-04a5d07cd10a}",
+        "hidden": false,
+        "icon": "C:\\Program Files\\PowerShell\\7\\assets\\Powershell_black.ico",
+        "name": "PowerShell 7"
+      },
+      {
+                "colorScheme": "Tokyo Night Storm",
+        "commandline": "C:\\WINDOWS\\system32\\wsl.exe -d Ubuntu",
+        "guid": "{62f8d00f-04a5-4b69-b353-59e34f4db2d1}",
+        "hidden": false,
+        "icon": "https://assets.ubuntu.com/v1/49a1a858-favicon-32x32.png",
+        "name": "Ubuntu",
+        "pathTranslationStyle": "wsl",
+        "startingDirectory": "~"
+      }
+    ]
+  },
+  "schemes": [
+    {
+      "name": "Tokyo Night Storm",
+      "background": "#24283B",
+      "foreground": "#C7D2F5",
+      "cursorColor": "#C0CAF5",
+      "selectionBackground": "#4B5378",
+      "black": "#4B5378",
+      "red": "#F7768E",
+      "green": "#73DACA",
+      "yellow": "#E0AF68",
+      "blue": "#7AA2F7",
+      "purple": "#BB9AF7",
+      "cyan": "#89DDFF",
+      "white": "#D5D6DB",
+      "brightBlack": "#7F8DB8",
+      "brightRed": "#F76373",
+      "brightGreen": "#87FFEC",
+      "brightYellow": "#FFC776",
+      "brightBlue": "#6FA6FF",
+      "brightPurple": "#9F6DFF",
+      "brightCyan": "#A4E8FF",
+      "brightWhite": "#FFFFFF"
+    }
+  ],
+  "actions": [
+    {
+      "command": {
+        "action": "sendInput",
+        "input": "\u001bn"
+      },
+      "keys": "ctrl+t"
+    },
+    {
+      "command": {
+        "action": "sendInput",
+        "input": "\u001bx"
+      },
+      "keys": "ctrl+w"
+    },
+    {
+      "command": {
+        "action": "sendInput",
+        "input": "\u001bh"
+      },
+      "keys": "ctrl+shift+tab"
+    },
+    {
+      "command": {
+        "action": "sendInput",
+        "input": "\u001bl"
+      },
+      "keys": "ctrl+tab"
+    },
+    {
+      "command": {
+        "action": "sendInput",
+        "input": "\u001bl"
+      },
+      "keys": "alt+tab"
+    },
+    {
+      "command": {
+        "action": "sendInput",
+        "input": "\u001bh"
+      },
+      "keys": "alt+shift+tab"
+    },
+    {
+      "command": {
+        "action": "sendInput",
+        "input": "\u001b,"
+      },
+      "keys": "ctrl+comma"
+    },
+    {
+      "command": {
+        "action": "sendInput",
+        "input": "\u001b."
+      },
+      "keys": "ctrl+period"
+    }
+  ],
+  "initialCols": 120,
+  "initialRows": 30,
+  "launchMode": "maximized"
 }
