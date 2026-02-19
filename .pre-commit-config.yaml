@@ -1,6 +1,12 @@
 repos:
   - repo: local
     hooks:
+      - id: distribute-ai-agent-configs
+        name: distribute ai agent configs
+        entry: scripts/distribute_ai_agent_configs.sh
+        language: system
+        pass_filenames: false
+        always_run: true
       - id: check-user
         name: check user value
         entry: scripts/check_user.sh

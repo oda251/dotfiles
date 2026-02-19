@@ -1,0 +1,8 @@
+# Legacy format:
+# source|destination
+#
+# Extended format:
+# copy|source|destination
+# concat|destination|source1|source2|...
+
+concat|dot_config/opencode/AGENTS.md|ai-agent-configs/rules/base.md|ai-agent-configs/skills/base.md

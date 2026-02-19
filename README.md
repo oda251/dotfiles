@@ -18,6 +18,20 @@ chezmoi init --apply https://github.com/oda251/dotfiles.git
 
 **Windows環境**: winget
 
+## AIエージェント設定の振り分け
+
+`pre-commit` 実行時に `ai-agent-configs/routes.txt` を読み込み、定義に従って設定ファイルを同期する。
+
+例:
+
+```text
+copy|ai-agent-configs/rules/base.md|dot_config/some-provider/RULES.md
+concat|dot_config/opencode/AGENTS.md|ai-agent-configs/rules/base.md|ai-agent-configs/skills/base.md
+```
+
+`rules` と `skills` を分離管理し、`concat` で1ファイルにまとめて配布できる。
+プロバイダ追加時は `routes.txt` に行を追加するだけでよい。
+
 ## mise で管理されるツール
 
 ### 全プラットフォーム共通
