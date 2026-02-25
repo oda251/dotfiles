@@ -26,6 +26,14 @@ alias now="date '+%Y%m%d%H%M%S'"
 alias copilot='copilot --allow-all-tools'
 alias wt='git worktree'
 
+codex() {
+  command codex --ask-for-approval never --sandbox danger-full-access "$@"
+}
+
+claude() {
+  command claude --dangerously-skip-permissions "$@"
+}
+
 function y() {
 	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
 	yazi "$@" --cwd-file="$tmp"
