@@ -15,4 +15,37 @@ if ! ya --help 2>/dev/null | grep -q '\bpkg\b'; then
   exit 0
 fi
 
-ya pkg install
+run_install() {
+  ya pkg install
+}
+
+plugins_root="${HOME}/.config/yazi/plugins/"
+max_retries=10
+attempt=0
+
+while true; do
+  if output="$(run_install 2>&1)"; then
+    printf '%s\n' "$output"
+    exit 0
+  fi
+
+  printf '%s\n' "$output" >&2
+
+  plugin_name="$(printf '%s\n' "$output" | sed -n 's/.*You have modified the contents of the `\([^`]*\)` plugin.*/\1/p' | head -n1)"
+  plugin_path="$(printf '%s\n' "$output" | sed -n 's#.*Please manually delete it from `\([^`]*\)` and re-run the command\..*#\1#p' | head -n1)"
+
+  if [[ -n "${plugin_name}" && -n "${plugin_path}" && "${plugin_path}" == "${plugins_root}"* ]]; then
+    attempt=$((attempt + 1))
+    if (( attempt > max_retries )); then
+      echo "Exceeded retry limit (${max_retries}) while repairing yazi plugins." >&2
+      exit 1
+    fi
+
+    echo "Detected locally modified yazi plugin: ${plugin_name}" >&2
+    echo "Removing ${plugin_path} and retrying (${attempt}/${max_retries})..." >&2
+    rm -rf -- "${plugin_path}"
+    continue
+  fi
+
+  exit 1
+done
