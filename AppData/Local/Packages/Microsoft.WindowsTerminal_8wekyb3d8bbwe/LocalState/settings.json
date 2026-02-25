@@ -85,6 +85,10 @@
     {
       "command": "unbound",
       "keys": "ctrl+period"
+    },
+    {
+      "command": "paste",
+      "keys": "ctrl+v"
     }
   ],
   "initialCols": 120,
