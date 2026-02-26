@@ -25,12 +25,12 @@ chezmoi init --apply https://github.com/<YOUR_USER>/dotfiles.git
 例:
 
 ```text
-copy|ai-agent-configs/rules/base.md|dot_claude/CLAUDE.md
-copy|ai-agent-configs/skills/documentation/SKILL.md|dot_claude/skills/documentation/SKILL.md
+copy|ai-agent-configs/rules/base.md|dot_config/some-provider/RULES.md
+concat|dot_config/opencode/AGENTS.md|ai-agent-configs/rules/base.md|ai-agent-configs/skills/base.md
 ```
 
-`rules` と `skills` を分離管理し、各エージェントの所定パスへ配布する。
-プロバイダやスキル追加時は `routes.txt` に行を追加するだけでよい。
+`rules` と `skills` を分離管理し、`concat` で1ファイルにまとめて配布できる。
+プロバイダ追加時は `routes.txt` に行を追加するだけでよい。
 
 ## mise で管理されるツール
 
