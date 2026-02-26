@@ -17,11 +17,7 @@ source_cache_script() {
   local script_path="$1"
   local compiled_path="${script_path}.zwc"
 
-  if [[ -s "$compiled_path" && "$script_path" -ot "$compiled_path" ]]; then
-    source "$compiled_path"
-    return
-  fi
-
+  # Source the original script so zsh can pick script.zwc automatically.
   source "$script_path"
   if [[ -s "$script_path" && ( ! -e "$compiled_path" || "$script_path" -nt "$compiled_path" ) ]]; then
     zcompile "$script_path" 2>/dev/null
