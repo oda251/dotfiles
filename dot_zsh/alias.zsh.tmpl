@@ -18,6 +18,7 @@ fi
 {{- end }}
 
 alias ls='eza --icons'
+alias df='df -h'
 alias cd='z'
 alias v='nvim'
 alias dk='diskonaut'
@@ -28,7 +29,7 @@ alias copilot='copilot --allow-all-tools'
 function wt() {
   local subcmd="$1"
 
-  if [[ "$subcmd" != "add" && "$subcmd" != "ls" && "$subcmd" != "rm" ]]; then
+  if [[ "$subcmd" != "add" && "$subcmd" != "ls" && "$subcmd" != "rm" && "$subcmd" != "cd" ]]; then
     git worktree "$@"
     return $?
   fi
@@ -104,6 +105,12 @@ function wt() {
     return 0
   fi
 
+  if [[ "$subcmd" == "cd" ]]; then
+    shift
+    wtcd "$@"
+    return $?
+  fi
+
   shift
   local remove_opts=()
   while [[ "$1" == -* ]]; do
@@ -136,6 +143,81 @@ function wt() {
   fi
 
   git -C "$repo_root" worktree remove "${remove_opts[@]}" "$worktree_dir"
+}
+
+function wtcd() {
+  local repo_root
+  repo_root="$(git rev-parse --show-toplevel 2>/dev/null)" || {
+    echo "wtcd: not inside a git repository" >&2
+    return 1
+  }
+
+  local target="$1"
+  if [[ -n "$target" ]]; then
+    local worktree_dir
+    if [[ -d "$target" ]]; then
+      worktree_dir="$(cd "$target" && pwd -P)"
+    else
+      worktree_dir="$(
+        git -C "$repo_root" worktree list --porcelain \
+          | awk -v b="refs/heads/$target" '
+              $1 == "worktree" { p = $2 }
+              $1 == "branch" && $2 == b { print p; exit }
+            '
+      )"
+    fi
+
+    if [[ -z "$worktree_dir" ]]; then
+      echo "wtcd: worktree not found for '$target'" >&2
+      return 1
+    fi
+
+    builtin cd "$worktree_dir" || return $?
+    return 0
+  fi
+
+  local entries
+  entries="$(
+    git -C "$repo_root" worktree list --porcelain \
+      | awk '
+          $1 == "worktree" { p = $2; b = "(detached)"; seen = 1; next }
+          $1 == "branch" { sub("refs/heads/", "", $2); b = $2; next }
+          $0 == "" && seen { print p "\t" b; seen = 0 }
+          END { if (seen) print p "\t" b }
+        '
+  )"
+
+  if [[ -z "$entries" ]]; then
+    echo "wtcd: no worktrees found" >&2
+    return 1
+  fi
+
+  local selected worktree_dir
+  if command -v fzf >/dev/null 2>&1; then
+    selected="$(
+      printf '%s\n' "$entries" \
+        | fzf --delimiter=$'\t' --with-nth=2,1 --prompt='WTCD> ' --height=40% --reverse
+    )"
+    [[ -z "$selected" ]] && return 1
+    worktree_dir="${selected%%$'\t'*}"
+  else
+    local -a worktree_paths worktree_labels
+    local line path branch
+    while IFS=$'\t' read -r path branch; do
+      worktree_paths+=("$path")
+      worktree_labels+=("$branch -> $path")
+    done <<< "$entries"
+
+    PS3='Select worktree: '
+    select line in "${worktree_labels[@]}"; do
+      [[ -z "$line" ]] && continue
+      worktree_dir="${worktree_paths[REPLY]}"
+      break
+    done
+  fi
+
+  [[ -z "$worktree_dir" ]] && return 1
+  builtin cd "$worktree_dir" || return $?
 }
 
 codex() {
