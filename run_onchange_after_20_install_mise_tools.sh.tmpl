@@ -57,6 +57,10 @@ mise install node npm
 eval "$(mise activate bash)"
 mise install
 
+if command -v git-lfs >/dev/null 2>&1; then
+  git lfs install --skip-repo
+fi
+
 if command -v playwright-cli >/dev/null 2>&1; then
   playwright-cli install --skills
 else

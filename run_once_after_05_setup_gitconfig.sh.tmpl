@@ -4,3 +4,7 @@ set -euo pipefail
 if command -v git >/dev/null 2>&1; then
   git config --global include.path "$HOME/.gitconfig_shared"
 fi
+
+if command -v git-lfs >/dev/null 2>&1; then
+  git lfs install --skip-repo
+fi
