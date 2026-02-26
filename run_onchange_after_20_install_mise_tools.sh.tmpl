@@ -52,8 +52,7 @@ if [[ "$has_libatomic" != "true" ]]; then
 fi
 {{ end -}}
 
-# Mac/Linux: Install node/npm first for npm-based tools
-mise install node npm
+# Install all tools declared in mise config
 eval "$(mise activate bash)"
 mise install
 
