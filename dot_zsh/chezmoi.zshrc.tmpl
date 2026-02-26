@@ -47,5 +47,8 @@ export VISUAL="nvim"
 export EDITOR="$VISUAL"
 export LAZYGIT_EDITOR="$VISUAL"
 
+# Interactive-only setup (prompt/plugins/aliases)
+[[ -o interactive ]] || return 0
+
 source "$HOME/.zsh/plugins.zsh"
 source "$HOME/.zsh/alias.zsh"

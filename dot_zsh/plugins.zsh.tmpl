@@ -13,6 +13,21 @@ elif [[ -f "/nix/var/nix/profiles/per-user/$USER/profile/share/zsh-syntax-highli
 fi
 {{- end }}
 
+source_cache_script() {
+  local script_path="$1"
+  local compiled_path="${script_path}.zwc"
+
+  if [[ -s "$compiled_path" && "$script_path" -ot "$compiled_path" ]]; then
+    source "$compiled_path"
+    return
+  fi
+
+  source "$script_path"
+  if [[ -s "$script_path" && ( ! -e "$compiled_path" || "$script_path" -nt "$compiled_path" ) ]]; then
+    zcompile "$script_path" 2>/dev/null
+  fi
+}
+
 # mise is used on all platforms (CLI tools only on Windows)
 if command -v mise >/dev/null 2>&1; then
   mise_bin="$(command -v mise)"
@@ -21,7 +36,7 @@ if command -v mise >/dev/null 2>&1; then
   if [[ ! -s "$mise_init_cache" || "$mise_bin" -nt "$mise_init_cache" ]]; then
     "$mise_bin" activate zsh >| "$mise_init_cache"
   fi
-  source "$mise_init_cache"
+  source_cache_script "$mise_init_cache"
 fi
 
 # zoxide and starship - installed via mise on all platforms
@@ -32,7 +47,7 @@ if command -v zoxide >/dev/null 2>&1; then
   if [[ ! -s "$zoxide_init_cache" || "$zoxide_bin" -nt "$zoxide_init_cache" ]]; then
     "$zoxide_bin" init zsh >| "$zoxide_init_cache"
   fi
-  source "$zoxide_init_cache"
+  source_cache_script "$zoxide_init_cache"
 fi
 
 if command -v starship >/dev/null 2>&1; then
@@ -42,14 +57,14 @@ if command -v starship >/dev/null 2>&1; then
   if [[ ! -s "$starship_init_cache" || "$starship_bin" -nt "$starship_init_cache" ]]; then
     "$starship_bin" init zsh >| "$starship_init_cache"
   fi
-  source "$starship_init_cache"
+  source_cache_script "$starship_init_cache"
 fi
 
 if command -v zsh >/dev/null 2>&1; then
   export SHELL="$(command -v zsh)"
 fi
 
-if [[ -z "$ZELLIJ" ]]; then
+if [[ -z "$ZELLIJ" && -o interactive && -t 0 && -t 1 ]] && command -v zellij >/dev/null 2>&1; then
     if [[ "$ZELLIJ_AUTO_ATTACH" == "true" ]]; then
         zellij attach -c || zellij
     else
