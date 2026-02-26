@@ -5,4 +5,12 @@
 # copy|source|destination
 # concat|destination|source1|source2|...
 
-concat|dot_config/opencode/AGENTS.md|ai-agent-configs/rules/base.md|ai-agent-configs/skills/base.md
+# Rules
+copy|ai-agent-configs/rules/base.md|dot_claude/CLAUDE.md
+copy|ai-agent-configs/rules/base.md|dot_codex/AGENTS.md
+copy|ai-agent-configs/rules/base.md|dot_cursor/rules/AGENTS.mdc
+
+# Skills
+copy|ai-agent-configs/skills/documentation/SKILL.md|dot_claude/skills/documentation/SKILL.md
+copy|ai-agent-configs/skills/documentation/SKILL.md|dot_codex/skills/documentation/SKILL.md
+copy|ai-agent-configs/skills/documentation/SKILL.md|dot_cursor/skills/documentation/SKILL.md
