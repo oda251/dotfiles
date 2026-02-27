@@ -149,9 +149,7 @@ function __wt_open_in_tab() {
 
   if command -v zellij >/dev/null 2>&1; then
     if [[ -n "$ZELLIJ" ]]; then
-      zellij action new-tab --name "$tab_name"
-      zellij action write-chars " builtin cd -- ${(qq)worktree_dir} && clear"
-      zellij action write 13
+      zellij action new-tab --name "$tab_name" --cwd "$worktree_dir"
     else
       zellij --cwd "$worktree_dir"
     fi

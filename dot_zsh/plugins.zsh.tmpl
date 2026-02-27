@@ -71,6 +71,14 @@ if command -v zsh >/dev/null 2>&1; then
   export SHELL="$(command -v zsh)"
 fi
 
+# OSC 7: ターミナルに CWD を通知（Zellij のペイン/タブ CWD 引き継ぎに必要）
+__notify_terminal_cwd() {
+  printf '\e]7;file://%s%s\e\\' "${HOST}" "${PWD}"
+}
+autoload -Uz add-zsh-hook
+add-zsh-hook chpwd __notify_terminal_cwd
+__notify_terminal_cwd
+
 if [[ "${ZELLIJ_AUTO_START:-false}" == "true" && -z "$ZELLIJ" && -o interactive && -t 0 && -t 1 ]] && command -v zellij >/dev/null 2>&1; then
     if [[ "$ZELLIJ_AUTO_ATTACH" == "true" ]]; then
         zellij attach -c || zellij
