@@ -96,17 +96,7 @@ function wt() {
       fi
     fi
 
-    if command -v zellij >/dev/null 2>&1; then
-      if [[ -n "$ZELLIJ" ]]; then
-        zellij action new-tab --name "$branch"
-        zellij action write-chars " builtin cd -- ${(qq)worktree_dir} && clear"
-        zellij action write 13
-      else
-        zellij --cwd "$worktree_dir"
-      fi
-    else
-      cd "$worktree_dir" || return $?
-    fi
+    __wt_open_in_tab "$worktree_dir" "$branch"
 
     return 0
   fi
@@ -147,6 +137,35 @@ function wt() {
   fi
 
   git -C "$repo_root" worktree remove "${remove_opts[@]}" "$worktree_dir"
+}
+
+function __wt_open_in_tab() {
+  local worktree_dir="$1"
+  local tab_name="$2"
+
+  if command -v zellij >/dev/null 2>&1; then
+    if [[ -n "$ZELLIJ" ]]; then
+      zellij action new-tab --name "$tab_name"
+      zellij action write-chars " builtin cd -- ${(qq)worktree_dir} && clear"
+      zellij action write 13
+    else
+      zellij --cwd "$worktree_dir"
+    fi
+  else
+    builtin cd "$worktree_dir" || return $?
+  fi
+}
+
+function __wt_branch_from_path() {
+  local repo_root="$1"
+  local worktree_dir="$2"
+
+  git -C "$repo_root" worktree list --porcelain \
+    | awk -v p="$worktree_dir" '
+        $1 == "worktree" && $2 == p { found = 1; next }
+        found && $1 == "branch" { sub("refs/heads/", "", $2); print $2; exit }
+        found && $0 == "" { exit }
+      '
 }
 
 function __wt_select() {
@@ -210,8 +229,9 @@ function wtcd() {
   }
 
   local target="$1"
+  local worktree_dir branch_name
+
   if [[ -n "$target" ]]; then
-    local worktree_dir
     if [[ -d "$target" ]]; then
       worktree_dir="$(cd "$target" && pwd -P)"
     else
@@ -228,14 +248,14 @@ function wtcd() {
       echo "wtcd: worktree not found for '$target'" >&2
       return 1
     fi
-
-    builtin cd "$worktree_dir" || return $?
-    return 0
+  else
+    worktree_dir="$(__wt_select "$repo_root" "WTCD>")" || return $?
   fi
 
-  local worktree_dir
-  worktree_dir="$(__wt_select "$repo_root" "WTCD>")" || return $?
-  builtin cd "$worktree_dir" || return $?
+  branch_name="$(__wt_branch_from_path "$repo_root" "$worktree_dir")"
+  : "${branch_name:=$(basename "$worktree_dir")}"
+
+  __wt_open_in_tab "$worktree_dir" "$branch_name"
 }
 
 codex() {
