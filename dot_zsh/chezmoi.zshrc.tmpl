@@ -38,8 +38,7 @@ elif [[ -d "$HOME/.linuxbrew" ]]; then
 fi
 export PATH="$PATH:/usr/local/go/bin"
 {{- else if eq .chezmoi.os "windows" }}
-# Windows-specific PATH configuration
-# No brew, nix, or mise on Windows
+# Windows: brew/nix は不使用、mise は plugins.zsh で activate
 {{- end }}
 export PATH="$HOME/.local/bin:$PATH"
 
