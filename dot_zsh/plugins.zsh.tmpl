@@ -41,8 +41,6 @@ if command -v mise >/dev/null 2>&1; then
   mkdir -p "${mise_init_cache:h}"
   if [[ ! -s "$mise_init_cache" || "$mise_bin" -nt "$mise_init_cache" ]]; then
     "$mise_bin" activate zsh >| "$mise_init_cache"
-    # precmd フックが最初のプロンプト前に hook-env を実行するため、初回呼び出しを除去
-    sed -i.bak '/^_mise_hook$/d' "$mise_init_cache" && rm -f "${mise_init_cache}.bak"
     rm -f "${mise_init_cache}.zwc"
   fi
   source_cache_script "$mise_init_cache"
