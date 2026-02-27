@@ -10,6 +10,11 @@ elif [[ -f "/nix/var/nix/profiles/per-user/$USER/profile/share/zsh-autocomplete/
   source "/nix/var/nix/profiles/per-user/$USER/profile/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh"
 fi
 
+if bindkey -M menuselect >/dev/null 2>&1; then
+  bindkey -M menuselect '^M' .accept-line
+  bindkey -M menuselect '^J' .accept-line
+fi
+
 if [[ -f "$HOME/.nix-profile/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
   source "$HOME/.nix-profile/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 elif [[ -f "/nix/var/nix/profiles/per-user/$USER/profile/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
