@@ -1,8 +1,8 @@
 {{- if ne .chezmoi.os "windows" }}
 # zsh plugins are managed by nix; source from nix profile
 zstyle ':autocomplete:*' default-context history-incremental-search-backward
-zstyle ':autocomplete:history-incremental-search-backward:*' list-lines 24
-zstyle ':autocomplete:history-search-backward:*' list-lines 2000
+zstyle ':autocomplete:history-incremental-search-backward:*' list-lines 8
+zstyle ':autocomplete:history-search-backward:*' list-lines 8
 
 if [[ -f "$HOME/.nix-profile/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]]; then
   source "$HOME/.nix-profile/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh"
