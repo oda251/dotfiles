@@ -98,16 +98,9 @@ function wt() {
 
     if command -v zellij >/dev/null 2>&1; then
       if [[ -n "$ZELLIJ" ]]; then
-        local layout_tmp
-        layout_tmp="$(mktemp "${TMPDIR:-/tmp}/wt-layout.XXXXXX.kdl")"
-        cat > "$layout_tmp" <<KDL
-layout {
-    cwd "$worktree_dir"
-    pane
-}
-KDL
-        zellij action new-tab --layout "$layout_tmp" --name "$branch"
-        rm -f "$layout_tmp"
+        zellij action new-tab --name "$branch"
+        zellij action write-chars " builtin cd -- ${(qq)worktree_dir} && clear"
+        zellij action write 13
       else
         zellij --cwd "$worktree_dir"
       fi
