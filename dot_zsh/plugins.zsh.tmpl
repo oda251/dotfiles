@@ -1,9 +1,13 @@
 {{- if ne .chezmoi.os "windows" }}
 # zsh plugins are managed by nix; source from nix profile
-if [[ -f "$HOME/.nix-profile/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
-  source "$HOME/.nix-profile/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
-elif [[ -f "/nix/var/nix/profiles/per-user/$USER/profile/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
-  source "/nix/var/nix/profiles/per-user/$USER/profile/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+zstyle ':autocomplete:*' default-context history-incremental-search-backward
+zstyle ':autocomplete:history-incremental-search-backward:*' list-lines 24
+zstyle ':autocomplete:history-search-backward:*' list-lines 2000
+
+if [[ -f "$HOME/.nix-profile/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]]; then
+  source "$HOME/.nix-profile/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh"
+elif [[ -f "/nix/var/nix/profiles/per-user/$USER/profile/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]]; then
+  source "/nix/var/nix/profiles/per-user/$USER/profile/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh"
 fi
 
 if [[ -f "$HOME/.nix-profile/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then

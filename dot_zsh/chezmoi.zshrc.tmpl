@@ -49,5 +49,8 @@ export LAZYGIT_EDITOR="$VISUAL"
 # Interactive-only setup (prompt/plugins/aliases)
 [[ -o interactive ]] || return 0
 
+HISTSIZE=2000
+SAVEHIST=2000
+
 source "$HOME/.zsh/plugins.zsh"
 source "$HOME/.zsh/alias.zsh"

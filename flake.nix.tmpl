@@ -24,6 +24,7 @@
         tree
         zsh
         awscli2
+        zsh-autocomplete
         zsh-autosuggestions
         zsh-syntax-highlighting
         diskonaut
@@ -42,6 +43,7 @@
 
       programs.zsh = {
         enable = true;
+        enableCompletion = false;
         initExtra = ''
           # Source chezmoi-managed zsh config
           [[ -f "$HOME/.zsh/chezmoi.zshrc" ]] && source "$HOME/.zsh/chezmoi.zshrc"
