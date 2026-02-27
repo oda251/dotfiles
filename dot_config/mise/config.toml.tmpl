@@ -1,28 +1,16 @@
 [tools]
 {{- if eq .chezmoi.os "windows" }}
-# Windows: CLI Tools only (no language runtimes)
-# Modern CLI Tools
+# Windows: プロンプトと基本 CLI ツールのみ
+starship = "latest"
+zoxide = "latest"
 fzf = "latest"
 fd = "latest"
 ripgrep = "latest"
 bat = "latest"
-"ubi:eza-community/eza" = "latest"
-zoxide = "latest"
-starship = "latest"
+delta = "latest"
+neovim = "latest"
 yazi = "latest"
 lazygit = "latest"
-lazydocker = "latest"
-delta = "latest"
-gh = "latest"
-"ubi:zellij-org/zellij" = "latest"
-neovim = "latest"
-"github:anomalyco/opencode" = "latest"
-bottom = "latest"
-
-k9s = "latest"
-kubectl = "latest"
-kubectx = "latest"
-kubens = "latest"
 {{- else }}
 # Mac/Linux: Full toolset including runtimes
 # Runtimes

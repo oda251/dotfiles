@@ -10,9 +10,9 @@ $env:LAZYGIT_EDITOR = $env:VISUAL
 # Add local bin to PATH
 $env:PATH = "$HOME\.local\bin;$env:PATH"
 
-# Initialize mise (mise が管理するツールを PATH に追加)
+# Initialize mise (shims モードで高速に PATH 追加)
 if (Get-Command mise -ErrorAction SilentlyContinue) {
-    Invoke-Expression (& { (mise activate pwsh | Out-String) })
+    Invoke-Expression (& { (mise activate pwsh --shims | Out-String) })
 }
 
 # Initialize zoxide (smart cd)
