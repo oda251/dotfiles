@@ -149,7 +149,14 @@ function __wt_open_in_tab() {
 
   if command -v zellij >/dev/null 2>&1; then
     if [[ -n "$ZELLIJ" ]]; then
+{{- if eq .chezmoi.os "darwin" }}
+      # macOS: Zellij が /proc を持たず --cwd が機能しないため write-chars で cd を送信
+      zellij action new-tab --name "$tab_name"
+      zellij action write-chars " builtin cd -- ${(qq)worktree_dir} && clear"
+      zellij action write 13
+{{- else }}
       zellij action new-tab --name "$tab_name" --cwd "$worktree_dir"
+{{- end }}
     else
       zellij --cwd "$worktree_dir"
     fi
