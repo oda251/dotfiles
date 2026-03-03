@@ -14,6 +14,9 @@ fi
 if bindkey -M menuselect >/dev/null 2>&1; then
   bindkey -M menuselect '^M' .accept-line
   bindkey -M menuselect '^J' .accept-line
+  # 左右矢印キーで補完メニューを移動しないようにする
+  bindkey -M menuselect '^[[D' backward-char
+  bindkey -M menuselect '^[[C' forward-char
 fi
 
 # 履歴候補リストのセミコロンサフィックスを除去
