@@ -16,6 +16,12 @@ if bindkey -M menuselect >/dev/null 2>&1; then
   bindkey -M menuselect '^J' .accept-line
 fi
 
+# 履歴候補リストのセミコロンサフィックスを除去
+() {
+  autoload +X _autocomplete__history_lines 2>/dev/null || return
+  eval "$(functions _autocomplete__history_lines | command sed "s/suf=([^)]*_autocomplete__history_lines_suffix[^)]*)/suf=( -qS ' ' )/")"
+}
+
 if [[ -f "$HOME/.nix-profile/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
   source "$HOME/.nix-profile/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 elif [[ -f "/nix/var/nix/profiles/per-user/$USER/profile/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then

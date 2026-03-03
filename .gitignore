@@ -7,3 +7,4 @@
 *.bak
 *~
 nix-backups/
+dot_zsh/local.zsh
