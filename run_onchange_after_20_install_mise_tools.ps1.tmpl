@@ -1,0 +1,6 @@
+{{- if eq .chezmoi.os "windows" -}}
+# mise config hash: {{ include "dot_config/mise/config.toml.tmpl" | sha256sum }}
+
+mise activate pwsh | Out-String | Invoke-Expression
+mise install
+{{- end -}}

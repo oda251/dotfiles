@@ -1,18 +1,4 @@
 [tools]
-{{- if eq .chezmoi.os "windows" }}
-# Windows: プロンプトと基本 CLI ツールのみ
-starship = "latest"
-zoxide = "latest"
-fzf = "latest"
-fd = "latest"
-ripgrep = "latest"
-bat = "latest"
-delta = "latest"
-neovim = "latest"
-yazi = "latest"
-lazygit = "latest"
-{{- else }}
-# Mac/Linux: Full toolset including runtimes
 # Runtimes
 node = "latest"
 npm = "latest"
@@ -23,18 +9,19 @@ npm = "latest"
 uv = "latest"
 bun = "latest"
 rust = "stable"
+awscli = "latest"
 terraform = "latest"
-prettier = "latest"
-biome = "latest"
-java = "latest"
-
 
 # Modern CLI Tools
 fzf = "latest"
 fd = "latest"
 ripgrep = "latest"
 bat = "latest"
+{{- if eq .chezmoi.os "windows" }}
+"github:eza-community/eza" = "latest"
+{{- else }}
 eza = "latest"
+{{- end }}
 zoxide = "latest"
 starship = "latest"
 yazi = "latest"
@@ -42,14 +29,17 @@ lazygit = "latest"
 lazydocker = "latest"
 delta = "latest"
 gh = "latest"
+{{- if ne .chezmoi.os "windows" }}
 zellij = "latest"
+{{- end }}
 neovim = "latest"
 "github:anomalyco/opencode" = "latest"
 bottom = "latest"
+oxlint = "latest"
+oxfmt = "latest"
 
 k9s = "latest"
 kubectl = "latest"
 kubectx = "latest"
 kubens = "latest"
 git-lfs = "latest"
-{{- end }}

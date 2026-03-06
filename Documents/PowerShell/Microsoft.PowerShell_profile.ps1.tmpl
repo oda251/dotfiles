@@ -69,6 +69,19 @@ function y {
     }
 }
 
+# Aliases
+Set-Alias -Name v -Value nvim
+Set-Alias -Name lg -Value lazygit
+function copilot { & copilot.exe --allow-all-tools @args }
+function claude { & claude.exe --dangerously-skip-permissions @args }
+function codex { & codex.exe --ask-for-approval never --sandbox danger-full-access @args }
+Remove-Alias -Name ls -Force -ErrorAction SilentlyContinue
+function ls { eza --icons @args }
+function ll { eza --icons -la @args }
+function now { Get-Date -Format "yyyyMMddHHmmss" }
+function pwb { git rev-parse --abbrev-ref HEAD | Set-Clipboard }
+function wt { git worktree @args }
+
 # PSReadLine configuration for better command line editing
 if (Get-Module -ListAvailable -Name PSReadLine) {
     Import-Module PSReadLine

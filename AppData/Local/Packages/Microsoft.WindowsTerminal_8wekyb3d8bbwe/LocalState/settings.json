@@ -1,7 +1,7 @@
 {
   "$help": "https://aka.ms/terminal-documentation",
   "$schema": "https://aka.ms/terminal-profiles-schema",
-  "defaultProfile": "{62f8d00f-04a5-4b69-b353-59e34f4db2d1}",
+  "defaultProfile": "{ed9a1a19-d869-4d1f-ab01-04a5d07cd10a}",
   "copyOnSelect": true,
   "profiles": {
     "defaults": {
@@ -17,7 +17,7 @@
       "startingDirectory": "%USERPROFILE%"
     },
     "list": [
-      {
+{
         "commandline": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
         "guid": "{ed9a1a19-d869-4d1f-ab01-04a5d07cd10a}",
         "hidden": false,

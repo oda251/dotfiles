@@ -1,0 +1,3 @@
+{{- if ne .chezmoi.os "windows" }}
+[[ -f "$HOME/.zsh/chezmoi.zshrc" ]] && source "$HOME/.zsh/chezmoi.zshrc"
+{{- end }}

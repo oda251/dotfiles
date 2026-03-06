@@ -1,0 +1,9 @@
+{{- if eq .chezmoi.os "windows" -}}
+# winget-packages.json hash: {{ include "dot_config/winget-packages.json" | sha256sum }}
+
+$packageFile = Join-Path $env:USERPROFILE ".config\winget-packages.json"
+$packages = (Get-Content $packageFile | ConvertFrom-Json).Sources.Packages
+foreach ($pkg in $packages) {
+  winget install --id $pkg.PackageIdentifier --source winget --accept-package-agreements --accept-source-agreements
+}
+{{- end -}}

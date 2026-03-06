@@ -1,34 +1,34 @@
 {{- if ne .chezmoi.os "windows" }}
-# zsh plugins are managed by nix; source from nix profile
+# zsh plugins - sourced from brew
 zstyle ':autocomplete:*' default-context history-incremental-search-backward
 zstyle ':autocomplete:history-incremental-search-backward:*' list-lines 8
 zstyle ':autocomplete:history-search-backward:*' list-lines 8
 zstyle ':autocomplete::compinit' arguments -C
 
-if [[ -f "$HOME/.nix-profile/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]]; then
-  source "$HOME/.nix-profile/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh"
-elif [[ -f "/nix/var/nix/profiles/per-user/$USER/profile/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]]; then
-  source "/nix/var/nix/profiles/per-user/$USER/profile/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh"
+{{- if eq .chezmoi.os "darwin" }}
+_brew_prefix="/opt/homebrew"
+{{- else }}
+_brew_prefix="/home/linuxbrew/.linuxbrew"
+{{- end }}
+
+if [[ -f "$_brew_prefix/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]]; then
+  source "$_brew_prefix/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh"
 fi
 
 if bindkey -M menuselect >/dev/null 2>&1; then
   bindkey -M menuselect '^M' .accept-line
   bindkey -M menuselect '^J' .accept-line
-  # 左右矢印キーで補完メニューを移動しないようにする
   bindkey -M menuselect '^[[D' backward-char
   bindkey -M menuselect '^[[C' forward-char
 fi
 
-# 履歴候補リストのセミコロンサフィックスを除去
 () {
   autoload +X _autocomplete__history_lines 2>/dev/null || return
   eval "$(functions _autocomplete__history_lines | command sed "s/suf=([^)]*_autocomplete__history_lines_suffix[^)]*)/suf=( -qS ' ' )/")"
 }
 
-if [[ -f "$HOME/.nix-profile/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
-  source "$HOME/.nix-profile/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-elif [[ -f "/nix/var/nix/profiles/per-user/$USER/profile/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
-  source "/nix/var/nix/profiles/per-user/$USER/profile/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+if [[ -f "$_brew_prefix/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
+  source "$_brew_prefix/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 fi
 {{- end }}
 
