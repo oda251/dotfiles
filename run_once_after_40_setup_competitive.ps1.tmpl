@@ -1,0 +1,11 @@
+{{- if eq .chezmoi.os "windows" }}
+$ACLibraryPath = "$HOME\atcoder\ac-library"
+if (-not (Test-Path $ACLibraryPath)) {
+    New-Item -ItemType Directory -Path "$HOME\atcoder" -Force | Out-Null
+    git clone https://github.com/atcoder/ac-library $ACLibraryPath
+} else {
+    Push-Location $ACLibraryPath
+    git pull
+    Pop-Location
+}
+{{- end }}
