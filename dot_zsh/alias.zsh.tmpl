@@ -296,7 +296,7 @@ codex() {
 }
 
 claude() {
-  command claude --dangerously-skip-permissions --remote-control "$@"
+  CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 command claude --dangerously-skip-permissions --remote-control "$@"
 }
 
 function y() {
