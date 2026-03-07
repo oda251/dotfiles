@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.local/share/chezmoi/scripts/claude-discord-notify.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.local/share/chezmoi/scripts/claude-discord-notify.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
