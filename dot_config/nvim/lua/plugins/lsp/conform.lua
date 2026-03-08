@@ -24,27 +24,34 @@ return {
         ".prettierrc.cjs",
         "prettier.config.js",
         "prettier.config.cjs",
-        "package.json",
       }, { upward = true, path = vim.api.nvim_buf_get_name(bufnr) })[1]
     end
 
-    local function get_formatter(bufnr)
+    local function get_web_formatter(bufnr)
       if has_prettier_config(bufnr) then
         return { "prettier" }
       end
-      return { "biome" }
+      return { "oxfmt" }
     end
 
     return {
+      formatters = {
+        oxfmt = {
+          command = "oxfmt",
+          args = { "--stdin-filepath", "$FILENAME" },
+          stdin = true,
+        },
+      },
       formatters_by_ft = {
         lua = { "stylua" },
-        javascript = get_formatter,
-        typescript = get_formatter,
-        javascriptreact = get_formatter,
-        typescriptreact = get_formatter,
-        css = get_formatter,
-        html = get_formatter,
-        json = get_formatter,
+        javascript = get_web_formatter,
+        typescript = get_web_formatter,
+        javascriptreact = get_web_formatter,
+        typescriptreact = get_web_formatter,
+        css = get_web_formatter,
+        html = get_web_formatter,
+        json = get_web_formatter,
+        vue = get_web_formatter,
         markdown = { "prettier" },
         ["*"] = { "codespell" },
       },

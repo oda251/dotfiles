@@ -19,5 +19,10 @@ return {
         end,
       },
     })
+
+    -- oxlint LSP (mise管理、mason外)
+    if vim.fn.executable("oxlint") == 1 then
+      lspconfig.oxlint.setup({ capabilities = capabilities })
+    end
   end,
 }

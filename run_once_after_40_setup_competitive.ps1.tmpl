@@ -1,4 +1,4 @@
-{{- if eq .chezmoi.os "windows" }}
+{{- if eq .chezmoi.os "windows" -}}
 $ACLibraryPath = "$HOME\atcoder\ac-library"
 if (-not (Test-Path $ACLibraryPath)) {
     New-Item -ItemType Directory -Path "$HOME\atcoder" -Force | Out-Null
