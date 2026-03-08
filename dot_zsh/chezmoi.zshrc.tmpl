@@ -36,7 +36,7 @@ elif [[ -d "$HOME/.linuxbrew" ]]; then
   fi
   source "$brew_shellenv_cache"
 fi
-export PATH="$PATH:/usr/local/go/bin"
+export PATH="$PATH:/usr/local/go/bin:/snap/bin"
 export ZELLIJ_AUTO_START="${ZELLIJ_AUTO_START:-true}"
 export ZELLIJ_AUTO_ATTACH="${ZELLIJ_AUTO_ATTACH:-true}"
 export ZELLIJ_AUTO_EXIT="${ZELLIJ_AUTO_EXIT:-false}"
