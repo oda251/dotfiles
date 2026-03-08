@@ -30,6 +30,11 @@ if ! command -v gh >/dev/null 2>&1; then
   exit 0
 fi
 
+if ! gh auth status &>/dev/null; then
+  echo "gh not authenticated; run 'gh auth login' before setting up extensions" >&2
+  exit 0
+fi
+
 if ! gh extension list | grep -q 'gh-dash'; then
     gh extension install dlvhdr/gh-dash
 fi
