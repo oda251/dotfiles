@@ -20,7 +20,7 @@ if [[ -f "$_brew_prefix/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]]; 
 fi
 
 # Tab: autocomplete の表示をクリアしてから標準補完を実行
-zle -C __tab_complete_impl menu-complete _main_complete
+zle -C __tab_complete_impl menu-select _main_complete
 __tab_complete() {
   RBUFFER=""
   zle -Rc
@@ -28,6 +28,7 @@ __tab_complete() {
 }
 zle -N __tab_complete
 bindkey '\t' __tab_complete
+bindkey -M menuselect '\t' down-line-or-history
 bindkey -M menuselect '^M' .accept-line
 bindkey -M menuselect '^J' .accept-line
 bindkey -M menuselect '^[[D' backward-char
