@@ -1,4 +1,5 @@
 [tools]
+{{- if ne .chezmoi.os "windows" }}
 # Runtimes
 node = "latest"
 npm = "latest"
@@ -11,6 +12,7 @@ bun = "latest"
 rust = "stable"
 awscli = "latest"
 terraform = "latest"
+{{- end }}
 
 # Modern CLI Tools
 fzf = "latest"
@@ -26,13 +28,13 @@ zoxide = "latest"
 starship = "latest"
 yazi = "latest"
 lazygit = "latest"
-lazydocker = "latest"
 delta = "latest"
 gh = "latest"
 jq = "latest"
+
 {{- if ne .chezmoi.os "windows" }}
+lazydocker = "latest"
 zellij = "latest"
-{{- end }}
 make = "latest"
 neovim = "latest"
 "github:anomalyco/opencode" = "latest"
@@ -45,3 +47,4 @@ kubectl = "latest"
 kubectx = "latest"
 kubens = "latest"
 git-lfs = "latest"
+{{- end }}

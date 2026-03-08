@@ -3,9 +3,7 @@
   "Sources": [
     {
       "Packages": [
-        { "PackageIdentifier": "Anthropic.ClaudeCode" },
-        { "PackageIdentifier": "jdx.mise" },
-        { "PackageIdentifier": "BrechtSanders.WinLibs.POSIX.UCRT" }
+        { "PackageIdentifier": "jdx.mise" }
       ],
       "SourceDetails": {
         "Argument": "https://cdn.winget.microsoft.com/cache",

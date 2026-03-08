@@ -30,6 +30,8 @@ keybind = "ctrl+comma=unbind"
 keybind = "ctrl+period=unbind"
 
 # Improve readability for completion/secondary text while keeping TokyoNight base
+selection-background = 364a82
+selection-foreground = c0caf5
 palette = 0=#24283b
 palette = 4=#7aa2f7
 palette = 6=#89ddff
