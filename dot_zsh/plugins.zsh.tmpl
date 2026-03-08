@@ -8,7 +8,11 @@ zstyle ':autocomplete::compinit' arguments -C
 {{- if eq .chezmoi.os "darwin" }}
 _brew_prefix="/opt/homebrew"
 {{- else }}
-_brew_prefix="/home/linuxbrew/.linuxbrew"
+if [[ -d "/home/linuxbrew/.linuxbrew" ]]; then
+  _brew_prefix="/home/linuxbrew/.linuxbrew"
+else
+  _brew_prefix="$HOME/.linuxbrew"
+fi
 {{- end }}
 
 if [[ -f "$_brew_prefix/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]]; then
