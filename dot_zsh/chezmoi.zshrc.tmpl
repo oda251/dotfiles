@@ -41,7 +41,6 @@ if [[ -n "${WSL_DISTRO_NAME:-}" ]]; then
   export PATH="$PATH:/mnt/c/Windows/System32"
 fi
 export ZELLIJ_AUTO_START="${ZELLIJ_AUTO_START:-true}"
-export ZELLIJ_AUTO_ATTACH="${ZELLIJ_AUTO_ATTACH:-true}"
 export ZELLIJ_AUTO_EXIT="${ZELLIJ_AUTO_EXIT:-false}"
 {{- else if eq .chezmoi.os "windows" }}
 # Windows: brew は不使用、mise は plugins.zsh で activate

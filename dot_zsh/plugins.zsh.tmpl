@@ -1,6 +1,6 @@
 {{- if ne .chezmoi.os "windows" }}
 # zsh plugins - sourced from brew
-zstyle ':autocomplete:*' default-context ''
+zstyle ':autocomplete:*' default-context history-incremental-search-backward
 zstyle ':autocomplete:history-incremental-search-backward:*' list-lines 8
 zstyle ':autocomplete:history-search-backward:*' list-lines 8
 zstyle ':autocomplete::compinit' arguments -C
@@ -19,17 +19,33 @@ if [[ -f "$_brew_prefix/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]]; 
   source "$_brew_prefix/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh"
 fi
 
-if bindkey -M menuselect >/dev/null 2>&1; then
-  bindkey -M menuselect '^M' .accept-line
-  bindkey -M menuselect '^J' .accept-line
-  bindkey -M menuselect '^[[D' backward-char
-  bindkey -M menuselect '^[[C' forward-char
-fi
+# Tab: autocomplete の表示をクリアしてから標準補完を実行
+zle -C __tab_complete_impl menu-complete _main_complete
+__tab_complete() {
+  RBUFFER=""
+  zle -Rc
+  zle __tab_complete_impl
+}
+zle -N __tab_complete
+bindkey '\t' __tab_complete
+bindkey -M menuselect '^M' .accept-line
+bindkey -M menuselect '^J' .accept-line
+bindkey -M menuselect '^[[D' backward-char
+bindkey -M menuselect '^[[C' forward-char
+
+# 上下矢印: 履歴の前方一致検索
+bindkey '\e[A'  history-search-backward
+bindkey '\eOA'  history-search-backward
+bindkey '\e[B'  history-search-forward
+bindkey '\eOB'  history-search-forward
+bindkey '^P'    history-search-backward
+bindkey '^N'    history-search-forward
 
 () {
   autoload +X _autocomplete__history_lines 2>/dev/null || return
   eval "$(functions _autocomplete__history_lines | command sed "s/suf=([^)]*_autocomplete__history_lines_suffix[^)]*)/suf=( -qS ' ' )/")"
 }
+
 
 if [[ -f "$_brew_prefix/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
   source "$_brew_prefix/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
@@ -93,11 +109,7 @@ add-zsh-hook chpwd __notify_terminal_cwd
 __notify_terminal_cwd
 
 if [[ "${ZELLIJ_AUTO_START:-false}" == "true" && -z "$ZELLIJ" && -o interactive && -t 0 && -t 1 ]] && command -v zellij >/dev/null 2>&1; then
-    if [[ "$ZELLIJ_AUTO_ATTACH" == "true" ]]; then
-        zellij attach -c || zellij
-    else
-        zellij
-    fi
+    zellij attach -c main
 
     if [[ "$ZELLIJ_AUTO_EXIT" == "true" ]]; then
         exit
