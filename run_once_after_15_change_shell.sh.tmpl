@@ -33,4 +33,4 @@ if ! grep -Fxq "$TARGET_ZSH" /etc/shells; then
   echo "$TARGET_ZSH" | sudo tee -a /etc/shells
 fi
 
-sudo chsh -s "$TARGET_ZSH" "$(whoami)"
+chsh -s "$TARGET_ZSH"
