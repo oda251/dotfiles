@@ -1,0 +1,13 @@
+#!/bin/bash
+{{- if and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") }}
+
+if ! grep -q '\[interop\]' /etc/wsl.conf 2>/dev/null; then
+  sudo tee -a /etc/wsl.conf > /dev/null <<'WSLCONF'
+
+[interop]
+appendWindowsPath = false
+WSLCONF
+  echo "wsl.conf updated: appendWindowsPath = false (restart WSL to apply)"
+fi
+
+{{- end }}
