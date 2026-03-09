@@ -19,6 +19,9 @@ if [[ -f "$_brew_prefix/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]]; 
   source "$_brew_prefix/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh"
 fi
 
+# Windows 由来の不要な拡張子をコマンド補完から除外
+zstyle ':completion:*:*:*:*' ignored-patterns '*.dll' '*.dat' '*.exe'
+
 # Tab: autocomplete の表示をクリアしてから標準補完を実行
 zle -C __tab_complete_impl menu-select _main_complete
 __tab_complete() {
