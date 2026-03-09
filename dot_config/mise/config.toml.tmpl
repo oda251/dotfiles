@@ -37,7 +37,7 @@ jq = "latest"
 {{- if ne .chezmoi.os "windows" }}
 lazydocker = "latest"
 zellij = "latest"
-{{- if ne .chezmoi.os "darwin" }}
+{{- if eq .chezmoi.os "linux" }}
 make = "latest"
 {{- end }}
 neovim = "latest"
