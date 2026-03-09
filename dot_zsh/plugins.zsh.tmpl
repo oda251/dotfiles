@@ -34,14 +34,24 @@ bindkey '\t' __tab_complete
 bindkey -M menuselect '\t' down-line-or-history
 bindkey -M menuselect '^M' .accept-line
 bindkey -M menuselect '^J' .accept-line
+bindkey -M menuselect '^[[A' up-line-or-history
+bindkey -M menuselect '^[[B' down-line-or-history
 bindkey -M menuselect '^[[D' backward-char
 bindkey -M menuselect '^[[C' forward-char
 
-# 上下矢印: 履歴の前方一致検索
+# 上下矢印: 履歴の前方一致検索（空バッファでは下矢印でも履歴に入れるようにする）
+__down_history_or_search() {
+  if [[ -z "$BUFFER" ]]; then
+    zle history-search-backward
+  else
+    zle history-search-forward
+  fi
+}
+zle -N __down_history_or_search
 bindkey '\e[A'  history-search-backward
 bindkey '\eOA'  history-search-backward
-bindkey '\e[B'  history-search-forward
-bindkey '\eOB'  history-search-forward
+bindkey '\e[B'  __down_history_or_search
+bindkey '\eOB'  __down_history_or_search
 bindkey '^P'    history-search-backward
 bindkey '^N'    history-search-forward
 
