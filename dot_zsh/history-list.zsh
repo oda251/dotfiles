@@ -9,6 +9,12 @@ typeset -g __hl_query=""
 typeset -g __hl_navigating=0
 typeset -g __hl_nav_buffer=""
 
+__hl_clear_nav() {
+  __hl_navigating=0
+  __hl_index=0
+  __hl_nav_buffer=""
+}
+
 __hl_search() {
   __hl_matches=()
   local -A seen=()
@@ -33,7 +39,7 @@ __hl_render() {
   while (( idx <= ${#__hl_matches} )); do
     entry="${__hl_matches[$idx]//$'\n'/↵}"
     if (( __hl_navigating && idx == __hl_index )); then
-      display+="▸ ${entry}"$'\n'
+      display+="❯ ${entry}"$'\n'
     else
       display+="  ${entry}"$'\n'
     fi
@@ -42,17 +48,24 @@ __hl_render() {
   zle -M "${display%$'\n'}"
 }
 
-# ナビゲーション解除して元の入力に戻す
+# ナビゲーション開始（検索 + 初期カーソル位置設定）
+__hl_begin_nav() {
+  __hl_query="$BUFFER"
+  __hl_search "$__hl_query"
+  (( ${#__hl_matches} == 0 )) && return 1
+  __hl_navigating=1
+  __hl_index=$1
+  return 0
+}
+
 __hl_exit_nav() {
-  __hl_navigating=0
-  __hl_index=0
-  __hl_nav_buffer=""
+  __hl_clear_nav
   BUFFER="$__hl_query"
   CURSOR=${#BUFFER}
   __hl_prev_buffer="$BUFFER"
+  __hl_render
 }
 
-# 現在の index のマッチを BUFFER に反映
 __hl_select_match() {
   BUFFER="${__hl_matches[$__hl_index]}"
   CURSOR=${#BUFFER}
@@ -63,9 +76,7 @@ __hl_select_match() {
 __hl_show() {
   if (( __hl_navigating )); then
     if [[ "$BUFFER" != "$__hl_nav_buffer" ]]; then
-      __hl_navigating=0
-      __hl_index=0
-      __hl_nav_buffer=""
+      __hl_clear_nav
     else
       return
     fi
@@ -77,36 +88,28 @@ __hl_show() {
   __hl_render
 }
 
+# ↓キー: 新しい方へ
 __hl_up() {
   if (( ! __hl_navigating )); then
-    __hl_query="$BUFFER"
-    __hl_search "$__hl_query"
-    (( ${#__hl_matches} == 0 )) && return
-    __hl_navigating=1
-    __hl_index=1
+    __hl_begin_nav 1 || return
   elif (( __hl_index < ${#__hl_matches} )); then
     (( __hl_index++ ))
   else
     __hl_exit_nav
-    __hl_render
     return
   fi
   __hl_select_match
   __hl_render
 }
 
+# ↑キー: 古い方へ
 __hl_down() {
   if (( ! __hl_navigating )); then
-    __hl_query="$BUFFER"
-    __hl_search "$__hl_query"
-    (( ${#__hl_matches} == 0 )) && return
-    __hl_navigating=1
-    __hl_index=${#__hl_matches}
+    __hl_begin_nav ${#__hl_matches} || return
   elif (( __hl_index > 1 )); then
     (( __hl_index-- ))
   else
     __hl_exit_nav
-    __hl_render
     return
   fi
   __hl_select_match
@@ -129,10 +132,8 @@ bindkey '\eOB'  __hl_up
 
 __hl_reset() {
   __hl_prev_buffer="__hl_unset__"
-  __hl_navigating=0
-  __hl_index=0
+  __hl_clear_nav
   __hl_matches=()
-  __hl_nav_buffer=""
 }
 autoload -Uz add-zsh-hook
 add-zsh-hook precmd __hl_reset
