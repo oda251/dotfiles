@@ -1,4 +1,13 @@
 completions:
+  - name: claude subcommands
+    patterns:
+      - "^claude $"
+      - "^claude --dangerously-skip-permissions $"
+    sourceCommand: "claude --help 2>&1 | sed -n '/^Commands:/,/^$/p' | tail -n +2 | awk 'NF{printf \"%-20s\\t%s\\n\", $1, substr($0, index($0,$2))}'"
+    options:
+      --prompt: "'Claude> '"
+    callback: "awk -F'\\t' '{print $1}' | tr -d ' '"
+
   - name: git switch branch
     patterns:
       - "^git switch $"

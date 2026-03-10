@@ -53,11 +53,22 @@ fi
 # 補完スクリプトの生成・キャッシュ
 _completion_cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/completions"
 mkdir -p "$_completion_cache_dir"
-if command -v chezmoi >/dev/null 2>&1; then
-  if [[ ! -s "$_completion_cache_dir/_chezmoi" || "$(command -v chezmoi)" -nt "$_completion_cache_dir/_chezmoi" ]]; then
-    chezmoi completion zsh >| "$_completion_cache_dir/_chezmoi"
+
+_cache_completion() {
+  local cmd="$1" subcmd="${2:-completion zsh}"
+  local bin_path cache_file
+  bin_path="$(command -v "$cmd")" || return 1
+  cache_file="$_completion_cache_dir/_${cmd}"
+  if [[ ! -s "$cache_file" || "$bin_path" -nt "$cache_file" ]]; then
+    eval "$cmd $subcmd" >| "$cache_file" 2>/dev/null
   fi
-fi
+}
+
+_cache_completion chezmoi "completion zsh"
+_cache_completion gh "completion -s zsh"
+_cache_completion mise "completion zsh"
+_cache_completion docker "completion zsh"
+_cache_completion yazi "completions zsh"
 fpath=( "$_completion_cache_dir" $fpath )
 autoload -Uz compinit
 if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
@@ -67,7 +78,7 @@ else
 fi
 
 # 専用補完関数が未定義のコマンドに _gnu_generic を適用
-zstyle ':completion:*' completer _extensions _complete _gnu_generic
+compdef _gnu_generic -default-
 
 # fzf-tab（Tab 補完を fzf でインタラクティブにする）
 _fzf_tab_dir="${HOME}/.zsh/fzf-tab"
