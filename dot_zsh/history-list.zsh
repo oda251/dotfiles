@@ -7,32 +7,21 @@ typeset -ga __hl_matches=()
 typeset -g __hl_index=0
 typeset -g __hl_query=""
 typeset -g __hl_navigating=0
-# ナビゲーション中に矢印キー操作で設定した BUFFER を記憶
 typeset -g __hl_nav_buffer=""
 
 __hl_search() {
-  local query="$1"
   __hl_matches=()
   local -A seen=()
   local line
-
-  if [[ -z "$query" ]]; then
-    for line in "${(@)history}"; do
-      [[ -n "${seen[$line]+x}" ]] && continue
-      seen[$line]=1
-      __hl_matches+=( "$line" )
-      (( ${#__hl_matches} >= __hl_max_lines )) && break
-    done
-  else
-    for line in "${(@)history}"; do
-      [[ "$line" != "${query}"* ]] && continue
-      [[ "$line" == "$query" ]] && continue
-      [[ -n "${seen[$line]+x}" ]] && continue
-      seen[$line]=1
-      __hl_matches+=( "$line" )
-      (( ${#__hl_matches} >= __hl_max_lines )) && break
-    done
-  fi
+  for line in "${(@)history}"; do
+    if [[ -n "$1" ]]; then
+      [[ "$line" != "$1"* || "$line" == "$1" ]] && continue
+    fi
+    [[ -n "${seen[$line]+x}" ]] && continue
+    seen[$line]=1
+    __hl_matches+=( "$line" )
+    (( ${#__hl_matches} >= __hl_max_lines )) && break
+  done
 }
 
 __hl_render() {
@@ -40,22 +29,37 @@ __hl_render() {
     zle -M ""
     return
   fi
-
   local display="" idx=${#__hl_matches}
   while (( idx >= 1 )); do
-    local line="${__hl_matches[$idx]}"
     if (( __hl_navigating && idx == __hl_index )); then
-      display+="▸ ${line}"$'\n'
+      display+="▸ ${__hl_matches[$idx]}"$'\n'
     else
-      display+="  ${line}"$'\n'
+      display+="  ${__hl_matches[$idx]}"$'\n'
     fi
     (( idx-- ))
   done
   zle -M "${display%$'\n'}"
 }
 
+# ナビゲーション解除して元の入力に戻す
+__hl_exit_nav() {
+  __hl_navigating=0
+  __hl_index=0
+  __hl_nav_buffer=""
+  BUFFER="$__hl_query"
+  CURSOR=${#BUFFER}
+  __hl_prev_buffer="$BUFFER"
+}
+
+# 現在の index のマッチを BUFFER に反映
+__hl_select_match() {
+  BUFFER="${__hl_matches[$__hl_index]}"
+  CURSOR=${#BUFFER}
+  __hl_prev_buffer="$BUFFER"
+  __hl_nav_buffer="$BUFFER"
+}
+
 __hl_show() {
-  # ナビゲーション中にバッファが矢印操作以外で変わったらナビ解除
   if (( __hl_navigating )); then
     if [[ "$BUFFER" != "$__hl_nav_buffer" ]]; then
       __hl_navigating=0
@@ -65,17 +69,13 @@ __hl_show() {
       return
     fi
   fi
-
   [[ "$BUFFER" == "$__hl_prev_buffer" ]] && return
   __hl_prev_buffer="$BUFFER"
-
   __hl_query="$BUFFER"
-  __hl_index=0
   __hl_search "$__hl_query"
   __hl_render
 }
 
-# 上矢印: リスト上方向（古い履歴へ）、初回は一番下からスタート
 __hl_up() {
   if (( ! __hl_navigating )); then
     __hl_query="$BUFFER"
@@ -83,19 +83,17 @@ __hl_up() {
     (( ${#__hl_matches} == 0 )) && return
     __hl_navigating=1
     __hl_index=1
+  elif (( __hl_index < ${#__hl_matches} )); then
+    (( __hl_index++ ))
   else
-    if (( __hl_index < ${#__hl_matches} )); then
-      (( __hl_index++ ))
-    fi
+    __hl_exit_nav
+    __hl_render
+    return
   fi
-  BUFFER="${__hl_matches[$__hl_index]}"
-  CURSOR=${#BUFFER}
-  __hl_prev_buffer="$BUFFER"
-  __hl_nav_buffer="$BUFFER"
+  __hl_select_match
   __hl_render
 }
 
-# 下矢印: リスト下方向（新しい履歴へ / 元の入力に戻る）、初回は一番上からスタート
 __hl_down() {
   if (( ! __hl_navigating )); then
     __hl_query="$BUFFER"
@@ -103,28 +101,14 @@ __hl_down() {
     (( ${#__hl_matches} == 0 )) && return
     __hl_navigating=1
     __hl_index=${#__hl_matches}
-    BUFFER="${__hl_matches[$__hl_index]}"
-    CURSOR=${#BUFFER}
-    __hl_prev_buffer="$BUFFER"
-    __hl_nav_buffer="$BUFFER"
+  elif (( __hl_index > 1 )); then
+    (( __hl_index-- ))
+  else
+    __hl_exit_nav
     __hl_render
     return
   fi
-
-  if (( __hl_index > 1 )); then
-    (( __hl_index-- ))
-    BUFFER="${__hl_matches[$__hl_index]}"
-    CURSOR=${#BUFFER}
-    __hl_prev_buffer="$BUFFER"
-    __hl_nav_buffer="$BUFFER"
-  else
-    __hl_navigating=0
-    __hl_index=0
-    __hl_nav_buffer=""
-    BUFFER="$__hl_query"
-    CURSOR=${#BUFFER}
-    __hl_prev_buffer="$BUFFER"
-  fi
+  __hl_select_match
   __hl_render
 }
 
