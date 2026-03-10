@@ -29,14 +29,14 @@ __hl_render() {
     zle -M ""
     return
   fi
-  local display="" idx=${#__hl_matches}
-  while (( idx >= 1 )); do
+  local display="" idx=1
+  while (( idx <= ${#__hl_matches} )); do
     if (( __hl_navigating && idx == __hl_index )); then
       display+="▸ ${__hl_matches[$idx]}"$'\n'
     else
       display+="  ${__hl_matches[$idx]}"$'\n'
     fi
-    (( idx-- ))
+    (( idx++ ))
   done
   zle -M "${display%$'\n'}"
 }
@@ -121,10 +121,10 @@ zle -N zle-line-pre-redraw __hl_show
 zle -N __hl_up
 zle -N __hl_down
 
-bindkey '\e[A'  __hl_up
-bindkey '\eOA'  __hl_up
-bindkey '\e[B'  __hl_down
-bindkey '\eOB'  __hl_down
+bindkey '\e[A'  __hl_down
+bindkey '\eOA'  __hl_down
+bindkey '\e[B'  __hl_up
+bindkey '\eOB'  __hl_up
 
 __hl_reset() {
   __hl_prev_buffer="__hl_unset__"

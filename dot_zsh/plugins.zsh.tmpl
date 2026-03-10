@@ -2,25 +2,32 @@ source_cache_script() {
   local script_path="$1"
   local compiled_path="${script_path}.zwc"
 
-  # Source the original script so zsh can pick script.zwc automatically.
   source "$script_path"
   if [[ -s "$script_path" && ( ! -e "$compiled_path" || "$script_path" -nt "$compiled_path" ) ]]; then
     zcompile "$script_path" 2>/dev/null
   fi
 }
 
-if command -v mise >/dev/null 2>&1; then
-  mise_bin="$(command -v mise)"
-  mise_init_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/mise-activate.zsh"
-  mkdir -p "${mise_init_cache:h}"
-  if [[ ! -s "$mise_init_cache" || "$mise_bin" -nt "$mise_init_cache" ]]; then
-    "$mise_bin" activate zsh >| "$mise_init_cache"
-    rm -f "${mise_init_cache}.zwc"
-  fi
-  source_cache_script "$mise_init_cache"
+# コマンドの init スクリプトをキャッシュして source する
+# 使い方: _init_tool_cache <コマンド名> <init サブコマンド...>
+_init_tool_cache() {
+  local tool_name="$1"
+  shift
+  local bin_path
+  bin_path="$(command -v "$tool_name")" || return 1
 
+  local cache_file="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/${tool_name}-init.zsh"
+  mkdir -p "${cache_file:h}"
+  if [[ ! -s "$cache_file" || "$bin_path" -nt "$cache_file" ]]; then
+    "$bin_path" "$@" >| "$cache_file"
+    rm -f "${cache_file}.zwc"
+  fi
+  source_cache_script "$cache_file"
+}
+
+if _init_tool_cache mise activate zsh; then
   # activate は遅延読み込みのため、即座に必要なツール（deno 等）のパスを先に追加
-  eval "$("$mise_bin" env -s zsh 2>/dev/null)"
+  eval "$(mise env -s zsh 2>/dev/null)"
 fi
 
 {{- if ne .chezmoi.os "windows" }}
@@ -50,6 +57,9 @@ if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
 else
   compinit -C
 fi
+
+# 専用補完関数が未定義のコマンドに _gnu_generic を適用
+zstyle ':completion:*' completer _extensions _complete _gnu_generic
 
 # fzf-tab（Tab 補完を fzf でインタラクティブにする）
 _fzf_tab_dir="${HOME}/.zsh/fzf-tab"
@@ -111,26 +121,8 @@ if [[ -f "$_brew_prefix/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zs
 fi
 {{- end }}
 
-# zoxide and starship - installed via mise on all platforms
-if command -v zoxide >/dev/null 2>&1; then
-  zoxide_bin="$(command -v zoxide)"
-  zoxide_init_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zoxide-init.zsh"
-  mkdir -p "${zoxide_init_cache:h}"
-  if [[ ! -s "$zoxide_init_cache" || "$zoxide_bin" -nt "$zoxide_init_cache" ]]; then
-    "$zoxide_bin" init zsh >| "$zoxide_init_cache"
-  fi
-  source_cache_script "$zoxide_init_cache"
-fi
-
-if command -v starship >/dev/null 2>&1; then
-  starship_bin="$(command -v starship)"
-  starship_init_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/starship-init.zsh"
-  mkdir -p "${starship_init_cache:h}"
-  if [[ ! -s "$starship_init_cache" || "$starship_bin" -nt "$starship_init_cache" ]]; then
-    "$starship_bin" init zsh >| "$starship_init_cache"
-  fi
-  source_cache_script "$starship_init_cache"
-fi
+_init_tool_cache zoxide init zsh
+_init_tool_cache starship init zsh
 
 if command -v zsh >/dev/null 2>&1; then
   export SHELL="$(command -v zsh)"
