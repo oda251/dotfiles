@@ -29,12 +29,13 @@ __hl_render() {
     zle -M ""
     return
   fi
-  local display="" idx=1
+  local display="" idx=1 entry
   while (( idx <= ${#__hl_matches} )); do
+    entry="${__hl_matches[$idx]//$'\n'/↵}"
     if (( __hl_navigating && idx == __hl_index )); then
-      display+="▸ ${__hl_matches[$idx]}"$'\n'
+      display+="▸ ${entry}"$'\n'
     else
-      display+="  ${__hl_matches[$idx]}"$'\n'
+      display+="  ${entry}"$'\n'
     fi
     (( idx++ ))
   done
