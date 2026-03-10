@@ -36,7 +36,9 @@ jq = "latest"
 {{- if ne .chezmoi.os "windows" }}
 lazydocker = "latest"
 zellij = "latest"
+{{- if ne .chezmoi.os "darwin" }}
 make = "latest"
+{{- end }}
 neovim = "latest"
 "github:anomalyco/opencode" = "latest"
 bottom = "latest"
