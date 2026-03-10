@@ -2,17 +2,7 @@
 
 # mise config hash: {{ include "dot_config/mise/config.toml.tmpl" | sha256sum }}
 
-{{ if eq .chezmoi.os "darwin" -}}
-if [[ -f "/opt/homebrew/bin/brew" ]]; then
-  eval "$(/opt/homebrew/bin/brew shellenv)"
-fi
-{{ else if eq .chezmoi.os "linux" -}}
-if [[ -d "/home/linuxbrew/.linuxbrew" ]]; then
-  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-elif [[ -d "$HOME/.linuxbrew" ]]; then
-  eval "$($HOME/.linuxbrew/bin/brew shellenv)"
-fi
-{{ end -}}
+{{ template "setup-brew-env.sh" . }}
 
 {{ if eq .chezmoi.os "linux" -}}
 has_libatomic=false
@@ -52,8 +42,7 @@ if [[ "$has_libatomic" != "true" ]]; then
 fi
 {{ end -}}
 
-# Install all tools declared in mise config
-eval "$(mise activate bash)"
+{{ template "setup-mise-env.sh" . }}
 mise install
 
 if command -v git-lfs >/dev/null 2>&1; then
@@ -69,7 +58,6 @@ fi
 
 if ! command -v claude >/dev/null 2>&1; then
   if command -v curl >/dev/null 2>&1; then
-    # Claude Code is installed natively via the official installer.
     curl -fsSL https://claude.ai/install.sh | bash
   else
     echo "curl not found; required to install Claude Code natively." >&2

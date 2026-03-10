@@ -2,15 +2,19 @@
 
 export XDG_CONFIG_HOME="$HOME/.config"
 
-{{- if eq .chezmoi.os "darwin" }}
-if [[ -x "/opt/homebrew/bin/brew" ]]; then
-  brew_shellenv_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/brew-shellenv.zsh"
-  mkdir -p "${brew_shellenv_cache:h}"
-  if [[ ! -s "$brew_shellenv_cache" || "/opt/homebrew/bin/brew" -nt "$brew_shellenv_cache" ]]; then
-    /opt/homebrew/bin/brew shellenv >| "$brew_shellenv_cache"
+{{- if ne .chezmoi.os "windows" }}
+# brew shellenv のキャッシュ
+_brew_shellenv_cache() {
+  local brew_bin="$1"
+  local cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/brew-shellenv.zsh"
+  mkdir -p "${cache:h}"
+  if [[ ! -s "$cache" || "$brew_bin" -nt "$cache" ]]; then
+    "$brew_bin" shellenv >| "$cache"
   fi
-  source "$brew_shellenv_cache"
-fi
+  source "$cache"
+}
+{{- if eq .chezmoi.os "darwin" }}
+[[ -x "/opt/homebrew/bin/brew" ]] && _brew_shellenv_cache "/opt/homebrew/bin/brew"
 
 export WASMER_DIR="$HOME/.wasmer"
 [ -s "$WASMER_DIR/wasmer.sh" ] && source "$WASMER_DIR/wasmer.sh"
@@ -22,19 +26,9 @@ export PATH="$HOME/.amp/bin:$PATH"
 export PATH="/Library/Ruby/Gems/2.6.0/bin:$PATH"
 {{- else if eq .chezmoi.os "linux" }}
 if [[ -d "/home/linuxbrew/.linuxbrew" ]]; then
-  brew_shellenv_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/brew-shellenv.zsh"
-  mkdir -p "${brew_shellenv_cache:h}"
-  if [[ ! -s "$brew_shellenv_cache" || "/home/linuxbrew/.linuxbrew/bin/brew" -nt "$brew_shellenv_cache" ]]; then
-    /home/linuxbrew/.linuxbrew/bin/brew shellenv >| "$brew_shellenv_cache"
-  fi
-  source "$brew_shellenv_cache"
+  _brew_shellenv_cache "/home/linuxbrew/.linuxbrew/bin/brew"
 elif [[ -d "$HOME/.linuxbrew" ]]; then
-  brew_shellenv_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/brew-shellenv.zsh"
-  mkdir -p "${brew_shellenv_cache:h}"
-  if [[ ! -s "$brew_shellenv_cache" || "$HOME/.linuxbrew/bin/brew" -nt "$brew_shellenv_cache" ]]; then
-    "$HOME/.linuxbrew/bin/brew" shellenv >| "$brew_shellenv_cache"
-  fi
-  source "$brew_shellenv_cache"
+  _brew_shellenv_cache "$HOME/.linuxbrew/bin/brew"
 fi
 export PATH="$PATH:/usr/local/go/bin:/snap/bin"
 if [[ -n "${WSL_DISTRO_NAME:-}" ]]; then
@@ -42,8 +36,8 @@ if [[ -n "${WSL_DISTRO_NAME:-}" ]]; then
 fi
 export ZELLIJ_AUTO_START="${ZELLIJ_AUTO_START:-true}"
 export ZELLIJ_AUTO_EXIT="${ZELLIJ_AUTO_EXIT:-false}"
-{{- else if eq .chezmoi.os "windows" }}
-# Windows: brew は不使用、mise は plugins.zsh で activate
+{{- end }}
+unfunction _brew_shellenv_cache
 {{- end }}
 export PATH="$HOME/.local/bin:$PATH"
 

@@ -11,9 +11,7 @@ if [[ ! -f "$config_path" ]]; then
   exit 0
 fi
 
-if command -v mise >/dev/null 2>&1; then
-  eval "$(mise activate bash)"
-fi
+{{ template "setup-mise-env.sh" . }}
 
 if ! command -v uv >/dev/null 2>&1; then
   echo "uv not found; run mise install before pre-commit setup" >&2
