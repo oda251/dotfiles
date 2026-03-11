@@ -35,9 +35,10 @@ __hl_render() {
     zle -M ""
     return
   fi
-  local display="" idx=1 entry
+  local display="" idx=1 entry max_width=$(( COLUMNS - 4 ))
   while (( idx <= ${#__hl_matches} )); do
     entry="${__hl_matches[$idx]//$'\n'/↵}"
+    (( ${#entry} > max_width )) && entry="${entry:0:$max_width}…"
     if (( __hl_navigating && idx == __hl_index )); then
       display+="❯ ${entry}"$'\n'
     else
