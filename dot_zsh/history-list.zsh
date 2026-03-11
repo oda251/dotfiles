@@ -8,6 +8,7 @@ typeset -g __hl_index=0
 typeset -g __hl_query=""
 typeset -g __hl_navigating=0
 typeset -g __hl_nav_buffer=""
+typeset -g __hl_last_display=""
 
 __hl_clear_nav() {
   __hl_navigating=0
@@ -15,38 +16,39 @@ __hl_clear_nav() {
   __hl_nav_buffer=""
 }
 
+# HIST_IGNORE_ALL_DUPS により $history は既にユニーク
 __hl_search() {
   __hl_matches=()
-  local -A seen=()
   local line
   for line in "${(@)history}"; do
     if [[ -n "$1" ]]; then
       [[ "$line" != "$1"* || "$line" == "$1" ]] && continue
     fi
-    [[ -n "${seen[$line]+x}" ]] && continue
-    seen[$line]=1
     __hl_matches+=( "$line" )
     (( ${#__hl_matches} >= __hl_max_lines )) && break
   done
 }
 
 __hl_render() {
-  if (( ${#__hl_matches} == 0 )); then
-    zle -M ""
-    return
+  local display=""
+  if (( ${#__hl_matches} > 0 )); then
+    local idx=1 entry max_width=$(( COLUMNS - 4 ))
+    while (( idx <= ${#__hl_matches} )); do
+      entry="${__hl_matches[$idx]//$'\n'/↵}"
+      (( ${#entry} > max_width )) && entry="${entry:0:$max_width}…"
+      if (( __hl_navigating && idx == __hl_index )); then
+        display+="❯ ${entry}"$'\n'
+      else
+        display+="  ${entry}"$'\n'
+      fi
+      (( idx++ ))
+    done
+    display="${display%$'\n'}"
   fi
-  local display="" idx=1 entry max_width=$(( COLUMNS - 4 ))
-  while (( idx <= ${#__hl_matches} )); do
-    entry="${__hl_matches[$idx]//$'\n'/↵}"
-    (( ${#entry} > max_width )) && entry="${entry:0:$max_width}…"
-    if (( __hl_navigating && idx == __hl_index )); then
-      display+="❯ ${entry}"$'\n'
-    else
-      display+="  ${entry}"$'\n'
-    fi
-    (( idx++ ))
-  done
-  zle -M "${display%$'\n'}"
+  # 表示内容が変わったときだけ zle -M を呼ぶ（ちらつき防止）
+  [[ "$display" == "$__hl_last_display" ]] && return
+  __hl_last_display="$display"
+  zle -M "$display"
 }
 
 # ナビゲーション開始（検索 + 初期カーソル位置設定）
@@ -133,6 +135,7 @@ bindkey '\eOB'  __hl_up
 
 __hl_reset() {
   __hl_prev_buffer="__hl_unset__"
+  __hl_last_display=""
   __hl_clear_nav
   __hl_matches=()
 }
