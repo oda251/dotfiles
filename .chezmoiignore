@@ -1,0 +1,16 @@
+# リポジトリ管理用ファイル
+README.md
+LICENSE
+lefthook.yml
+ai-agent-configs
+
+# Windows専用（Linux/macOSでは不要）
+{{ if ne .chezmoi.os "windows" }}
+AppData
+Documents
+{{ end }}
+
+# Linux/macOS専用（Windowsでは不要）
+{{ if eq .chezmoi.os "windows" }}
+dot_Brewfile.tmpl
+{{ end }}
