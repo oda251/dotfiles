@@ -93,7 +93,27 @@ while IFS= read -r raw_line || [[ -n "$raw_line" ]]; do
   fi
 
   mode="$(trim "${parts[0]}")"
-  if [[ "$mode" == "copy" ]]; then
+  if [[ "$mode" == "sync" ]]; then
+    if [[ "$part_count" -ne 3 ]]; then
+      echo "invalid sync route: $line" >&2
+      exit 1
+    fi
+    src_dir="$(trim "${parts[1]}")"
+    dst_dir="$(trim "${parts[2]}")"
+    if [[ -z "$src_dir" || -z "$dst_dir" ]]; then
+      echo "invalid sync route: $line" >&2
+      exit 1
+    fi
+    src_abs="$repo_root/$src_dir"
+    if [[ ! -d "$src_abs" ]]; then
+      echo "source directory not found: $src_dir" >&2
+      exit 1
+    fi
+    while IFS= read -r -d '' file; do
+      rel="${file#"$src_abs/"}"
+      sync_copy "$src_dir/$rel" "$dst_dir/$rel"
+    done < <(find "$src_abs" -type f -print0)
+  elif [[ "$mode" == "copy" ]]; then
     if [[ "$part_count" -ne 3 ]]; then
       echo "invalid copy route: $line" >&2
       exit 1

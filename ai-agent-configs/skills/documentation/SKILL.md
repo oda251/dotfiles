@@ -1,18 +1,24 @@
 ---
 name: documentation
-description: 仕様・設計に関する情報を扱うときは、これをもとに逐次ドキュメント化する
+description: This skill should be used when the user asks to "document this", "write docs", "save investigation results", "ドキュメント化して", or when handling specification, design, or investigation information that should be persisted.
 ---
 
-# 手順
+# Documentation Skill
 
-1. `docs/` ディレクトリが存在しなければ作成する
-2. 種別に応じたサブディレクトリに配置する
-   - 仕様: `docs/spec/`
-   - 設計: `docs/design/`
-3. ファイル名には作成日を入れる（例：2026-01-01-ER-diagram.md）
-4. 既存ドキュメントがあれば内容を確認し、差分を更新する。ただし、作成日や内容に隔たりがあれば、同じスコープであっても新たなファイルに記録する
-5. 行数が500行を超す場合、ファイルを分割する。分割元のファイルも、スコープに応じて適切にリネームする。
+Persist specification, design, and investigation information as structured markdown documents.
 
-# 備考
+## Process
 
-- 図形はmermaidで表現する
+1. Create `docs/` directory if it does not exist
+2. Place documents in subdirectories by type:
+   - Specification: `docs/spec/`
+   - Design: `docs/design/`
+   - Investigation: `docs/investigation/`
+3. Include the creation date in the filename (e.g., `2026-01-01-ER-diagram.md`)
+4. Check existing documents and update the diff. If the creation date or content diverges significantly, create a new file even for the same scope
+5. Split files exceeding 500 lines. Rename the original file appropriately for the scope
+6. Include sources (URLs, document paths, issue numbers, etc.) in a references section at the end
+
+## Notes
+
+- Represent diagrams with mermaid

@@ -4,13 +4,17 @@
 # Extended format:
 # copy|source|destination
 # concat|destination|source1|source2|...
+# sync|source_dir|destination_dir
 
 # Rules
 copy|ai-agent-configs/rules/base.md|dot_claude/CLAUDE.md
 copy|ai-agent-configs/rules/base.md|dot_codex/AGENTS.md
 copy|ai-agent-configs/rules/base.md|dot_cursor/rules/AGENTS.mdc
 
+# Agents (Claude Code only)
+sync|ai-agent-configs/agents|dot_claude/agents
+
 # Skills
-copy|ai-agent-configs/skills/documentation/SKILL.md|dot_claude/skills/documentation/SKILL.md
-copy|ai-agent-configs/skills/documentation/SKILL.md|dot_codex/skills/documentation/SKILL.md
-copy|ai-agent-configs/skills/documentation/SKILL.md|dot_cursor/skills/documentation/SKILL.md
+sync|ai-agent-configs/skills|dot_claude/skills
+sync|ai-agent-configs/skills|dot_codex/skills
+sync|ai-agent-configs/skills|dot_cursor/skills
