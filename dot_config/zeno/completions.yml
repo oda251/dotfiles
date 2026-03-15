@@ -1,0 +1,125 @@
+completions:
+  - name: claude subcommands
+    patterns:
+      - "^claude $"
+      - "^claude --dangerously-skip-permissions $"
+    sourceCommand: "claude --help 2>&1 | sed -n '/^Commands:/,/^$/p' | tail -n +2 | awk 'NF{printf \"%-20s\\t%s\\n\", $1, substr($0, index($0,$2))}'"
+    options:
+      --prompt: "'Claude> '"
+    callback: "awk -F'\\t' '{print $1}' | tr -d ' '"
+
+  - name: git switch branch
+    patterns:
+      - "^git switch $"
+      - "^gsw $"
+    sourceCommand: "git branch --format='%(refname:short)' --sort=-committerdate"
+    options:
+      --prompt: "'Branch> '"
+      --preview: "git log --oneline -20 {}"
+
+  - name: git checkout branch
+    patterns:
+      - "^git checkout $"
+      - "^gco $"
+    sourceCommand: "git branch -a --format='%(refname:short)' --sort=-committerdate"
+    options:
+      --prompt: "'Branch> '"
+      --preview: "git log --oneline -20 {}"
+
+  - name: git add files
+    patterns:
+      - "^git add $"
+      - "^ga $"
+    sourceCommand: "git status --short | awk '{print $2}'"
+    options:
+      --multi: true
+      --prompt: "'Git Add> '"
+      --preview: "git diff --color=always -- {}"
+
+  - name: git diff files
+    patterns:
+      - "^git diff $"
+      - "^gd $"
+    sourceCommand: "git diff --name-only"
+    options:
+      --multi: true
+      --prompt: "'Git Diff> '"
+      --preview: "git diff --color=always -- {}"
+
+  - name: git stash
+    patterns:
+      - "^git stash (pop|apply|drop|show) $"
+    sourceCommand: "git stash list"
+    options:
+      --prompt: "'Stash> '"
+      --preview: "git stash show -p {1}"
+    callback: "awk -F: '{print $1}'"
+
+  - name: docker container
+    patterns:
+      - "^docker (stop|restart|logs|exec|rm|inspect) $"
+    sourceCommand: "docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}' | sed 1d"
+    options:
+      --prompt: "'Container> '"
+    callback: "awk '{print $1}'"
+
+  - name: docker image
+    patterns:
+      - "^docker rmi $"
+      - "^docker image (rm|inspect) $"
+    sourceCommand: "docker images --format 'table {{.Repository}}:{{.Tag}}\t{{.Size}}\t{{.CreatedSince}}' | sed 1d"
+    options:
+      --multi: true
+      --prompt: "'Image> '"
+    callback: "awk '{print $1}'"
+
+  - name: kubectl namespace
+    patterns:
+      - "^kubectl -n $"
+      - "^kubectl --namespace $"
+    sourceCommand: "kubectl get namespaces -o jsonpath='{range .items[*]}{.metadata.name}{\"\\n\"}{end}'"
+    options:
+      --prompt: "'Namespace> '"
+
+  - name: kubectl pod
+    patterns:
+      - "^kubectl (logs|exec|describe|delete|port-forward) (pod/)?$"
+      - "^kubectl (-n \\S+ )?(logs|exec|describe|delete|port-forward) $"
+    sourceCommand: "kubectl get pods --no-headers"
+    options:
+      --prompt: "'Pod> '"
+    callback: "awk '{print $1}'"
+
+  - name: kill process
+    patterns:
+      - "^kill( .*)? $"
+    excludePatterns:
+      - " -[lns] $"
+    sourceCommand: "LANG=C ps -ef | sed 1d"
+    options:
+      --multi: true
+      --prompt: "'Kill> '"
+    callback: "awk '{print $2}'"
+
+  - name: cd directory
+    patterns:
+      - "^(cd|z) $"
+    sourceCommand: "fd --type d --hidden --exclude .git --max-depth 4"
+    options:
+      --prompt: "'Dir> '"
+      --preview: "eza --icons --tree --level=2 {}"
+
+  - name: npm scripts
+    patterns:
+      - "^npm run $"
+      - "^bun run $"
+    sourceCommand: "cat package.json 2>/dev/null | jq -r '.scripts | keys[]'"
+    options:
+      --prompt: "'Script> '"
+
+  - name: mise tool
+    patterns:
+      - "^mise (use|install|uninstall) $"
+    sourceCommand: "mise ls --json 2>/dev/null | jq -r 'to_entries[] | \"\\(.key)@\\(.value[0].version)\"'"
+    options:
+      --prompt: "'Tool> '"

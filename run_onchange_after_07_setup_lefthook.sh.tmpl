@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# lefthook config hash: {{ include "lefthook.yml" | sha256sum }}
+
+source_dir="${CHEZMOI_SOURCE_DIR:-$HOME/.local/share/chezmoi}"
+
+{{ template "setup-mise-env.sh" . }}
+
+if ! command -v lefthook >/dev/null 2>&1; then
+  echo "lefthook not found; run mise install first" >&2
+  exit 0
+fi
+
+cd "$source_dir"
+lefthook install

@@ -1,0 +1,13 @@
+[include]
+	path = {{ .chezmoi.homeDir }}/.gitconfig_shared
+[user]
+	name = oda251
+	email = 69433701+oda251@users.noreply.github.com
+[init]
+	defaultBranch = main
+[credential "https://github.com"]
+	helper =
+	helper = !/usr/bin/env gh auth git-credential
+[credential "https://gist.github.com"]
+	helper =
+	helper = !/usr/bin/env gh auth git-credential

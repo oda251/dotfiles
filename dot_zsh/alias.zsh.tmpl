@@ -27,7 +27,16 @@ alias cd='z'
 alias v='nvim'
 alias lg='lazygit'
 alias now="date '+%Y%m%d%H%M%S'"
+alias tf='terraform'
 alias copilot='copilot --allow-all-tools'
+
+claude() {
+  command claude --dangerously-skip-permissions "$@"
+}
+
+codex() {
+  command codex --ask-for-approval never --sandbox danger-full-access "$@"
+}
 
 function wt() {
   local subcmd="$1"
@@ -295,13 +304,6 @@ function wtcd() {
   __wt_open_in_tab "$worktree_dir" "$branch_name"
 }
 
-codex() {
-  command codex --ask-for-approval never --sandbox danger-full-access "$@"
-}
-
-claude() {
-  command claude --dangerously-skip-permissions "$@"
-}
 
 function y() {
 	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"

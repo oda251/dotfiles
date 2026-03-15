@@ -1,9 +1,44 @@
+source_cache_script() {
+  local script_path="$1"
+  local compiled_path="${script_path}.zwc"
+
+  source "$script_path"
+  if [[ -s "$script_path" && ( ! -e "$compiled_path" || "$script_path" -nt "$compiled_path" ) ]]; then
+    zcompile "$script_path" 2>/dev/null
+  fi
+}
+
+# コマンドの init スクリプトをキャッシュして source する
+# 使い方: _init_tool_cache <コマンド名> <init サブコマンド...>
+_init_tool_cache() {
+  local tool_name="$1"
+  shift
+  local bin_path
+  bin_path="$(command -v "$tool_name")" || return 1
+
+  local cache_file="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/${tool_name}-init.zsh"
+  mkdir -p "${cache_file:h}"
+  if [[ ! -s "$cache_file" || "$bin_path" -nt "$cache_file" ]]; then
+    "$bin_path" "$@" >| "$cache_file"
+    rm -f "${cache_file}.zwc"
+  fi
+  source_cache_script "$cache_file"
+}
+
+if _init_tool_cache mise activate zsh; then
+  # activate は遅延読み込みのため、即座に必要なツール（deno 等）のパスを先に追加
+  local mise_env_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/mise-env.zsh"
+  local mise_global_config="${XDG_CONFIG_HOME:-$HOME/.config}/mise/config.toml"
+  if [[ ! -s "$mise_env_cache" \
+        || ( -f "$mise_global_config" && "$mise_global_config" -nt "$mise_env_cache" ) \
+        || "$(command -v mise)" -nt "$mise_env_cache" ]]; then
+    mise env -s zsh >| "$mise_env_cache" 2>/dev/null
+    rm -f "${mise_env_cache}.zwc"
+  fi
+  source_cache_script "$mise_env_cache"
+fi
+
 {{- if ne .chezmoi.os "windows" }}
-# zsh plugins - sourced from brew
-zstyle ':autocomplete:*' default-context history-incremental-search-backward
-zstyle ':autocomplete:history-incremental-search-backward:*' list-lines 8
-zstyle ':autocomplete:history-search-backward:*' list-lines 8
-zstyle ':autocomplete::compinit' arguments -C
 
 {{- if eq .chezmoi.os "darwin" }}
 _brew_prefix="/opt/homebrew"
@@ -15,100 +50,98 @@ else
 fi
 {{- end }}
 
-if [[ -f "$_brew_prefix/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh" ]]; then
-  source "$_brew_prefix/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh"
+# 補完スクリプトの生成・キャッシュ
+_completion_cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/completions"
+mkdir -p "$_completion_cache_dir"
+
+_cache_completion() {
+  local cmd="$1" subcmd="${2:-completion zsh}"
+  local bin_path cache_file
+  bin_path="$(command -v "$cmd")" || return 1
+  cache_file="$_completion_cache_dir/_${cmd}"
+  if [[ ! -s "$cache_file" || "$bin_path" -nt "$cache_file" ]]; then
+    eval "$cmd $subcmd" >| "$cache_file" 2>/dev/null
+  fi
+}
+
+_cache_completion chezmoi "completion zsh"
+_cache_completion gh "completion -s zsh"
+_cache_completion mise "completion zsh"
+_cache_completion docker "completion zsh"
+fpath=( "$_completion_cache_dir" $fpath )
+autoload -Uz compinit
+if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
+  compinit
+else
+  compinit -C
 fi
+
+# 専用補完関数が未定義のコマンドに _gnu_generic を適用
+compdef _gnu_generic -default-
+
+# fzf-tab（Tab 補完を fzf でインタラクティブにする）
+_fzf_tab_dir="${HOME}/.zsh/fzf-tab"
+if [[ ! -d "$_fzf_tab_dir" ]]; then
+  git clone https://github.com/Aloxaf/fzf-tab.git "$_fzf_tab_dir"
+fi
+if [[ -f "$_fzf_tab_dir/fzf-tab.plugin.zsh" ]]; then
+  source "$_fzf_tab_dir/fzf-tab.plugin.zsh"
+fi
+zstyle ':fzf-tab:*' fzf-bindings 'space:accept' 'right:accept' 'enter:accept'
+zstyle ':fzf-tab:*' accept-line enter
+
+# zeno.zsh（Deno + fzf ベースのスニペット・特定コマンド補完）
+_zeno_dir="${HOME}/.zsh/zeno.zsh"
+if [[ ! -d "$_zeno_dir" ]]; then
+  git clone https://github.com/yuki-yano/zeno.zsh.git "$_zeno_dir"
+fi
+
+export ZENO_HOME="$_zeno_dir"
+export ZENO_ENABLE_SOCK=1
+export ZENO_GIT_CAT="bat --color=always"
+export ZENO_GIT_TREE="eza --tree"
+
+if [[ -f "$_zeno_dir/zeno.zsh" ]]; then
+  source "$_zeno_dir/zeno.zsh"
+fi
+
+# zeno のフォールバックを fzf-tab に設定
+export ZENO_COMPLETION_FALLBACK=fzf-tab-complete
+
+# Tab: zeno 補完（パターン未マッチ時は fzf-tab にフォールバック）
+bindkey '\t' zeno-completion
+
+# Ctrl-R: zeno 履歴検索
+bindkey '^r' zeno-history-selection
+
+# スペース / Enter: スニペット自動展開
+bindkey ' '  zeno-auto-snippet
+bindkey '^m' zeno-auto-snippet-and-accept-line
+
+# Ctrl-X + s: スニペット挿入
+bindkey '^x^s' zeno-insert-snippet
+
+# Ctrl-X + Ctrl-G: ghq リポジトリ移動
+bindkey '^x^g' zeno-ghq-cd
 
 # Windows 由来の不要な拡張子をコマンド補完から除外
 zstyle ':completion:*:*:*:*' ignored-patterns '*.dll' '*.dat' '*.exe'
 
-# Tab: autocomplete の表示をクリアしてから標準補完を実行
-zle -C __tab_complete_impl menu-select _main_complete
-__tab_complete() {
-  RBUFFER=""
-  zle -Rc
-  zle __tab_complete_impl
-}
-zle -N __tab_complete
-bindkey '\t' __tab_complete
-bindkey -M menuselect '\t' down-line-or-history
-bindkey -M menuselect '^M' .accept-line
-bindkey -M menuselect '^J' .accept-line
-bindkey -M menuselect '^[[A' up-line-or-history
-bindkey -M menuselect '^[[B' down-line-or-history
-bindkey -M menuselect '^[[D' backward-char
-bindkey -M menuselect '^[[C' forward-char
+# 常時履歴リスト表示
+source "$HOME/.zsh/history-list.zsh"
 
-# 上下矢印: 履歴の前方一致検索（空バッファでは下矢印でも履歴に入れるようにする）
-__down_history_or_search() {
-  if [[ -z "$BUFFER" ]]; then
-    zle history-search-backward
-  else
-    zle history-search-forward
-  fi
-}
-zle -N __down_history_or_search
-bindkey '\e[A'  history-search-backward
-bindkey '\eOA'  history-search-backward
-bindkey '\e[B'  __down_history_or_search
-bindkey '\eOB'  __down_history_or_search
-bindkey '^P'    history-search-backward
-bindkey '^N'    history-search-forward
+bindkey '^P' __hl_up
+bindkey '^N' __hl_down
 
-() {
-  autoload +X _autocomplete__history_lines 2>/dev/null || return
-  eval "$(functions _autocomplete__history_lines | command sed "s/suf=([^)]*_autocomplete__history_lines_suffix[^)]*)/suf=( -qS ' ' )/")"
-}
-
-
+# zsh-syntax-highlighting（最後に読み込む）
 if [[ -f "$_brew_prefix/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
   source "$_brew_prefix/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 fi
 {{- end }}
 
-source_cache_script() {
-  local script_path="$1"
-  local compiled_path="${script_path}.zwc"
-
-  # Source the original script so zsh can pick script.zwc automatically.
-  source "$script_path"
-  if [[ -s "$script_path" && ( ! -e "$compiled_path" || "$script_path" -nt "$compiled_path" ) ]]; then
-    zcompile "$script_path" 2>/dev/null
-  fi
-}
-
-# mise is used on all platforms (CLI tools only on Windows)
-if command -v mise >/dev/null 2>&1; then
-  mise_bin="$(command -v mise)"
-  mise_init_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/mise-activate.zsh"
-  mkdir -p "${mise_init_cache:h}"
-  if [[ ! -s "$mise_init_cache" || "$mise_bin" -nt "$mise_init_cache" ]]; then
-    "$mise_bin" activate zsh >| "$mise_init_cache"
-    rm -f "${mise_init_cache}.zwc"
-  fi
-  source_cache_script "$mise_init_cache"
-fi
-
-# zoxide and starship - installed via mise on all platforms
-if command -v zoxide >/dev/null 2>&1; then
-  zoxide_bin="$(command -v zoxide)"
-  zoxide_init_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zoxide-init.zsh"
-  mkdir -p "${zoxide_init_cache:h}"
-  if [[ ! -s "$zoxide_init_cache" || "$zoxide_bin" -nt "$zoxide_init_cache" ]]; then
-    "$zoxide_bin" init zsh >| "$zoxide_init_cache"
-  fi
-  source_cache_script "$zoxide_init_cache"
-fi
-
-if command -v starship >/dev/null 2>&1; then
-  starship_bin="$(command -v starship)"
-  starship_init_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/starship-init.zsh"
-  mkdir -p "${starship_init_cache:h}"
-  if [[ ! -s "$starship_init_cache" || "$starship_bin" -nt "$starship_init_cache" ]]; then
-    "$starship_bin" init zsh >| "$starship_init_cache"
-  fi
-  source_cache_script "$starship_init_cache"
-fi
+_init_tool_cache direnv hook zsh
+_init_tool_cache zoxide init zsh
+_init_tool_cache starship init zsh
 
 if command -v zsh >/dev/null 2>&1; then
   export SHELL="$(command -v zsh)"

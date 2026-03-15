@@ -9,9 +9,11 @@ npm = "latest"
 "npm:wrangler" = "latest"
 uv = "latest"
 bun = "latest"
+deno = "latest"
 rust = "stable"
 awscli = "latest"
 terraform = "latest"
+direnv = "latest"
 {{- end }}
 
 # Modern CLI Tools
@@ -35,16 +37,20 @@ jq = "latest"
 {{- if ne .chezmoi.os "windows" }}
 lazydocker = "latest"
 zellij = "latest"
+{{- if ne .chezmoi.os "darwin" }}
 make = "latest"
+{{- end }}
 neovim = "latest"
 "github:anomalyco/opencode" = "latest"
 bottom = "latest"
 oxlint = "latest"
 "npm:oxfmt" = "latest"
+"npm:openclaw" = "beta"
 
 k9s = "latest"
 kubectl = "latest"
 kubectx = "latest"
 kubens = "latest"
 git-lfs = "latest"
+lefthook = "latest"
 {{- end }}
