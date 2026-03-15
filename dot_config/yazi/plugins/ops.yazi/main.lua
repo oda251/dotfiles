@@ -333,6 +333,38 @@ local function git_add_selected()
 	notify("info", "Git stage", string.format("staged %d, unstaged %d", #to_stage, #to_unstage))
 end
 
+local open_if_editable = ya.sync(function()
+	local hovered = cx.active.current.hovered
+	if not hovered then
+		return
+	end
+
+	if hovered.cha.is_dir then
+		ya.emit("enter", {})
+		return
+	end
+
+	local mime = hovered.mime
+	if not mime then
+		return
+	end
+
+	local isTextLike = mime:find("^text/")
+		or mime == "application/json"
+		or mime == "application/javascript"
+		or mime == "application/typescript"
+		or mime == "application/xml"
+		or mime == "application/toml"
+		or mime == "application/x-yaml"
+		or mime == "application/x-shellscript"
+		or mime == "application/x-sh"
+		or mime == "inode/x-empty"
+
+	if isTextLike then
+		ya.emit("open", {})
+	end
+end)
+
 return {
 	entry = function(_, job)
 		local action = job and job.args and job.args[1] or nil
@@ -346,6 +378,8 @@ return {
 			return open_shell()
 		elseif action == "run-zsh-command" then
 			return run_zsh_command()
+		elseif action == "open-if-editable" then
+			return open_if_editable()
 		end
 
 		notify("warn", "Ops", "Unknown action")
