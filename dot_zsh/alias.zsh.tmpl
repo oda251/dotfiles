@@ -66,8 +66,32 @@ function wt() {
     shift
     local branch="$1"
     if [[ -z "$branch" ]]; then
-      echo "usage: wt add <branch-name>" >&2
+      echo "usage: wt add <branch-name|issue-number|issue-url>" >&2
       return 1
+    fi
+
+    if [[ "$branch" =~ ^[0-9]+$ || "$branch" =~ ^https:// ]]; then
+      local issue_json
+      issue_json="$(gh issue view "$branch" --json number,title 2>/dev/null)" || {
+        echo "wt: failed to fetch issue '$branch'" >&2
+        return 1
+      }
+      local issue_number issue_title slug
+      issue_number="$(echo "$issue_json" | jq -r '.number')"
+      issue_title="$(echo "$issue_json" | jq -r '.title')"
+      slug="$(echo "$issue_title" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g; s/--*/-/g; s/^-//; s/-$//')"
+      if [[ -z "$slug" ]]; then
+        echo "wt: title='$issue_title' (non-ASCII removed)"
+        printf "wt: slug (empty=feat/%s): " "$issue_number"
+        read -r slug
+        slug="$(echo "$slug" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g; s/--*/-/g; s/^-//; s/-$//')"
+      fi
+      if [[ -n "$slug" ]]; then
+        branch="feat/${issue_number}-${slug}"
+      else
+        branch="feat/${issue_number}"
+      fi
+      echo "wt: branch → $branch"
     fi
 
     local repo_name parent_dir safe_branch worktree_dir
