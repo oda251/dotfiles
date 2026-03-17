@@ -72,6 +72,7 @@ function wt() {
 
     local repo_name parent_dir safe_branch worktree_dir
     repo_name="$(basename "$repo_root")"
+    repo_name="${repo_name%%@*}"
     parent_dir="$(dirname "$repo_root")"
     safe_branch="${branch//\//__}"
     worktree_dir="$parent_dir/${repo_name}@${safe_branch}"
