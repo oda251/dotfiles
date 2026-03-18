@@ -72,6 +72,7 @@ fpath=( "$_completion_cache_dir" $fpath )
 autoload -Uz compinit
 if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
   compinit
+  { zcompile ~/.zcompdump } &!
 else
   compinit -C
 fi
@@ -90,39 +91,8 @@ fi
 zstyle ':fzf-tab:*' fzf-bindings 'space:accept' 'right:accept' 'enter:accept'
 zstyle ':fzf-tab:*' accept-line enter
 
-# zeno.zsh（Deno + fzf ベースのスニペット・特定コマンド補完）
-_zeno_dir="${HOME}/.zsh/zeno.zsh"
-if [[ ! -d "$_zeno_dir" ]]; then
-  git clone https://github.com/yuki-yano/zeno.zsh.git "$_zeno_dir"
-fi
-
-export ZENO_HOME="$_zeno_dir"
-export ZENO_ENABLE_SOCK=1
-export ZENO_GIT_CAT="bat --color=always"
-export ZENO_GIT_TREE="eza --tree"
-
-if [[ -f "$_zeno_dir/zeno.zsh" ]]; then
-  source "$_zeno_dir/zeno.zsh"
-fi
-
-# zeno のフォールバックを fzf-tab に設定
-export ZENO_COMPLETION_FALLBACK=fzf-tab-complete
-
-# Tab: zeno 補完（パターン未マッチ時は fzf-tab にフォールバック）
-bindkey '\t' zeno-completion
-
-# Ctrl-R: zeno 履歴検索
-bindkey '^r' zeno-history-selection
-
-# スペース / Enter: スニペット自動展開
-bindkey ' '  zeno-auto-snippet
-bindkey '^m' zeno-auto-snippet-and-accept-line
-
-# Ctrl-X + s: スニペット挿入
-bindkey '^x^s' zeno-insert-snippet
-
-# Ctrl-X + Ctrl-G: ghq リポジトリ移動
-bindkey '^x^g' zeno-ghq-cd
+# パターンマッチ fzf 補完（fzf-tab の後に source し、^I をラップ）
+source "$HOME/.zsh/fzf-completion.zsh"
 
 # Windows 由来の不要な拡張子をコマンド補完から除外
 zstyle ':completion:*:*:*:*' ignored-patterns '*.dll' '*.dat' '*.exe'
