@@ -26,7 +26,7 @@ _init_tool_cache() {
 }
 
 if _init_tool_cache mise activate zsh; then
-  # activate は遅延読み込みのため、即座に必要なツール（deno 等）のパスを先に追加
+  # activate は遅延読み込みのため、即座に必要なツールのパスを先に追加
   local mise_env_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/mise-env.zsh"
   local mise_global_config="${XDG_CONFIG_HOME:-$HOME/.config}/mise/config.toml"
   if [[ ! -s "$mise_env_cache" \
