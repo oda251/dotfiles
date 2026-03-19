@@ -77,8 +77,28 @@ else
   compinit -C
 fi
 
-# 専用補完関数が未定義のコマンドに _gnu_generic を適用
-compdef _gnu_generic -default-
+# 専用補完関数が未定義のコマンドに対して --help から -option / --option を抽出
+# _gnu_generic は --long-option のみ対応のため、-single-dash も拾うカスタム版を使用
+_help_generic() {
+  local bin_path
+  bin_path="$(command -v "${words[1]}")" || return 1
+  local raw_key="${words[1]:t}_${(j:_:)words[2,-1]}"
+  local cache_file="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/help-generic/${raw_key//[^a-zA-Z0-9._-]/_}"
+  if [[ ! -s "$cache_file" || "$bin_path" -nt "$cache_file" ]]; then
+    mkdir -p "${cache_file:h}"
+    local help_output
+    help_output="$("${words[1]}" "${(@)words[2,-1]}" --help 2>&1)"
+    [[ -n "$help_output" ]] || return 1
+    command grep -oE '(^|[[:space:]])-{1,2}[a-zA-Z][-a-zA-Z0-9]*=?' <<< "$help_output" \
+      | sed 's/^[[:space:]]*//' | sort -u >| "$cache_file"
+  fi
+  local -a opts=(${(f)"$(<"$cache_file")"})
+  local -a eq_opts=(${(M)opts:#*=}) bare_opts=(${opts:#*=})
+  (( ${#eq_opts} )) && _describe 'option' eq_opts -S ''
+  (( ${#bare_opts} )) && _describe 'option' bare_opts
+  _default
+}
+compdef _help_generic -default-
 
 # fzf-tab（Tab 補完を fzf でインタラクティブにする）
 _fzf_tab_dir="${HOME}/.zsh/fzf-tab"
