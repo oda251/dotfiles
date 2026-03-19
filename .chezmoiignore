@@ -1,8 +1,13 @@
 # リポジトリ管理用ファイル
 README.md
 LICENSE
+CLAUDE.md
 lefthook.yml
+mise.toml
 ai-agent-configs
+scripts
+docs
+nix-backups
 
 # Windows専用（Linux/macOSでは不要）
 {{ if ne .chezmoi.os "windows" }}
