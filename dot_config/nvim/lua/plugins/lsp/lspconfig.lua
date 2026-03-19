@@ -1,24 +1,35 @@
 return {
-  "neovim/nvim-lspconfig",
-  event = { "BufReadPre", "BufNewFile" },
-  cmd = { "LspInfo", "LspInstall", "LspStart", "LspStop", "Mason", "MasonInstall", "MasonUpdate" },
-  dependencies = {
-    { "mason-org/mason.nvim", opts = {} },
-    "mason-org/mason-lspconfig.nvim",
-    "saghen/blink.cmp",
+  {
+    "neovim/nvim-lspconfig",
+    event = { "BufReadPre", "BufNewFile" },
+    config = function()
+      vim.api.nvim_create_autocmd("LspAttach", {
+        once = true,
+        callback = function()
+          local caps = require("blink.cmp").get_lsp_capabilities()
+          vim.lsp.config("*", { capabilities = caps })
+        end,
+      })
+      local servers = { "lua_ls", "vtsls", "tailwindcss", "clangd", "rust_analyzer", "pyright" }
+      for _, server in ipairs(servers) do
+        vim.lsp.enable(server)
+      end
+      if vim.fn.executable("oxlint") == 1 then
+        vim.lsp.enable("oxlint")
+      end
+    end,
   },
-  config = function()
-    vim.lsp.config("*", {
-      capabilities = require("blink.cmp").get_lsp_capabilities(),
-    })
-
-    require("mason-lspconfig").setup({
+  {
+    "mason-org/mason.nvim",
+    cmd = { "Mason", "MasonInstall", "MasonUpdate" },
+    opts = {},
+  },
+  {
+    "mason-org/mason-lspconfig.nvim",
+    cmd = { "LspInstall" },
+    dependencies = { "mason-org/mason.nvim" },
+    opts = {
       ensure_installed = { "lua_ls", "vtsls", "tailwindcss", "clangd", "rust_analyzer", "pyright" },
-    })
-
-    -- oxlint LSP (mise管理、mason外)
-    if vim.fn.executable("oxlint") == 1 then
-      vim.lsp.enable("oxlint")
-    end
-  end,
+    },
+  },
 }
