@@ -80,7 +80,7 @@ __fc_widget() {
 
     if [[ "$BUFFER" =~ $pattern ]]; then
       result="$(eval "$source_cmd" 2>/dev/null \
-        | eval "fzf --height=40% --reverse --border $fzf_opts" </dev/tty \
+        | eval "fzf --height=40% --reverse --cycle $fzf_opts" \
         | eval "$callback")"
       [[ -n "$result" ]] && LBUFFER+="$result"
       zle reset-prompt
