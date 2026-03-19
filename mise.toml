@@ -1,0 +1,3 @@
+[hooks.enter]
+shell = "bash"
+script = "lefthook install"
