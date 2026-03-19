@@ -9,7 +9,6 @@ npm = "latest"
 "npm:wrangler" = "latest"
 uv = "latest"
 bun = "latest"
-deno = "latest"
 rust = "stable"
 awscli = "latest"
 terraform = "latest"
@@ -37,7 +36,7 @@ jq = "latest"
 {{- if ne .chezmoi.os "windows" }}
 lazydocker = "latest"
 zellij = "latest"
-{{- if eq .chezmoi.os "linux" }}
+{{- if ne .chezmoi.os "darwin" }}
 make = "latest"
 {{- end }}
 neovim = "latest"
@@ -45,7 +44,6 @@ neovim = "latest"
 bottom = "latest"
 oxlint = "latest"
 "npm:oxfmt" = "latest"
-"npm:openclaw" = "beta"
 "npm:@googleworkspace/cli" = "latest"
 
 k9s = "latest"

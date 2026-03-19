@@ -21,7 +21,14 @@ elif command -v xsel &> /dev/null; then
 fi
 {{- end }}
 
-alias ls='eza --icons'
+alias ls='eza --icons=auto'
+cat() {
+  if [[ -t 0 ]]; then
+    bat --style=auto "$@"
+  else
+    bat --style=plain "$@"
+  fi
+}
 alias df='df -h'
 alias cd='z'
 alias v='nvim'
@@ -31,7 +38,7 @@ alias tf='terraform'
 alias copilot='copilot --allow-all-tools'
 
 claude() {
-  command claude --dangerously-skip-permissions "$@"
+  command claude --dangerously-skip-permissions --remote-control "$@"
 }
 
 codex() {
