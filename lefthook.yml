@@ -2,5 +2,6 @@ pre-commit:
   commands:
     distribute-ai-agent-configs:
       run: scripts/distribute_ai_agent_configs.sh
+      stage_fixed: true
     check-user:
       run: scripts/check_user.sh
