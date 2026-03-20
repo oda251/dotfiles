@@ -14,7 +14,7 @@ chezmoi init --apply https://github.com/<YOUR_USER>/dotfiles.git
 
 # パッケージ管理
 
-**Mac/Linux環境**: nix, mise, brew
+**Mac/Linux環境**: mise, brew
 
 **Windows環境**: winget
 
