@@ -24,6 +24,7 @@ run = "plugin ops -- run-zsh-command"
 desc = "run zsh command"
 
 [[mgr.prepend_keymap]]
-on = "n"
-run = "create"
-desc = "create a file (or dir with trailing /)"
+on = "<Enter>"
+run = "open --hovered"
+desc = "open file"
+
