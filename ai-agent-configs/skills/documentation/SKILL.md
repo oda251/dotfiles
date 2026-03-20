@@ -1,23 +1,113 @@
 ---
 name: documentation
-description: This skill should be used when the user asks to "document this", "write docs", "save investigation results", "ドキュメント化して", or when handling investigation, planning, or outcome information that should be persisted.
+description: 調査・検討・意思決定のドキュメントフォーマット規則。ドキュメントを書く際に参照する。サブエージェントもこのスキルに従う。
 ---
 
 # Documentation Skill
 
-Persist investigation, planning, and outcome information as structured markdown documents.
+## ドキュメントの種類
 
-## Process
+必ず investigation → consideration → decision の順序を踏む。前段階の省略は不可。
 
-1. Create `docs/` directory if it does not exist
-2. Place documents by category:
-   - Investigation: `docs/investigation/{date}-{topic}.md`
-   - Projects: `docs/projects/{date}-{topic}/plan.md`, `docs/projects/{date}-{topic}/outcome.md`
-3. Use the creation date in the directory or filename (e.g., `2026-01-01-agent-organization`)
-4. Check existing documents and update the diff. If the creation date or content diverges significantly, create a new file even for the same scope
-5. Split files exceeding 500 lines. Rename the original file appropriately for the scope
-6. Include sources (URLs, document paths, issue numbers, etc.) in a references section at the end
+- **investigation (inv-)**: 事実の収集、技術比較、現状把握
+- **consideration (con-)**: 選択肢の評価、トレードオフ分析
+- **decision (dec-)**: 採用した方針、理由、今後のアクション
 
-## Notes
+同一ドキュメント内で複数段階を記述してよい。その場合、プレフィックスは最上位レベルを採用する（dec > con > inv）。
 
-- Represent diagrams with mermaid
+```markdown
+<!-- 1ファイルに全段階を含む場合 → dec- -->
+# SSE 採用の決定
+
+## 調査
+WebSocket と SSE を比較した結果...（出典付き）
+
+## 検討
+SSE はサーバー→クライアントの単方向で十分なユースケースにおいて...
+
+## 決定
+SSE を採用する。理由: ...
+```
+
+別ドキュメントに分かれる場合は depends-on でリンクする。
+
+## ファイル命名
+
+`docs/{date}-{prefix}-{topic}.md`
+
+- `inv-` / `con-` / `dec-`
+
+例: `docs/2026-03-20-inv-websocket-vs-sse.md`
+
+## Obsidian 互換 frontmatter
+
+```markdown
+---
+tags:
+  - investigation
+  - websocket
+  - sse
+---
+```
+
+tags にはドキュメントの種類とトピックのキーワードを含める。
+
+## ドキュメント間のリンク
+
+```markdown
+---
+tags:
+  - decision
+  - realtime
+  - sse
+---
+# リアルタイム通信方式の決定
+
+depends-on:
+- [リアルタイム通信の選択肢検討](./2026-03-20-con-realtime-options.md)
+```
+
+## 出典ルール
+
+情報単位ごとにインラインで出典を付ける。末尾まとめは禁止。
+
+```markdown
+# 良い例
+`useEffect` は第2引数に依存配列を受け取る（[React 18.2 公式ドキュメント](https://react.dev/reference/react/useEffect)）。
+
+# 悪い例
+useEffect は第2引数に依存配列を受け取る。
+参考: React公式ドキュメント
+```
+
+- 出典が無い情報は **（未検証）** と明記する
+- 信頼度レベル（HIGH / MEDIUM / LOW 等）は不要
+- 確認不能なら「わかりません」と明言する
+- バージョン固有の挙動にはバージョンを明記する
+
+## 調査ソースの優先順位
+
+| 調査対象 | 方法 |
+|----------|------|
+| ライブラリ・API仕様 | ctx7（最優先）→ WebSearch にフォールバック |
+| 技術的事実 | 公式ドキュメント or WebSearch |
+| 一般的事実 | WebSearch |
+| ファイル内容 | Read |
+| コードの挙動 | Read + トレース |
+
+## 管理ルール
+
+- `docs/` ディレクトリが存在しなければ作成する
+- 既存ドキュメントがあれば差分を確認し更新する。大きく変わった場合は新規作成
+- 500行を超えるファイルは分割する
+- 図はmermaidで表現する
+
+## セルフチェック
+
+```
+□ 各情報にインラインで出典を付けたか？
+□ 出典なしの情報に（未検証）を付けたか？
+□ 関連ドキュメントへのリンクを付けたか？
+□ 前段階が存在するか？（スキップ不可）
+□ 詳細を捏造していないか？
+```

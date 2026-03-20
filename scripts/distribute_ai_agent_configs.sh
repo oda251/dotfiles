@@ -113,6 +113,25 @@ while IFS= read -r raw_line || [[ -n "$raw_line" ]]; do
       rel="${file#"$src_abs/"}"
       sync_copy "$src_dir/$rel" "$dst_dir/$rel"
     done < <(find "$src_abs" -type f -print0)
+    # Remove files in destination that no longer exist in source
+    dst_abs="$repo_root/$dst_dir"
+    if [[ -d "$dst_abs" ]]; then
+      while IFS= read -r -d '' file; do
+        rel="${file#"$dst_abs/"}"
+        if [[ ! -f "$src_abs/$rel" ]]; then
+          rm "$file"
+          echo "removed: $dst_dir/$rel (no longer in source)"
+          sync_count=$((sync_count + 1))
+          # Clean up empty parent directories
+          parent="$(dirname "$file")"
+          while [[ "$parent" != "$dst_abs" ]] && [[ -d "$parent" ]] && [[ -z "$(ls -A "$parent")" ]]; do
+            rmdir "$parent"
+            echo "removed empty dir: ${parent#"$repo_root/"}"
+            parent="$(dirname "$parent")"
+          done
+        fi
+      done < <(find "$dst_abs" -type f -print0)
+    fi
   elif [[ "$mode" == "copy" ]]; then
     if [[ "$part_count" -ne 3 ]]; then
       echo "invalid copy route: $line" >&2
