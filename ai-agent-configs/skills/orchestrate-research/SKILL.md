@@ -7,11 +7,25 @@ description: 調査・検討・意思決定の並列実行。
 
 | 調査対象 | 方法 |
 |----------|------|
-| ライブラリ・API仕様 | ctx7（最優先）→ WebSearch にフォールバック |
+| ライブラリ・API仕様 | ctx7 CLI（最優先）→ WebSearch にフォールバック |
 | 技術的事実 | 公式ドキュメント or WebSearch |
 | 一般的事実 | WebSearch |
 | ファイル内容 | Read |
 | コードの挙動 | Read + トレース |
+
+### ctx7 CLI の使い方
+
+ライブラリ・API のドキュメントを取得する CLI ツール。MCP サーバーではない。
+
+```bash
+# 1. ライブラリ ID を検索
+ctx7 library "react" "hooks usage"
+
+# 2. ドキュメントを取得
+ctx7 docs /facebook/react "useEffect cleanup"
+```
+
+ctx7 が利用できない環境では WebSearch にフォールバックする。
 
 ## 並列アクセス
 

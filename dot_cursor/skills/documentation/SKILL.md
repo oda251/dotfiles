@@ -37,33 +37,25 @@ SSE を採用する。理由: ...
 
 例: `docs/2026-03-20-inv-websocket-vs-sse.md`
 
-## Obsidian 互換 frontmatter
+## テンプレート
 
 ```markdown
 ---
 tags:
   - investigation
-  - websocket
-  - sse
----
-```
-
-tags にはドキュメントの種類とトピックのキーワードを含める。
-
-## ドキュメント間のリンク
-
-```markdown
----
-tags:
+  - consideration
   - decision
-  - realtime
+  - websocket
   - sse
 ---
 # リアルタイム通信方式の決定
 
 depends-on:
-- [リアルタイム通信の選択肢検討](./2026-03-20-con-realtime-options.md)
+- [WebSocket vs SSE 調査](./2026-03-20-inv-websocket-vs-sse.md)
 ```
+
+- tags にはドキュメントに含まれる全段階とトピックのキーワードを含める
+- depends-on は依存する別ドキュメントがある場合に冒頭に記載する
 
 ## 出典ルール
 
