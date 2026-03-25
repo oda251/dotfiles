@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# skills hash: {{ joinPath "dot_claude/skills" "**/SKILL.md" | glob | join "\n" | sha256sum }}
+
+target_dir="$HOME/.claude/skills"
+source_dir="{{ .chezmoi.sourceDir }}/dot_claude/skills"
+
+if [[ ! -d "$target_dir" ]] || [[ ! -d "$source_dir" ]]; then
+  exit 0
+fi
+
+for dir in "$target_dir"/*/; do
+  [[ ! -d "$dir" ]] && continue
+  skill_name="$(basename "$dir")"
+
+  if [[ -d "$source_dir/$skill_name" ]]; then
+    continue
+  fi
+
+  echo "removing stale skill: $skill_name"
+  rm -rf "$dir"
+done
