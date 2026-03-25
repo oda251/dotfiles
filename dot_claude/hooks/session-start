@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+CLAUDE_DIR="$HOME/.claude"
+
+# Read bootstrap skill content
+bootstrap_content=$(cat "${CLAUDE_DIR}/skills/bootstrap/SKILL.md" 2>&1 || echo "Error reading bootstrap skill")
+
+# Escape string for JSON embedding
+escape_for_json() {
+  local s="$1"
+  s="${s//\\/\\\\}"
+  s="${s//\"/\\\"}"
+  s="${s//$'\n'/\\n}"
+  s="${s//$'\r'/\\r}"
+  s="${s//$'\t'/\\t}"
+  printf '%s' "$s"
+}
+
+bootstrap_escaped=$(escape_for_json "$bootstrap_content")
+session_context="<EXTREMELY_IMPORTANT>\nYou have a skill-based workflow system.\n\n**Below is your bootstrap skill - the router that determines which skill to invoke. For all other skills, use the Skill tool:**\n\n${bootstrap_escaped}\n</EXTREMELY_IMPORTANT>"
+
+# Output context injection (Claude Code format)
+printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$session_context"
+
+exit 0

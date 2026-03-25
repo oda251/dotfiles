@@ -17,6 +17,9 @@ sync|ai-agent-configs/agents|dot_claude/agents
 # Contexts (Claude Code only)
 sync|ai-agent-configs/contexts|dot_claude/contexts
 
+# Hooks (Claude Code only)
+sync|ai-agent-configs/hooks|dot_claude/hooks
+
 # Skills
 sync|ai-agent-configs/skills|dot_claude/skills
 sync|ai-agent-configs/skills|dot_codex/skills

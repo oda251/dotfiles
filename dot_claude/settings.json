@@ -2,5 +2,19 @@
   "skipDangerousModePermissionPrompt": true,
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.claude/hooks/session-start\"",
+            "async": false
+          }
+        ]
+      }
+    ]
   }
 }
