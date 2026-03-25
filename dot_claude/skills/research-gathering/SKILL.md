@@ -1,11 +1,8 @@
 ---
 name: research-gathering
 description: research-planning で決定したリソースに並列アクセスし、ソース付きで情報を収集する。
+user-invocable: false
 ---
-
-## トリガー
-
-research-planning から遷移してきたとき。
 
 ## 手順
 

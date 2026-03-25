@@ -1,11 +1,8 @@
 ---
 name: test-writing
-description: 計画で定義した振る舞いをテストとして先に書く。実装より先にテストを作る。
+description: 計画で定義した振る舞いをテストとして先に書く。
+user-invocable: false
 ---
-
-## トリガー
-
-writing-plans から遷移してきたとき。各タスクに対して呼ばれる。
 
 ## エージェント構成
 

@@ -1,11 +1,8 @@
 ---
 name: investigation-review
 description: 調査ドキュメントの網羅性をレビューし、不足があれば research-planning に戻す。
+user-invocable: false
 ---
-
-## トリガー
-
-investigation-writing から遷移してきたとき。
 
 ## 手順
 

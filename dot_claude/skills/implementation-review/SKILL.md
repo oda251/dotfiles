@@ -1,15 +1,12 @@
 ---
 name: implementation-review
 description: 実装をレビューし、指摘があれば implementation に戻す。指摘がなければ検証して完了。
+user-invocable: false
 ---
-
-## トリガー
-
-implementation から遷移してきたとき。
 
 ## エージェント構成
 
-実装者のバイアスを避けるため、レビュアーは別エージェント。小規模タスクでは自分でレビューしてよい。
+実装者のバイアスを避けるため、レビュアーは別エージェント。
 
 ## 手順
 

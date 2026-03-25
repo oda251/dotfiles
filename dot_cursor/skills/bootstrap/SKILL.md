@@ -1,6 +1,7 @@
 ---
 name: bootstrap
 description: session-start hook で自動注入されるルータースキル。ユーザーメッセージを受け取るたびにスキルチェーンの起点を判断する。
+disable-model-invocation: true
 ---
 
 <SUBAGENT-STOP>

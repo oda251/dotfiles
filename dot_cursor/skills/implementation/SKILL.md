@@ -1,11 +1,8 @@
 ---
 name: implementation
-description: テストを通す実装を行う。実装者はテスト作成と同じエージェントでよい。
+description: テストを通す実装を行う。
+user-invocable: false
 ---
-
-## トリガー
-
-test-review から遷移してきたとき。または implementation-review から指摘ありで戻ってきたとき。
 
 ## 手順
 

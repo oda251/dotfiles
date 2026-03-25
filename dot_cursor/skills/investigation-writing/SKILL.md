@@ -1,11 +1,8 @@
 ---
 name: investigation-writing
 description: 収集結果を元に調査ドキュメントを作成する。documentation スキルのフォーマットに従う。
+user-invocable: false
 ---
-
-## トリガー
-
-research-gathering から遷移してきたとき。
 
 ## 手順
 
