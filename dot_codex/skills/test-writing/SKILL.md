@@ -19,7 +19,7 @@ user-invocable: false
 
 正常系・異常系・境界値を網羅すること。
 
-インターネット接続を伴う依存（外部API、リモートサービス等）は mock/stub する。ローカルで完結する依存（DB、キャッシュ等）は testcontainers や docker-compose で実サービスを立てて繋ぐ。mock で本番との乖離を作らない。
+インターネット接続を伴う依存（外部API、リモートサービス等）は mock/stub する。ローカルで完結する依存（DB、キャッシュ等）は testcontainers で実サービスを立てて繋ぐ。mock で本番との乖離を作らない。
 
 ## 次のスキル
 
