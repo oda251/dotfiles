@@ -4,19 +4,16 @@ description: セットアップタスクや、レビュー指摘の修正を行�
 user-invocable: false
 ---
 
-## 準備
-
-対象言語・フレームワークに対応するガイドラインがあれば読む:
-- `~/.claude/references/{lang}.md`（例: `ts.md`）
-- `~/.claude/references/{lang}-{framework}.md`（例: `ts-react.md`）
-
 ## 手順
+
+別エージェントを起動し、以下を指示する:
 
 ```
 以下のファイルを変更せよ。
 - 対象: [ファイルパス]
 - 変更内容: [具体的な指示]
 - 守るべきインターフェース: [型定義や API 契約]
+- ガイドライン: 対象言語のガイドライン（~/.claude/references/{lang}.md, {lang}-{framework}.md）があれば従う
 ```
 
 並列実装時は、共有リソース（同一ファイルへの同時書き込み等）の競合を避ける。

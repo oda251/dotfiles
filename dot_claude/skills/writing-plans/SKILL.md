@@ -48,5 +48,9 @@ description: 設計方針をフェーズとタスクに分解し、実行計画�
 
 ## 次のスキル
 
+各タスクのサブエージェント指示に、準備で特定したガイドラインのパスを含めること:
+- `~/.claude/references/{lang}.md`
+- `~/.claude/references/{lang}-{framework}.md`
+
 セットアップタスク → **implementation** を呼べ。
 振る舞いタスク → **test-writing** を呼べ。
