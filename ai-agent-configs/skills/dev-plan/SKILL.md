@@ -1,5 +1,5 @@
 ---
-name: writing-plans
+name: dev-plan
 description: 設計方針をフェーズとタスクに分解し、実行計画を作成する。
 ---
 
