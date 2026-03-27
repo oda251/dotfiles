@@ -4,8 +4,6 @@ description: 指定されたフェーズを展開し、子タスクファイル�
 user-invocable: false
 ---
 
-タスク管理は `~/.claude/references/task-management-guideline.md` に従う。
-
 ## 手順
 
 ### 1. 指定フェーズの確認
@@ -26,6 +24,23 @@ user-invocable: false
 
 ガイドラインに従いタスクを分解し、子タスクファイルに書き出す。
 
-### 5. ステータス更新と次のタスク判断
+保存先: `docs/.tasks/{date}-{chain}-{topic}.md`
 
-task-management-guideline に従い、親タスクのステータスを更新し、次のタスクを判断する。
+frontmatter で親タスクファイルを参照する:
+
+```yaml
+---
+parent: {親タスクファイル名}
+parent-phase: {フェーズ番号}
+---
+```
+
+### 5. 親タスクに子ファイルリンクを付記
+
+```
+- 🔵 a. 認証機能 → 2028-03-28-dev-user-auth.md
+```
+
+## 次のスキル
+
+→ **dispatch** を呼べ。子タスクファイルのパスを引き継ぐ。
