@@ -1,6 +1,6 @@
 ---
 name: research-gather
-description: 計画ファイルの Research タスクを並列実行し、ソース付きで情報を収集する。
+description: 計画ファイルのタスクを並列実行し、ソース付きで情報を収集する。
 user-invocable: false
 ---
 
@@ -8,7 +8,7 @@ user-invocable: false
 
 ### 1. 計画ファイルの読み込み
 
-`docs/.tasks/*.md` を読み、現フェーズの Research セクションから未完了タスクを特定する。
+`docs/.tasks/*.md`（`chain: research`）を読み、現フェーズの未完了タスクを特定する。
 
 ### 2. 収集の実行
 

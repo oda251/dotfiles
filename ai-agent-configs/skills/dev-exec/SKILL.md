@@ -8,7 +8,7 @@ user-invocable: false
 
 ### 1. 計画ファイルの読み込み
 
-`docs/.tasks/*.md` を読み、現フェーズの Dev セクションから未完了タスクを特定する。
+`docs/.tasks/*.md`（`chain: dev`）を読み、現フェーズの未完了タスクを特定する。
 
 ### 2. タスクの並列起動
 
