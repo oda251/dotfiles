@@ -24,9 +24,9 @@ user-invocable: false
 
 ガイドラインに従いタスクを分解し、子タスクファイルに書き出す。
 
-plan が書けるフェーズ:
-- `plan-*`（更なる分割。調査が必要なら `plan-research` 等）
-- 自ドメインの `exec-*`（`plan-dev` なら `exec-dev`、`plan-research` なら `exec-research` + `exec-research-write`）
+`plan-{X}` が子タスクファイルに書けるフェーズ:
+- `plan-*`（任意のドメインへの更なる計画委譲）
+- `exec-{X}`（自ドメイン `{X}` の実行のみ。他ドメインの exec は書けない）
 
 保存先: `docs/.tasks/{date}-{chain}-{topic}.md`
 
