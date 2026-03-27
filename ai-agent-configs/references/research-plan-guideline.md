@@ -13,3 +13,17 @@
 ## タスク分解
 
 調査テーマを観点ごとにタスクとして分解する。
+
+gather フェーズの後に write/review フェーズを必ず含める:
+
+```markdown
+## Phase 1: exec-research
+- ⬜ a. 観点1
+- ⬜ b. 観点2
+
+## Phase 2: exec-research-write
+- ⬜ a. 調査結果を統合ドキュメントにまとめる
+
+## Phase 3: exec-research-review
+- ⬜ a. ドキュメントレビュー
+```
