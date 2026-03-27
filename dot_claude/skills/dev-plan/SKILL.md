@@ -35,7 +35,7 @@ description: 設計方針をフェーズとタスクに分解し、実行計画�
 
 タスク一覧をファイルに書き出す。
 
-保存先: `.plans/{date}-{topic}.md`
+保存先: `docs/.plans/{date}-{topic}.md`
 
 ステータスは絵文字プレフィックスで表現する:
 
