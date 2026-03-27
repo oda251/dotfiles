@@ -5,7 +5,13 @@ description: 設計方針をフェーズとタスクに分解し、実行計画�
 
 ## 手順
 
-### 0. 調査（必要な場合）
+### 0. 準備
+
+対象言語・フレームワークに対応するガイドラインがあれば読む:
+- `~/.claude/references/{lang}.md`（例: `ts.md`）
+- `~/.claude/references/{lang}-{framework}.md`（例: `ts-react.md`）
+
+フレームワークは設定ファイル（next.config, svelte.config, hono 等）から判定する。
 
 新規実装や設計判断を伴う変更では、計画の前にベストプラクティス・既存コードのパターン・ライブラリの推奨用法を調べる。
 Skill tool で research-planning を呼ばず、自分で直接ツール（Read, WebSearch 等）を使って調べること。

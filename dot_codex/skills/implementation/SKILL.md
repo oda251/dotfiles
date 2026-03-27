@@ -4,6 +4,12 @@ description: テストを通す実装を行う。
 user-invocable: false
 ---
 
+## 準備
+
+対象言語・フレームワークに対応するガイドラインがあれば読む:
+- `~/.claude/references/{lang}.md`（例: `ts.md`）
+- `~/.claude/references/{lang}-{framework}.md`（例: `ts-react.md`）
+
 ## 手順
 
 **実装者**がテストを通す実装を行う。実装者はテスト作成と同じエージェントでよい（コンテキストを共有するため）。
