@@ -4,8 +4,6 @@ description: 指定されたフェーズのタスクを消化する。ドメイ�
 user-invocable: false
 ---
 
-タスク管理は `~/.claude/references/task-management-guideline.md` に従う。
-
 ## 手順
 
 ### 1. ドメイン判別とガイドライン読み込み
@@ -16,8 +14,8 @@ user-invocable: false
 
 ### 2. タスク消化
 
-ガイドラインに従って指定フェーズのタスクを実行する。
+ガイドラインに従って指定フェーズのタスクを実行する。タスク完了時に `🔵` → `✅` に更新。
 
-### 3. ステータス更新と次のタスク判断
+## 次のスキル
 
-task-management-guideline に従い、ステータスを更新し、次のタスクを判断する。
+→ **dispatch** を呼べ。タスクファイルのパスを引き継ぐ。
