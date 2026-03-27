@@ -24,6 +24,12 @@ user-invocable: false
 
 ガイドラインに従いタスクを分解し、子タスクファイルに書き出す。
 
+plan は自ドメインの exec フェーズのみ書く:
+- `plan-dev` → `exec-dev` フェーズのみ
+- `plan-research` → `exec-research` + `exec-research-write` フェーズのみ
+
+異なるドメインの調査が必要な場合は、親タスクファイルに `plan-research` フェーズとして分割する。
+
 保存先: `docs/.tasks/{date}-{chain}-{topic}.md`
 
 frontmatter で親タスクファイルを参照する:
