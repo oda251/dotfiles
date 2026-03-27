@@ -31,6 +31,7 @@ frontmatter で親タスクファイルを参照する:
 ```yaml
 ---
 parent: {親タスクファイル名}
+parent-task: {親タスクのID（例: a）}
 ---
 ```
 
