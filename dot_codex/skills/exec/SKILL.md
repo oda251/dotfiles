@@ -8,9 +8,9 @@ user-invocable: false
 
 ### 1. ドメイン判別とガイドライン読み込み
 
-タスクファイルのファイル名から種別（dev / research）を判別し、対応するガイドラインを読む:
-- `dev` → `~/.claude/references/dev-exec-guideline.md`
-- `research` → `~/.claude/references/research-exec-guideline.md`
+現フェーズの見出し（`exec-dev` / `exec-research`）からドメインを判別し、対応するガイドラインを読む:
+- `exec-dev` → `~/.claude/references/dev-exec-guideline.md`
+- `exec-research` → `~/.claude/references/research-exec-guideline.md`
 
 ### 2. タスク消化
 
@@ -18,12 +18,12 @@ user-invocable: false
 
 ## 次のタスク判断
 
-現フェーズ完了後、タスクファイル内の次の未完了タスクのプレフィックスに応じてスキルを呼ぶ:
+現フェーズ完了後、次の未完了フェーズの種別に応じてスキルを呼ぶ:
 - `plan-*` → **plan** を呼べ
 - `exec-*` → **exec** を呼べ
 
-タスクファイル内の全タスク完了の場合:
-- 親タスクファイルの対象タスクを `🔵` → `✅` に更新する
-- 親に次の未完了タスクがあれば、プレフィックスに応じてスキルを呼ぶ
+全フェーズ完了の場合:
+- 親タスクファイルの対象フェーズ内タスクを `🔵` → `✅` に更新する
+- 親に次の未完了フェーズがあれば、種別に応じてスキルを呼ぶ
 - 親がさらに親を持ち全完了 → 再帰的に上へ
-- root の全タスク完了 → ゴール達成をユーザーに報告する
+- root の全フェーズ完了 → ゴール達成をユーザーに報告する

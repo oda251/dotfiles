@@ -47,15 +47,15 @@ description: 「Xを作りたい」「Xを実装して」など構築・設計�
 | 実行中 | `🔵` |
 | 完了 | `✅` |
 
-### Phase 1
-- ⬜ a. plan-research: JWT / Session / OAuth の認証パターン比較
+### Phase 1: plan-research
+- ⬜ a. JWT / Session / OAuth の認証パターン比較
 
-### Phase 2
-- ⬜ a. plan-dev: 認証機能の設計・実装
+### Phase 2: plan-dev
+- ⬜ a. 認証機能の設計・実装
 ```
 
 タスクは具体的に書く。「ベストプラクティス調査」のような曖昧な記述は避ける。
-調査不要なら plan-research は省略してよい。
+調査不要なら plan-research フェーズは省略してよい。
 
 ## 次のスキル
 
