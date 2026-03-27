@@ -37,6 +37,52 @@ const Status = { Active: 'active', Inactive: 'inactive' } as const
 type Status = (typeof Status)[keyof typeof Status]
 ```
 
+### Discriminated Union + Exhaustive Check
+
+Union 型にタグフィールドを持たせ、switch + `never` で全パターン網羅をコンパイル時に保証する。
+
+```ts
+type Shape =
+  | { kind: 'circle'; radius: number }
+  | { kind: 'square'; side: number }
+
+const area = (shape: Shape): number => {
+  switch (shape.kind) {
+    case 'circle':
+      return Math.PI * shape.radius ** 2
+    case 'square':
+      return shape.side ** 2
+    default: {
+      const _: never = shape
+      throw new Error(`Unknown: ${_}`)
+    }
+  }
+}
+```
+
+### Branded Types
+
+プリミティブ型に型タグを付けて混同を防ぐ。companion pattern と組み合わせる。
+
+```ts
+type UserId = string & { readonly __brand: unique symbol }
+
+export const UserId = {
+  from: (value: string): UserId => value as UserId,
+} as const
+```
+
+### `satisfies`
+
+型を広げずに型チェックだけかける。`as const` との併用で型安全な定数定義。
+
+```ts
+const config = {
+  port: 3000,
+  host: 'localhost',
+} as const satisfies Config
+```
+
 ### エラーハンドリング
 
 neverthrow を使い、例外ではなく Result 型でエラーを表現する。
@@ -46,6 +92,24 @@ import { ok, err, Result } from 'neverthrow'
 
 const parseConfig = (raw: string): Result<Config, ParseError> => {
   // ...
+}
+```
+
+## 型安全
+
+### `any` 禁止
+
+`any` の代わりに `unknown` で受けて narrowing する。
+
+```ts
+// NG
+const parse = (data: any) => data.name
+
+// OK
+const parse = (data: unknown) => {
+  if (typeof data === 'object' && data !== null && 'name' in data) {
+    return (data as { name: string }).name
+  }
 }
 ```
 
