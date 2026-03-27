@@ -1,23 +1,52 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# skills hash: {{ joinPath "dot_claude/skills" "**/SKILL.md" | glob | join "\n" | sha256sum }}
+# Trigger on any change in managed directories
+# hash: {{ joinPath "dot_claude" "**" | glob | join "\n" | sha256sum }}
+# hash: {{ joinPath "dot_codex" "**" | glob | join "\n" | sha256sum }}
+# hash: {{ joinPath "dot_cursor" "**" | glob | join "\n" | sha256sum }}
 
-target_dir="$HOME/.claude/skills"
-source_dir="{{ .chezmoi.sourceDir }}/dot_claude/skills"
+source_root="{{ .chezmoi.sourceDir }}"
 
-if [[ ! -d "$target_dir" ]] || [[ ! -d "$source_dir" ]]; then
-  exit 0
-fi
+# Managed sync directories (from routes.txt)
+sync_pairs=(
+  "dot_claude/skills:$HOME/.claude/skills"
+  "dot_claude/agents:$HOME/.claude/agents"
+  "dot_claude/contexts:$HOME/.claude/contexts"
+  "dot_claude/hooks:$HOME/.claude/hooks"
+  "dot_claude/references:$HOME/.claude/references"
+  "dot_codex/skills:$HOME/.codex/skills"
+  "dot_cursor/skills:$HOME/.cursor/skills"
+)
 
-for dir in "$target_dir"/*/; do
-  [[ ! -d "$dir" ]] && continue
-  skill_name="$(basename "$dir")"
+for pair in "${sync_pairs[@]}"; do
+  source_dir="$source_root/${pair%%:*}"
+  target_dir="${pair##*:}"
 
-  if [[ -d "$source_dir/$skill_name" ]]; then
-    continue
+  [[ ! -d "$target_dir" ]] && continue
+  [[ ! -d "$source_dir" ]] && continue
+
+  # Delete files/dirs in target that don't exist in source
+  while IFS= read -r -d '' target_path; do
+    rel_path="${target_path#"$target_dir"/}"
+    if [[ ! -e "$source_dir/$rel_path" ]]; then
+      echo "removing stale: $target_path"
+      rm -rf "$target_path"
+    fi
+  done < <(find "$target_dir" -mindepth 1 -maxdepth 2 -print0)
+
+  # Remove empty directories
+  find "$target_dir" -mindepth 1 -type d -empty -delete 2>/dev/null || true
+done
+
+# Clean up stale files from removed copy routes
+stale_files=(
+  "$HOME/.claude/CLAUDE.md"
+)
+
+for f in "${stale_files[@]}"; do
+  if [[ -f "$f" ]]; then
+    echo "removing stale file: $f"
+    rm -f "$f"
   fi
-
-  echo "removing stale skill: $skill_name"
-  rm -rf "$dir"
 done
