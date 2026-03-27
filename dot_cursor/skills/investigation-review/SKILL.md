@@ -4,8 +4,6 @@ description: 調査ドキュメントの網羅性をレビューし、不足が�
 user-invocable: false
 ---
 
-レビュー共通ルールは `~/.claude/references/review-guideline.md` に従う。
-
 ## 手順
 
 ### 1. レビューの実行
@@ -17,7 +15,7 @@ user-invocable: false
 - ドキュメント: [ファイルパス]
 - 調査テーマ: [テーマ]
 - 調査の目的: [目的]
-- 観点: ~/.claude/references/review-guideline.md の「調査レビュー」に従う
+- 観点: ~/.claude/references/investigation-guideline.md に従う
 - 問題があれば「不足している情報」を具体的にリストアップすること
 ```
 
