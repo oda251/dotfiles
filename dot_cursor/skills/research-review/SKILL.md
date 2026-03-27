@@ -1,6 +1,6 @@
 ---
-name: investigation-review
-description: 調査ドキュメントの網羅性をレビューし、不足があれば research-planning に戻す。
+name: research-review
+description: 調査ドキュメントの網羅性をレビューし、不足があれば research-plan に戻す。
 user-invocable: false
 ---
 
@@ -15,16 +15,16 @@ user-invocable: false
 - ドキュメント: [ファイルパス]
 - 調査テーマ: [テーマ]
 - 調査の目的: [目的]
-- 観点: ~/.claude/references/investigation-guideline.md に従う
+- 観点: ~/.claude/references/research-guideline.md に従う
 - 問題があれば「不足している情報」を具体的にリストアップすること
 ```
 
 ### 2. レビュー結果の判断
 
 - **十分** → 調査完了。ユーザーにドキュメントを提示する
-- **不足あり** → research-planning に戻り、不足分のリソースを追加して再収集する
+- **不足あり** → research-plan に戻り、不足分のリソースを追加して再収集する
 
 ## 次のスキル
 
 - 十分な場合 → **完了**（チェーン終端）
-- 不足がある場合 → **research-planning** に戻る
+- 不足がある場合 → **research-plan** に戻る

@@ -1,6 +1,6 @@
 ---
-name: research-gathering
-description: research-planning で決定したリソースに並列アクセスし、ソース付きで情報を収集する。
+name: research-gather
+description: research-plan で決定したリソースに並列アクセスし、ソース付きで情報を収集する。
 user-invocable: false
 ---
 
@@ -48,4 +48,4 @@ docs/.research/2026-03-25-inv-websocket-vs-sse/
 
 ## 次のスキル
 
-→ **investigation-writing** を呼べ。収集結果ファイルのパスを引き継ぐ。
+→ **research-write** を呼べ。収集結果ファイルのパスを引き継ぐ。

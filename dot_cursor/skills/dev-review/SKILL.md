@@ -1,5 +1,5 @@
 ---
-name: code-review
+name: dev-review
 description: 実装とテストをレビューする。サブエージェントが読む実行指示。
 user-invocable: false
 ---

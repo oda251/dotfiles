@@ -1,5 +1,5 @@
 ---
-name: investigation-writing
+name: research-write
 description: 収集結果を元に調査ドキュメントを作成する。documentation スキルのフォーマットに従う。
 user-invocable: false
 ---
@@ -10,7 +10,7 @@ user-invocable: false
 
 ```
 以下の収集結果を元に調査ドキュメントを作成せよ。
-- documentation スキルに従ってフォーマットすること
+- documentation スキルを使ってフォーマットすること
 - 入力: [収集結果ディレクトリのパス]（中の全ファイルを読むこと）
 - 出力先: docs/{date}-inv-{topic}.md
 - 出典は原本ソース（URL等）をそのまま使うこと。収集結果ファイルへの参照は出典にしない
@@ -22,4 +22,4 @@ user-invocable: false
 
 ## 次のスキル
 
-→ **investigation-review** を呼べ。作成したドキュメントのパスを引き継ぐ。
+→ **research-review** を呼べ。作成したドキュメントのパスを引き継ぐ。
