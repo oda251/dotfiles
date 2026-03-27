@@ -44,13 +44,19 @@ description: 設計方針をフェーズとタスクに分解し、実行計画�
 
 保存先: `docs/plans/{date}-{topic}.md`
 
-```markdown
-## タスク
+同一フェーズ内のタスクは並列実行可能。フェーズ間は直列（前フェーズの全タスク完了後に次フェーズへ）。
 
+```markdown
+## Phase 1
 - [ ] [setup] ライブラリ導入（express, zod）
 - [ ] [setup] ディレクトリ構成作成
+
+## Phase 2
 - [ ] [tdd] ユーザー登録 API
-- [ ] [tdd] バリデーション
+- [ ] [tdd] 商品検索 API
+
+## Phase 3
+- [ ] [tdd] 注文 API（Phase 2 に依存）
 ```
 
 ## 次のスキル
