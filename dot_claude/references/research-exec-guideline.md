@@ -19,5 +19,5 @@
 
 親タスクファイルの子ファイルリンクに成果物パスを付記する:
 ```
-- ✅ a. [認証パターン比較](docs/.tasks/2028-03-28-research-auth.md) → [docs/2026-03-28-res-jwt-auth.md](docs/2026-03-28-res-jwt-auth.md)
+- ✅ a. [認証パターン比較](docs/.tasks/2028-03-28-research-auth.md) → [調査結果](docs/2026-03-28-res-jwt-auth.md)
 ```
