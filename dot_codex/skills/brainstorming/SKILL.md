@@ -23,9 +23,23 @@ description: 「Xを作りたい」「Xを実装して」など構築・設計�
 
 ### 3. タスクファイル作成
 
-合意した要件からワークフローをタスクファイルに書き出す。
+合意した内容を root タスクファイルに書き出す。
 
 保存先: `docs/.tasks/{date}-{topic}.md`
+
+```markdown
+## 背景
+既存のセッション認証から JWT に移行したい。移行中も既存セッションを切りたくない。
+
+## ゴール
+- JWT ベースの認証 API
+- 既存セッションとの並行稼働期間
+
+## 制約
+- Express + TypeScript
+- 既存の connect-redis セッションストアは残す
+
+## タスク
 
 | ステータス | 表記 |
 |-----------|------|
@@ -33,16 +47,15 @@ description: 「Xを作りたい」「Xを実装して」など構築・設計�
 | 実行中 | `🔵` |
 | 完了 | `✅` |
 
-```markdown
-## Phase 1
-- ⬜ a. research: Hono + Drizzle での REST API 認証パターン比較（JWT / Session / OAuth）
+### Phase 1
+- ⬜ a. plan-research: JWT / Session / OAuth の認証パターン比較
 
-## Phase 2
-- ⬜ a. dev: ユーザー登録・認証 API（POST /users, POST /auth/login, GET /auth/me）
+### Phase 2
+- ⬜ a. plan-dev: 認証機能の設計・実装
 ```
 
-調査不要なら research ステップは省略してよい。
 タスクは具体的に書く。「ベストプラクティス調査」のような曖昧な記述は避ける。
+調査不要なら plan-research は省略してよい。
 
 ## 次のスキル
 
