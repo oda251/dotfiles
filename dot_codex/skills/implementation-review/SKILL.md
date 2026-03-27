@@ -20,11 +20,13 @@ user-invocable: false
 
 ### 2. 判断
 
-- **指摘あり** → implementation に戻る
 - **指摘なし** → 全テスト pass・ビルド確認して完了
+- **振る舞いの追加・変更が必要な指摘** → test-writing に戻る（テスト先行）
+- **既存テスト範囲内の修正（リファクタ、命名等）** → implementation に戻る
 
 ## 次のスキル
 
-- 指摘あり → **implementation** に戻る
+- 振る舞い変更あり → **test-writing** に戻る
+- 軽微な修正 → **implementation** に戻る
 - 指摘なし・全タスク完了 → **完了**（チェーン終端）
 - 残りタスクがある場合 → 次のタスクの **test-writing** を呼ぶ
