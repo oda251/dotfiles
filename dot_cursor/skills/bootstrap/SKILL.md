@@ -26,7 +26,7 @@ disable-model-invocation: true
 | diff を1文で説明できる軽微な変更 | スキルチェーンを通さず直接対応してよい |
 | 調査・リサーチ・比較・情報収集 | `research-planning` |
 | 設計・ブレスト・「Xを作りたい」 | `brainstorming` |
-| バグ修正・エラー調査・コーディング・実装・リファクタリング | `brainstorming`（設計から）or `writing-plans`（方針明確なら直接） |
+| バグ修正・エラー調査・コーディング・実装・リファクタリング | `brainstorming`（設計から）or `dev-plan`（方針明確なら直接） |
 | ドキュメント作成 | `documentation` |
 
 ## スキルの呼び方
