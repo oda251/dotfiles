@@ -20,7 +20,7 @@ description: 「Xを作りたい」「Xを実装して」など構築・設計�
 
 ### 2. タスクファイル作成
 
-合意した内容を root タスクファイルに書き出す。
+背景・ゴール・制約を frontmatter に書き、依頼内容に応じたドメインの plan フェーズを1つ書く。タスク分解は plan に任せる。
 
 保存先: `docs/.tasks/{date}-{topic}.md`
 
@@ -35,16 +35,12 @@ description: 「Xを作りたい」「Xを実装して」など構築・設計�
   - 既存の connect-redis セッションストアは残す
 ---
 
-## Phase 1: plan-research
-- ⬜ a. JWT / Session / OAuth の認証パターン比較
-
-## Phase 2: plan-dev
-- ⬜ a. 認証機能の設計・実装
+## Phase 1: plan-dev
 ```
 
-各フェーズのタスクは1行で概要を書く。詳細な分解は plan に任せる。
-「ベストプラクティス調査」のような曖昧な記述は避けるが、観点の列挙まではしない。
-調査不要なら plan-research フェーズは省略してよい。
+ドメインの判断:
+- 実装・構築 → `plan-dev`
+- 調査・比較・技術選定 → `plan-research`
 
 ## 次のスキル
 
