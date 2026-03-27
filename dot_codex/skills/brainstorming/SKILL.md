@@ -28,23 +28,20 @@ description: 「Xを作りたい」「Xを実装して」など構築・設計�
 保存先: `docs/.tasks/{date}-{topic}.md`
 
 ```markdown
-## 背景
-既存のセッション認証から JWT に移行したい。移行中も既存セッションを切りたくない。
+---
+背景: 既存のセッション認証から JWT に移行したい。移行中も既存セッションを切りたくない。
+ゴール:
+  - JWT ベースの認証 API
+  - 既存セッションとの並行稼働期間
+制約:
+  - Express + TypeScript
+  - 既存の connect-redis セッションストアは残す
+---
 
-## ゴール
-- JWT ベースの認証 API
-- 既存セッションとの並行稼働期間
-
-## 制約
-- Express + TypeScript
-- 既存の connect-redis セッションストアは残す
-
-## タスク
-
-### Phase 1: plan-research
+## Phase 1: plan-research
 - ⬜ a. JWT / Session / OAuth の認証パターン比較
 
-### Phase 2: plan-dev
+## Phase 2: plan-dev
 - ⬜ a. 認証機能の設計・実装
 ```
 
