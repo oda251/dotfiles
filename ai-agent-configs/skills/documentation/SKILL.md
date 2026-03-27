@@ -5,30 +5,30 @@ description: 調査・検討・意思決定のドキュメントフォーマッ�
 
 ## ドキュメントの種類
 
-- **investigation (inv-)**: 事実の収集、技術比較、現状把握。調査テーマに対して網羅的に情報を収集し、出典付きで整理する。
+- **research (res-)**: 事実の収集、技術比較、現状把握。調査テーマに対して網羅的に情報を収集し、出典付きで整理する。
 
 必要に応じて以下の段階を同一ドキュメント内に含めてもよい:
 
 - **consideration (con-)**: 選択肢の評価、トレードオフ分析
 - **decision (dec-)**: 採用した方針、理由、今後のアクション
 
-複数段階を含む場合、プレフィックスは最上位レベルを採用する（dec > con > inv）。
+複数段階を含む場合、プレフィックスは最上位レベルを採用する（dec > con > res）。
 別ドキュメントに分かれる場合は depends-on でリンクする。
 
 ## ファイル命名
 
 `docs/{date}-{prefix}-{topic}.md`
 
-- `inv-` / `con-` / `dec-`
+- `res-` / `con-` / `dec-`
 
-例: `docs/2026-03-20-inv-websocket-vs-sse.md`
+例: `docs/2026-03-20-res-websocket-vs-sse.md`
 
 ## テンプレート
 
 ```markdown
 ---
 tags:
-  - investigation
+  - research
   - consideration
   - decision
   - websocket
@@ -37,7 +37,7 @@ tags:
 # リアルタイム通信方式の決定
 
 depends-on:
-- [WebSocket vs SSE 調査](./2026-03-20-inv-websocket-vs-sse.md)
+- [WebSocket vs SSE 調査](./2026-03-20-res-websocket-vs-sse.md)
 ```
 
 - tags にはドキュメントに含まれる全段階とトピックのキーワードを含める
