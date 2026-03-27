@@ -8,13 +8,13 @@ user-invocable: false
 
 ### 1. 親タスクファイルの読み込み
 
-引き継がれたタスクファイルから、最初の未完了タスクを特定する。
+引き継がれたタスクファイルから、最初の未完了タスク（`plan-*`）を特定する。
 
 ### 2. ドメイン判別とガイドライン読み込み
 
-タスクの種別（dev / research）に応じたガイドラインを読む:
-- `dev` → `~/.claude/references/dev-plan-guideline.md`
-- `research` → `~/.claude/references/research-plan-guideline.md`
+タスクのプレフィックスからドメインを判別し、対応するガイドラインを読む:
+- `plan-dev` → `~/.claude/references/dev-plan-guideline.md`
+- `plan-research` → `~/.claude/references/research-plan-guideline.md`
 
 ### 3. 先行タスクの成果物を参照
 
@@ -38,8 +38,8 @@ parent-task: {タスクID（例: a）}
 
 ```markdown
 ## Phase 1
-- ⬜ a. タスク内容
-- ⬜ b. タスク内容
+- ⬜ a. exec-research: JWT の仕様と制約
+- ⬜ b. exec-research: Session vs Token の比較
 ```
 
 ### 5. 親タスクのステータス更新
@@ -50,6 +50,6 @@ parent-task: {タスクID（例: a）}
 - 🔵 a. plan-dev: 認証機能 → 2028-03-28-dev-user-auth.md
 ```
 
-## 次のスキル
+## 次のタスク判断
 
-→ **after-task** を呼べ。親タスクファイルのパスを引き継ぐ。
+→ **exec** を呼べ。子タスクファイルのパスを引き継ぐ。
