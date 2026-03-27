@@ -32,12 +32,13 @@ description: 設計方針をフェーズとタスクに分解し、実行計画�
 
 タスク一覧をファイルに書き出す。
 
-保存先: `docs/.tasks/{date}-{topic}.md`
+保存先: `docs/.tasks/{date}-dev-{topic}.md`
+
+事前調査が必要だった場合、親タスクを frontmatter に明記する:
 
 ```yaml
 ---
-parent: 2028-03-28-inv-backend-trends.md  # 依存する親タスクファイル（あれば）
-chain: dev
+parent: 2028-03-28-research-backend-trends.md
 ---
 ```
 
@@ -47,16 +48,16 @@ chain: dev
 | 実行中 | `🔵` |
 | 完了 | `✅` |
 
-タスクはフェーズ番号 + アルファベットで識別する:
+タスクはフェーズ内でアルファベットで識別する:
 
 ```markdown
 ## Phase 1
-- ⬜ 1a. ライブラリ導入（express, zod）
-- ⬜ 1b. ディレクトリ構成作成
+- ⬜ a. ライブラリ導入（express, zod）
+- ⬜ b. ディレクトリ構成作成
 
 ## Phase 2
-- ⬜ 2a. ユーザー登録 API
-- ⬜ 2b. 商品検索 API
+- ⬜ a. ユーザー登録 API
+- ⬜ b. 商品検索 API
 ```
 
 ## 次のスキル

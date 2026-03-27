@@ -23,13 +23,7 @@ description: 「Xについて調べて」「XとYを比較して」など調査�
 
 タスク一覧をファイルに書き出す。
 
-保存先: `docs/.tasks/{date}-{topic}.md`
-
-```yaml
----
-chain: research
----
-```
+保存先: `docs/.tasks/{date}-research-{topic}.md`
 
 | ステータス | 表記 |
 |-----------|------|
@@ -39,9 +33,9 @@ chain: research
 
 ```markdown
 ## Phase 1
-- ⬜ 1a. 各言語の使用率・人気度の定量データ
-- ⬜ 1b. スタートアップでの採用動向
-- ⬜ 1c. Kotlin のバックエンド進出状況
+- ⬜ a. 各言語の使用率・人気度の定量データ
+- ⬜ b. スタートアップでの採用動向
+- ⬜ c. Kotlin のバックエンド進出状況
 ```
 
 ## 次のスキル
