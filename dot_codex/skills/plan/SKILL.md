@@ -4,6 +4,8 @@ description: 指定されたフェーズを展開し、子タスクファイル�
 user-invocable: false
 ---
 
+タスク管理は `~/.claude/references/task-management-guideline.md` に従う。
+
 ## 手順
 
 ### 1. 指定フェーズの確認
@@ -24,31 +26,6 @@ user-invocable: false
 
 ガイドラインに従いタスクを分解し、子タスクファイルに書き出す。
 
-保存先: `docs/.tasks/{date}-{chain}-{topic}.md`
+### 5. ステータス更新と次のタスク判断
 
-frontmatter で親タスクファイルを参照する:
-
-```yaml
----
-parent: {親タスクファイル名}
-parent-phase: {フェーズ番号（例: 1）}
----
-```
-
-```markdown
-## Phase 1: exec-research
-- ⬜ a. JWT の仕様と制約
-- ⬜ b. Session vs Token の比較
-```
-
-### 5. 親タスクのステータス更新
-
-親タスクファイルの対象フェーズ内タスクを `⬜` → `🔵` に更新し、子ファイルへのリンクを付記する。
-
-```
-- 🔵 a. 認証機能 → 2028-03-28-dev-user-auth.md
-```
-
-### 6. 次のタスク判断
-
-`~/.claude/references/next-task-guideline.md` に従う。子タスクファイルを現ファイルとして判断を開始する。
+task-management-guideline に従い、親タスクのステータスを更新し、次のタスクを判断する。
