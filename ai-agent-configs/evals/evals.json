@@ -1,0 +1,106 @@
+{
+  "skill_name": "skill-chain",
+  "description": "スキルチェーンシステム全体のトリガー精度とチェーン統合テスト",
+  "evals": [
+    {
+      "id": 1,
+      "category": "trigger-brainstorming",
+      "prompt": "認証機能をJWTベースに移行したい。今はセッションベースで、express-sessionとconnect-redisを使ってる。移行中も既存ユーザーのセッションを切りたくないんだけど",
+      "expected_output": "brainstorming スキルが呼ばれ、要件の引き出し（質問）から始まる。いきなり実装に入らない",
+      "assertions": [
+        {"type": "skill_invoked", "skill": "brainstorming", "text": "brainstorming スキルが Skill tool で呼ばれる"},
+        {"type": "behavior", "text": "ユーザーに質問して要件を引き出す（実装に飛ばない）"}
+      ]
+    },
+    {
+      "id": 2,
+      "category": "trigger-brainstorming",
+      "prompt": "社内用のダッシュボード作って。BigQueryのデータをリアルタイムで可視化したい。チームの5人が毎日使う想定",
+      "expected_output": "brainstorming スキルが呼ばれ、技術選定や要件確認の対話が始まる",
+      "assertions": [
+        {"type": "skill_invoked", "skill": "brainstorming", "text": "brainstorming スキルが Skill tool で呼ばれる"},
+        {"type": "behavior", "text": "ゴール・制約・スコープについて質問する"}
+      ]
+    },
+    {
+      "id": 3,
+      "category": "trigger-research",
+      "prompt": "React Server ComponentsとNext.js App Routerの現状を調べて。既存のPages Routerプロジェクト（React 18.2）に導入するか判断したい",
+      "expected_output": "research-planning スキルが呼ばれ、調査テーマの整理とリソース列挙が始まる",
+      "assertions": [
+        {"type": "skill_invoked", "skill": "research-planning", "text": "research-planning スキルが Skill tool で呼ばれる"},
+        {"type": "behavior", "text": "調査テーマ・目的・粒度を整理し、アクセスすべきリソースを列挙する"}
+      ]
+    },
+    {
+      "id": 4,
+      "category": "trigger-research",
+      "prompt": "TailwindとCSS Modulesどっちがうちのプロジェクトに合うか比較して。Next.js 14でチーム3人、CSS経験はバラバラ",
+      "expected_output": "research-planning スキルが呼ばれる",
+      "assertions": [
+        {"type": "skill_invoked", "skill": "research-planning", "text": "research-planning スキルが Skill tool で呼ばれる"}
+      ]
+    },
+    {
+      "id": 5,
+      "category": "trigger-writing-plans",
+      "prompt": "Userモデルにemailフィールドを追加して。型定義はsrc/types/user.ts、スキーマはsrc/schema/user.ts、バリデーションはzodで。既存のnameフィールドと同じパターンで",
+      "expected_output": "方針が明確なので brainstorming をスキップし、writing-plans または直接実装チェーンに入る",
+      "assertions": [
+        {"type": "skill_invoked_any", "skills": ["writing-plans", "brainstorming"], "text": "writing-plans か brainstorming が呼ばれる（brainstorming の場合でもすぐ writing-plans に遷移すべき）"},
+        {"type": "behavior", "text": "長い対話なしにタスク分解・計画作成に進む"}
+      ]
+    },
+    {
+      "id": 6,
+      "category": "trigger-documentation",
+      "prompt": "先週のWebSocket導入検討の結果をドキュメントにまとめて。SSEと比較した結論と、選定理由を残したい",
+      "expected_output": "documentation スキルが呼ばれ、ドキュメントフォーマットに従って作成が始まる",
+      "assertions": [
+        {"type": "skill_invoked", "skill": "documentation", "text": "documentation スキルが Skill tool で呼ばれる"},
+        {"type": "behavior", "text": "docs/ ディレクトリに documentation スキルのフォーマット（frontmatter, 出典ルール等）に従ったファイルを作成する"}
+      ]
+    },
+    {
+      "id": 7,
+      "category": "trigger-direct",
+      "prompt": "src/utils/format.ts の42行目、'recieve' を 'receive' に直して",
+      "expected_output": "スキルチェーンを通さず直接対応する",
+      "assertions": [
+        {"type": "no_skill_invoked", "text": "Skill tool が呼ばれない（直接 Edit で対応）"}
+      ]
+    },
+    {
+      "id": 8,
+      "category": "trigger-direct",
+      "prompt": "git log の最新5件見せて",
+      "expected_output": "スキルチェーンを通さず直接対応する",
+      "assertions": [
+        {"type": "no_skill_invoked", "text": "Skill tool が呼ばれない（直接 Bash で対応）"}
+      ]
+    },
+    {
+      "id": 9,
+      "category": "chain-implementation",
+      "prompt": "chezmoi のテンプレート処理で、.chezmoiexternal.toml のエントリからURLとパスを抽出して、壊れたリンクを検出するスクリプトを作りたい。Bashで、ciでも使えるようにexit codeで結果を返す形で",
+      "expected_output": "brainstorming → writing-plans → test-writing → test-review → implementation → implementation-review の順でチェーンが流れる",
+      "assertions": [
+        {"type": "chain_order", "expected_chain": ["brainstorming", "writing-plans", "test-writing", "test-review", "implementation", "implementation-review"], "text": "実装チェーンが正しい順序で流れる"},
+        {"type": "behavior", "text": "テストが実装より先に書かれる（Red-Green）"},
+        {"type": "behavior", "text": "レビューが別エージェントで実行される"}
+      ]
+    },
+    {
+      "id": 10,
+      "category": "chain-research",
+      "prompt": "Claude Code の hooks 機能を網羅的に調べて。SessionStart と UserPromptSubmit 以外にどんなイベントがあるか、各イベントの発火タイミング、使えるフィールド、実用的なユースケースを知りたい。公式ドキュメントベースで",
+      "expected_output": "research-planning → research-gathering → investigation-writing → investigation-review の順でチェーンが流れ、docs/ に出典付きの調査ドキュメントが生成される",
+      "assertions": [
+        {"type": "chain_order", "expected_chain": ["research-planning", "research-gathering", "investigation-writing", "investigation-review"], "text": "調査チェーンが正しい順序で流れる"},
+        {"type": "behavior", "text": "収集結果が docs/.research/ にファイルとして永続化される"},
+        {"type": "behavior", "text": "最終ドキュメントが docs/ に documentation スキルのフォーマットで生成される"},
+        {"type": "behavior", "text": "各情報にインライン出典が付いている"}
+      ]
+    }
+  ]
+}

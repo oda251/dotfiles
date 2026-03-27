@@ -6,11 +6,6 @@
 # concat|destination|source1|source2|...
 # sync|source_dir|destination_dir
 
-# Rules
-copy|ai-agent-configs/rules/base.md|dot_claude/CLAUDE.md
-copy|ai-agent-configs/rules/base.md|dot_codex/AGENTS.md
-copy|ai-agent-configs/rules/base.md|dot_cursor/rules/AGENTS.mdc
-
 # Agents (Claude Code only)
 sync|ai-agent-configs/agents|dot_claude/agents
 
