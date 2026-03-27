@@ -13,8 +13,8 @@ user-invocable: false
 
 `expect(fn(input)).toBe(output)` をテスト前に書けるか？
 
-- **書ける** → TDD で進める（ビジネスロジック、API、データ変換、バリデーション、アルゴリズム）
-- **書けない** → スキップして直接 implementation に進む（UI レイアウト、設定変更、CRUD）
+- **書ける** → TDD で進める
+- **書けない** → スキップして直接 implementation に進む
 
 ## 手順
 
