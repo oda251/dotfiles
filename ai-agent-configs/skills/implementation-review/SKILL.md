@@ -4,9 +4,7 @@ description: 実装をレビューし、指摘があれば implementation に戻
 user-invocable: false
 ---
 
-## エージェント構成
-
-実装者のバイアスを避けるため、レビュアーは別エージェント。
+レビュー共通ルールは `~/.claude/references/review-guideline.md` に従う。
 
 ## 手順
 
@@ -18,7 +16,7 @@ user-invocable: false
 以下の変更をレビューせよ。
 - 変更ファイル: [ファイルパス一覧]
 - 変更の意図: [何を実現するための変更か]
-- 観点: 正確性、一貫性、エッジケース、セキュリティ
+- 観点: ~/.claude/references/review-guideline.md の「実装レビュー」に従う
 - 問題があれば具体的な修正案を示すこと
 ```
 
@@ -26,10 +24,6 @@ user-invocable: false
 
 - **指摘あり** → implementation に戻る
 - **指摘なし** → 全テスト pass・ビルド確認して完了
-
-### レビューループの上限
-
-最大 3 回まで。3 回を超えた場合はユーザーに状況を報告し、判断を仰ぐ。
 
 ## 次のスキル
 
