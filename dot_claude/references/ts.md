@@ -24,6 +24,19 @@ export const User = {
 } as const
 ```
 
+### enum を使わない
+
+`enum` の代わりに `as const` + 型推論を使う。
+
+```ts
+// NG
+enum Status { Active, Inactive }
+
+// OK
+const Status = { Active: 'active', Inactive: 'inactive' } as const
+type Status = (typeof Status)[keyof typeof Status]
+```
+
 ### エラーハンドリング
 
 neverthrow を使い、例外ではなく Result 型でエラーを表現する。
@@ -38,4 +51,11 @@ const parseConfig = (raw: string): Result<Config, ParseError> => {
 
 ## バリデーション
 
-外部入力（API リクエスト、フォーム、環境変数等）のバリデーションには zod を使う。
+外部入力（API リクエスト、フォーム、環境変数等）のバリデーションには zod を使う。`.parse()` ではなく `.safeParse()` を使い、例外を投げずに Result として扱う。
+
+```ts
+const result = schema.safeParse(input)
+if (!result.success) {
+  // result.error で処理
+}
+```
