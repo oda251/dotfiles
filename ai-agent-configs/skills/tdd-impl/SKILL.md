@@ -1,5 +1,5 @@
 ---
-name: test-writing
+name: tdd-impl
 description: TDD サイクル（Red-Green）をテストケース単位で繰り返す。
 user-invocable: false
 ---

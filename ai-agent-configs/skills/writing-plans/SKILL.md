@@ -31,7 +31,7 @@ description: 設計方針をフェーズとタスクに分解し、実行計画�
 | 種類 | 例 | 進め方 |
 |------|-----|--------|
 | **セットアップ** | ライブラリ導入、ディレクトリ構成、設定ファイル、型定義の初期設計 | implementation → implementation-review |
-| **振る舞い** | ビジネスロジック、API、データ変換、バリデーション | test-writing（TDD サイクル）→ implementation-review |
+| **振る舞い** | ビジネスロジック、API、データ変換、バリデーション | tdd-impl（TDD サイクル）→ implementation-review |
 
 - 変更対象ファイルを列挙する
 - ファイル間の依存関係を整理し、並列実行可能な単位に分割する
@@ -53,4 +53,4 @@ description: 設計方針をフェーズとタスクに分解し、実行計画�
 - `~/.claude/references/{lang}-{framework}.md`
 
 セットアップタスク → **implementation** を呼べ。
-振る舞いタスク → **test-writing** を呼べ。
+振る舞いタスク → **tdd-impl** を呼べ。
