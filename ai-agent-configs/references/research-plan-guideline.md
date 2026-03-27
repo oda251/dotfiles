@@ -23,7 +23,4 @@ gather フェーズの後に write/review フェーズを必ず含める:
 
 ## Phase 2: exec-research-write
 - ⬜ a. 調査結果を統合ドキュメントにまとめる
-
-## Phase 3: exec-research-review
-- ⬜ a. ドキュメントレビュー
 ```
