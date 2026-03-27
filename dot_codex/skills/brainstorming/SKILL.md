@@ -35,13 +35,14 @@ description: 「Xを作りたい」「Xを実装して」など構築・設計�
 
 ```markdown
 ## Phase 1
-- ⬜ a. research: ベストプラクティス調査
+- ⬜ a. research: Hono + Drizzle での REST API 認証パターン比較（JWT / Session / OAuth）
 
 ## Phase 2
-- ⬜ a. dev: ユーザーAPI実装
+- ⬜ a. dev: ユーザー登録・認証 API（POST /users, POST /auth/login, GET /auth/me）
 ```
 
 調査不要なら research ステップは省略してよい。
+タスクは具体的に書く。「ベストプラクティス調査」のような曖昧な記述は避ける。
 
 ## 次のスキル
 
