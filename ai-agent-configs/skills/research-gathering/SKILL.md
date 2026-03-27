@@ -10,10 +10,7 @@ user-invocable: false
 
 research-planning で列挙したリソースにアクセスする。
 
-**5件未満（自分で収集）:**
-- Web: WebFetch / WebSearch を同一ターンで並列呼び出し
-- ローカル: Read / Grep を同一ターンで並列呼び出し
-- 混在: 同時実行
+**5件未満**: 自分で収集する。
 
 **5件以上（サブエージェント並列起動）:**
 
