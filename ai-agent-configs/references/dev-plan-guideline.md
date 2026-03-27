@@ -23,16 +23,12 @@
 - 共有するインターフェース（型定義、API 契約等）を先に確定する
 - 要件不明確・設計判断が分かれる場合はユーザーに確認。推測で実装しない
 - 先行フェーズに調査結果がある場合、その内容を踏まえて計画する
-- 調査が必要な場合は exec-research フェーズを先行させる
+- 調査が必要な場合は plan-research フェーズとして分割する（exec-dev の中に exec-research を混ぜない）
+
+plan-dev は `exec-dev` フェーズのみ書く:
 
 ```markdown
-## Phase 1: exec-research
-- ⬜ a. 認証ライブラリの比較
-
-## Phase 2: exec-research-write
-- ⬜ a. 調査結果を統合ドキュメントにまとめる
-
-## Phase 3: exec-dev
+## Phase 1: exec-dev
 - ⬜ a. ライブラリ導入
 - ⬜ b. 認証 API
 ```
