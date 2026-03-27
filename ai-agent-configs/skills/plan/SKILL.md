@@ -38,7 +38,7 @@ parent-phase: {フェーズ番号}
 ### 5. 親タスクに子ファイルリンクを付記
 
 ```
-- 🔵 a. 認証機能 → 2028-03-28-dev-user-auth.md
+- 🔵 a. [認証機能](docs/.tasks/2028-03-28-dev-user-auth.md)
 ```
 
 ## 次のスキル
