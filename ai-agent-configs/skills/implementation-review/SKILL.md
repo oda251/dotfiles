@@ -4,8 +4,6 @@ description: 実装をレビューし、指摘があれば implementation に戻
 user-invocable: false
 ---
 
-レビュー共通ルールは `~/.claude/references/review-guideline.md` に従う。
-
 ## 手順
 
 ### 1. レビュー
@@ -16,7 +14,7 @@ user-invocable: false
 以下の変更をレビューせよ。
 - 変更ファイル: [ファイルパス一覧]
 - 変更の意図: [何を実現するための変更か]
-- 観点: ~/.claude/references/review-guideline.md の「実装レビュー」に従う
+- 観点: ~/.claude/references/implementation-guideline.md に従う
 - 問題があれば具体的な修正案を示すこと
 ```
 
