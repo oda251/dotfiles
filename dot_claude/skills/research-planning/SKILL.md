@@ -41,14 +41,6 @@ ctx7 docs /facebook/react "useEffect cleanup"
 
 ctx7 が利用できない環境では WebSearch にフォールバックする。
 
-### 3. アクセス戦略の決定
-
-リソース数に応じて戦略を決める:
-
-リソース数に応じてサブエージェントを並列起動する。
-
-確認なしでそのまま収集に進む。
-
 ## 次のスキル
 
-→ **research-gathering** を呼べ。リソース一覧とアクセス戦略を引き継ぐ。
+→ **research-gathering** を呼べ。リソース一覧を引き継ぐ。
