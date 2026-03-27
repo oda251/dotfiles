@@ -14,7 +14,7 @@ user-invocable: false
 以下の変更をレビューせよ。
 - 変更ファイル: [ファイルパス一覧]
 - 変更の意図: [何を実現するための変更か]
-- 観点: ~/.claude/references/implementation-guideline.md に従う
+- 観点: 対象言語のガイドライン（~/.claude/references/{lang}.md, {lang}-{framework}.md）があれば従う
 - 問題があれば具体的な修正案を示すこと
 ```
 
