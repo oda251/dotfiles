@@ -16,9 +16,9 @@ user-invocable: false
 - `plan-dev` → `~/.claude/references/dev-plan-guideline.md`
 - `plan-research` → `~/.claude/references/research-plan-guideline.md`
 
-### 3. 先行タスクの成果物を参照
+### 3. 先行フェーズの成果物を参照
 
-親タスクファイルの完了済みフェーズ（全タスク ✅）に子ファイルリンクがあれば、その成果物（docs/ 配下のドキュメント、収集結果等）を読み、計画に反映する。
+同一タスクファイル内の完了済みフェーズ（✅）に成果物リンク（`[調査結果](...)` 等）があれば読み、計画に反映する。
 
 ### 4. 子タスクファイル作成
 
