@@ -26,6 +26,6 @@ user-invocable: false
 
 ```bash
 # 調査してから実装
-dispatch task add --ws {ws_id} --title "認証パターン調査" --type plan-research --depends-on {parent_task_id}
-dispatch task add --ws {ws_id} --title "認証API実装" --type exec-dev --depends-on {research_task_id}
+dispatch task add --title "認証パターン調査" --type plan-research --depends-on {parent_task_id}
+dispatch task add --title "認証API実装" --type exec-dev --depends-on {research_task_id}
 ```

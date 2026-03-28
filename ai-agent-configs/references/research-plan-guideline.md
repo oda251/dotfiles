@@ -12,15 +12,10 @@
 
 ## タスク分解
 
-調査テーマを観点ごとにタスクとして分解する。
+調査テーマを観点ごとにタスクとして分解する。gather タスクの後に write タスクを追加する:
 
-gather フェーズの後に write/review フェーズを必ず含める:
-
-```markdown
-## Phase 1: exec-research
-- ⬜ a. 観点1
-- ⬜ b. 観点2
-
-## Phase 2: exec-research-write
-- ⬜ a. 調査結果を統合ドキュメントにまとめる
+```bash
+dispatch task add --title "観点1" --type exec-research --depends-on {parent}
+dispatch task add --title "観点2" --type exec-research --depends-on {parent}
+dispatch task add --title "調査結果を統合ドキュメントにまとめる" --type exec-research-write --depends-on {gather1},{gather2}
 ```

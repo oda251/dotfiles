@@ -1,6 +1,6 @@
 ---
 name: bootstrap
-description: session-start hook で自動注入されるルータースキル。ユーザーメッセージを受け取るたびにスキルチェーンの起点を判断する。
+description: session-start hook で自動注入されるルータースキル。ユーザーメッセージを受け取るたびに適切なスキルを判断する。
 disable-model-invocation: true
 ---
 
@@ -23,7 +23,7 @@ disable-model-invocation: true
 
 | トリガー | スキル |
 |----------|--------|
-| diff を1文で説明できる軽微な変更 | スキルチェーンを通さず直接対応してよい |
+| diff を1文で説明できる軽微な変更 | 直接対応してよい |
 | 調査・リサーチ・比較・情報収集・設計・ブレスト・実装・リファクタリング | `brainstorming` |
 | ドキュメント作成 | `documentation` |
 

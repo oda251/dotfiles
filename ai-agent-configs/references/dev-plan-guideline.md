@@ -2,19 +2,11 @@
 
 ## 準備
 
-対象言語・フレームワークに対応するガイドラインがあれば読む:
+対象言語・フレームワークに対応するガイドラインが��れば読む:
 - `~/.claude/references/{lang}.md`（例: `ts.md`）
 - `~/.claude/references/{lang}-{framework}.md`（例: `ts-react.md`）
 
 フレームワークは設定ファイル（next.config, svelte.config, hono 等）から判定する。
-
-## フェーズ分割
-
-大きなタスクは依存関係に基づいてフェーズに分割する。
-
-後続フェーズが前のフェーズの成果物に依存する場合、必ず別フェーズにする。
-1サイクル内の依存順整理（先にAを実装してからBを実装）で済む場合はフェーズ分割不要。
-単一フェーズで完結するタスクではフェーズ分割は不要。
 
 ## タスク分解
 
@@ -22,13 +14,10 @@
 - ファイル間の依存関係を整理し、並列実行可能な単位に分割する
 - 共有するインターフェース（型定義、API 契約等）を先に確定する
 - 要件不明確・設計判断が分かれる場合はユーザーに確認。推測で実装しない
-- 調査が必要な場合は `plan-research` フェーズを先行させる
+- 調査が必要な場合は `plan-research` タスクを先行させる
 
-```markdown
-## Phase 1: plan-research
-- ⬜ a. 認証ライブラリの比較
-
-## Phase 2: exec-dev
-- ⬜ a. ライブラリ導入
-- ⬜ b. 認証 API
+```bash
+dispatch task add --title "認証ライブラリの比較" --type plan-research --depends-on {parent}
+dispatch task add --title "ライブラリ導入" --type exec-dev --depends-on {research}
+dispatch task add --title "認証 API" --type exec-dev --depends-on {research}
 ```

@@ -16,4 +16,5 @@
 
 不足観点を発見した場合:
 - ドキュメントを作成した上で、不足している観点を報告する
-- 追加調査タスクを起票する: `dispatch task add --title "不足観点" --type exec-research --depends-on {current_task_id}`
+- 現在のタスクIDは `dispatch task current` で取得できる
+- 追加調査タスクを起票する: `dispatch task add --title "不足観点" --type exec-research`
