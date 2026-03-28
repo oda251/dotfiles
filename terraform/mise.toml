@@ -1,0 +1,6 @@
+[tools]
+terraform = "latest"
+terragrunt = "latest"
+
+[env]
+_.file = ".env"

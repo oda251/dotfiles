@@ -2,6 +2,7 @@
 name: research-write
 description: 収集結果を元に調査ドキュメントを作成する。サブエージェントが読む実行指示。
 user-invocable: false
+task-types: [exec-research-write]
 ---
 
 収集結果を元に調査ドキュメントを作成せよ。
@@ -20,3 +21,12 @@ user-invocable: false
 ## 不足時のエスカレーション
 
 セルフチェックで情報の不足を発見した場合、ドキュメントを作成した上で不足観点をオーケストレーターに報告せよ。追加調査が必要な観点を具体的にリストアップすること。
+
+## 完了フロー
+
+完了時: `dispatch task done --result "ドキュメントパス"`
+
+不足観点を発見した場合:
+- ドキュメントを作成した上で、不足している観点を報告する
+- 現在のタスクIDは `dispatch task current` で取得できる
+- 追加調査タスクを起票する: `dispatch task add --title "不足観点" --type exec-research`

@@ -2,12 +2,14 @@
 name: dev-impl
 description: タスクを実装する。TDD 適用はサブエージェントが判断する。
 user-invocable: false
+task-types: [exec-dev]
 ---
 
 タスクを実装せよ。
 
-- 対象言語のガイドライン（`~/.claude/references/{lang}.md`, `{lang}-{framework}.md`）があれば従う
-- `~/.claude/references/testing-guideline.md` に従う
+- 対象言語のガイドライン（`~/.claude/references/policy/{lang}.md`, `{lang}-{framework}.md`）があれば従う
+- `~/.claude/references/policy/testing.md` に従う
+- ライブラリ追加・プロジェクト初期設定など技術選定を伴う場合は `~/.claude/references/setup/` を参照する
 
 ## TDD 適用判断
 
@@ -18,3 +20,10 @@ user-invocable: false
   2. Green: テストを通す最小限のコードを書く
   3. 繰り返す（正常系 → 異常系 → 境界値）
 - **書けない** → そのまま実装する
+
+## 完了フロー
+
+1. 実装する
+2. 変更内容をセルフレビューする
+3. **指摘なし** → `dispatch task done --result "変更ファイルパス"` で完了
+4. **指摘あり** → 修正してステップ 2 に戻る

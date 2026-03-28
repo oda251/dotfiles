@@ -1,0 +1,152 @@
+/**
+ * Task runner: executes tasks via Claude Agent SDK query().
+ */
+
+import { query } from "@anthropic-ai/claude-agent-sdk"
+import { ok, err, type Result } from "neverthrow"
+import {
+  type WorkspaceId,
+  type TaskId,
+  type TaskRecord,
+  type RunResult,
+} from "./types.ts"
+import * as db from "./db.ts"
+import type { Db } from "./db.ts"
+import { getSkillContent, getPolicyContents } from "./config.ts"
+
+const buildPrompt = (database: Db, task: TaskRecord): Result<string, string> => {
+  const ctxResult = db.getTaskWithContext(database, task.id)
+  if (ctxResult.isErr()) return err(ctxResult.error)
+  const ctx = ctxResult.value
+  const ws = ctx.workspace
+
+  const depContext = ctx.dependencies
+    .filter((dep) => dep.result)
+    .map((dep) => `- ${dep.title}: ${dep.result}`)
+    .join("\n")
+
+  const skillResult = getSkillContent(task.type)
+  if (skillResult.isErr()) return err(skillResult.error)
+  const skill = skillResult.value
+
+  const policy = getPolicyContents()
+
+  let prompt = `## ワークスペース
+タイトル: ${ws.title}
+背景: ${ws.background}
+ゴール: ${JSON.stringify(ws.goals)}
+制約: ${JSON.stringify(ws.constraints)}
+
+## タスク
+ID: ${task.id}
+タイトル: ${task.title}
+タイプ: ${task.type}
+
+`
+  if (depContext) prompt += `## 先行タスクの成果物\n${depContext}\n\n`
+  if (skill) prompt += `## スキル\n${skill}\n\n`
+  if (policy) prompt += `## ポリシー\n${policy}\n`
+
+  return ok(prompt)
+}
+
+const executeTask = async (prompt: string): Promise<string | null> => {
+  let result: string | null = null
+
+  for await (const message of query({
+    prompt,
+    options: {
+      permissionMode: "acceptEdits",
+      allowedTools: ["Read", "Edit", "Write", "Bash", "Glob", "Grep", "WebSearch", "WebFetch"],
+      cwd: process.cwd(),
+      settingSources: [],
+      systemPrompt: { type: "preset", preset: "claude_code" },
+    },
+  })) {
+    if ("result" in message) {
+      result = message.result as string
+    }
+  }
+
+  return result
+}
+
+export const runNext = (database: Db, wsId: WorkspaceId): RunResult => {
+  const task = db.getNextTask(database, wsId)
+  if (!task) {
+    if (db.isWorkspaceComplete(database, wsId)) {
+      return { status: "complete", message: "All tasks done." }
+    }
+    return { status: "blocked", message: "No runnable tasks. Dependencies not met." }
+  }
+
+  const promptResult = buildPrompt(database, task)
+  if (promptResult.isErr()) {
+    return { status: "error", message: promptResult.error }
+  }
+
+  db.startTask(database, task.id)
+  return { status: "ready", task, prompt: promptResult.value }
+}
+
+export const runAuto = async (database: Db, wsId: WorkspaceId): Promise<RunResult> => {
+  while (true) {
+    const tasks = db.getAllRunnableTasks(database, wsId)
+    if (tasks.length === 0) {
+      if (db.isWorkspaceComplete(database, wsId)) {
+        return { status: "complete", message: "All tasks done." }
+      }
+      return { status: "blocked", message: "No runnable tasks. Dependencies not met." }
+    }
+
+    const prompts: Map<string, string> = new Map()
+    for (const t of tasks) {
+      const promptResult = buildPrompt(database, t)
+      if (promptResult.isErr()) {
+        return { status: "error", message: promptResult.error }
+      }
+      prompts.set(t.id as string, promptResult.value)
+    }
+
+    for (const t of tasks) {
+      db.startTask(database, t.id)
+    }
+
+    const results = await Promise.all(
+      tasks.map(async (t) => {
+        const result = await executeTask(prompts.get(t.id as string)!)
+        return { id: t.id, result }
+      }),
+    )
+
+    for (const { id, result } of results) {
+      db.completeTask(database, id, result ?? undefined)
+    }
+  }
+}
+
+export const completeAndContinue = (
+  database: Db,
+  taskId: TaskId,
+  result?: string,
+): RunResult => {
+  const taskResult = db.completeTask(database, taskId, result)
+  if (taskResult.isErr()) {
+    return { status: "error", message: taskResult.error }
+  }
+
+  return runNext(database, taskResult.value.workspaceId)
+}
+
+export const completeAndContinueAuto = async (
+  database: Db,
+  taskId: TaskId,
+  result?: string,
+): Promise<RunResult> => {
+  const taskResult = db.completeTask(database, taskId, result)
+  if (taskResult.isErr()) {
+    return { status: "error", message: taskResult.error }
+  }
+
+  return runAuto(database, taskResult.value.workspaceId)
+}

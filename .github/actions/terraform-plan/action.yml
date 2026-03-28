@@ -1,0 +1,72 @@
+name: Terraform Plan
+description: Run terragrunt plan and capture output
+
+inputs:
+  working_directory:
+    description: "Terraform working directory"
+    required: true
+  tf_api_token:
+    description: "Terraform Cloud API token"
+    required: true
+  tf_cloud_organization:
+    description: "Terraform Cloud organization"
+    required: true
+
+outputs:
+  plan_text_path:
+    description: "Path to plan output file"
+    value: ${{ steps.plan.outputs.plan_text_path }}
+  has_changes:
+    description: "Whether plan has changes"
+    value: ${{ steps.plan.outputs.has_changes }}
+  format:
+    description: "Output format: diff, text (error)"
+    value: ${{ steps.plan.outputs.format }}
+  plan_hash:
+    description: "Hash of plan output (excluding warnings)"
+    value: ${{ steps.plan.outputs.plan_hash }}
+
+runs:
+  using: composite
+  steps:
+    - name: Setup
+      uses: oda251/dotfiles/.github/actions/terraform-setup@main
+      with:
+        working_directory: ${{ inputs.working_directory }}
+        tf_api_token: ${{ inputs.tf_api_token }}
+        tf_cloud_organization: ${{ inputs.tf_cloud_organization }}
+
+    - name: Plan
+      id: plan
+      shell: bash
+      working-directory: ${{ inputs.working_directory }}
+      run: |
+        PLAN_FILE="$(mktemp)"
+
+        set +e
+        terragrunt plan -no-color -detailed-exitcode 2>&1 | tee "$PLAN_FILE"
+        EXIT_CODE=${PIPESTATUS[0]}
+        set -e
+
+        echo "plan_text_path=$PLAN_FILE" >> "$GITHUB_OUTPUT"
+
+        # Exit code 0 = no changes, 1 = error, 2 = has changes
+        if [ $EXIT_CODE -eq 1 ]; then
+          echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          echo "format=text" >> "$GITHUB_OUTPUT"
+          echo "plan_hash=" >> "$GITHUB_OUTPUT"
+          exit 1
+        elif [ $EXIT_CODE -eq 2 ]; then
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          echo "format=diff" >> "$GITHUB_OUTPUT"
+        else
+          echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          echo "format=diff" >> "$GITHUB_OUTPUT"
+        fi
+
+        # Hash plan excluding warnings (for change detection)
+        HASH=$(grep -v '^\s*Warning:' "$PLAN_FILE" | grep -v '^\s*│' | sha256sum | cut -d' ' -f1)
+        echo "plan_hash=$HASH" >> "$GITHUB_OUTPUT"
+      env:
+        TF_TOKEN_app_terraform_io: ${{ inputs.tf_api_token }}
+        TF_CLOUD_ORGANIZATION: ${{ inputs.tf_cloud_organization }}

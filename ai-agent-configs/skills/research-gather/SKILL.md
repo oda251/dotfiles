@@ -2,6 +2,7 @@
 name: research-gather
 description: 調査観点に基づき情報を収集する。サブエージェントが読む実行指示。
 user-invocable: false
+task-types: [exec-research]
 ---
 
 指示された観点について調査せよ。
@@ -12,3 +13,11 @@ user-invocable: false
 - 1リソースごとに即ファイルに書き出せ。まとめて書くな
 - ページ内に関連する内部リンク（同一ドメイン）があれば追え。ただし既に十分な情報があれば深追いしない
 - ソースのない情報は記録しない。確認できなかった項目は「未確認」と明記する
+
+## 保存先
+
+収集結果の保存先: `docs/.research/{date}-{topic}/`
+
+## 完了フロー
+
+完了時: `dispatch task done --result "収集結果ファイルパス"`
