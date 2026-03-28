@@ -3,9 +3,7 @@
  */
 
 import { query } from "@anthropic-ai/claude-agent-sdk"
-import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite"
 import { ok, err, type Result } from "neverthrow"
-import type * as schemaModule from "./schema.ts"
 import {
   type WorkspaceId,
   type TaskId,
@@ -13,9 +11,8 @@ import {
   type RunResult,
 } from "./types.ts"
 import * as db from "./db.ts"
+import type { Db } from "./db.ts"
 import { getSkillContent, getPolicyContents } from "./config.ts"
-
-type Db = BunSQLiteDatabase<typeof schemaModule>
 
 const buildPrompt = (database: Db, task: TaskRecord): Result<string, string> => {
   const ctxResult = db.getTaskWithContext(database, task.id)
@@ -53,10 +50,7 @@ ID: ${task.id}
   return ok(prompt)
 }
 
-const executeTask = async (database: Db, task: TaskRecord): Promise<string | null> => {
-  const promptResult = buildPrompt(database, task)
-  if (promptResult.isErr()) return null
-  const prompt = promptResult.value
+const executeTask = async (prompt: string): Promise<string | null> => {
   let result: string | null = null
 
   for await (const message of query({
@@ -105,11 +99,13 @@ export const runAuto = async (database: Db, wsId: WorkspaceId): Promise<RunResul
       return { status: "blocked", message: "No runnable tasks. Dependencies not met." }
     }
 
+    const prompts: Map<string, string> = new Map()
     for (const t of tasks) {
       const promptResult = buildPrompt(database, t)
       if (promptResult.isErr()) {
         return { status: "error", message: promptResult.error }
       }
+      prompts.set(t.id as string, promptResult.value)
     }
 
     for (const t of tasks) {
@@ -118,7 +114,7 @@ export const runAuto = async (database: Db, wsId: WorkspaceId): Promise<RunResul
 
     const results = await Promise.all(
       tasks.map(async (t) => {
-        const result = await executeTask(database, t)
+        const result = await executeTask(prompts.get(t.id as string)!)
         return { id: t.id, result }
       }),
     )

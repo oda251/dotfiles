@@ -2,15 +2,11 @@ import { describe, test, expect, beforeEach, afterEach } from "bun:test"
 import { mkdirSync, writeFileSync, rmSync } from "node:fs"
 import { join } from "node:path"
 import { tmpdir } from "node:os"
-import { createDb } from "../src/db.ts"
+import { createDb, type Db } from "../src/db.ts"
 import * as db from "../src/db.ts"
 import * as runner from "../src/runner.ts"
 import { getSkillContent, getPolicyContents } from "../src/config.ts"
 import { WorkspaceId, TaskId, TaskType, TaskStatus, type WorkspaceRecord, type TaskRecord } from "../src/types.ts"
-import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite"
-import type * as schema from "../src/schema.ts"
-
-type Db = BunSQLiteDatabase<typeof schema>
 
 let database: Db
 

@@ -22,7 +22,7 @@ import {
 
 const DB_NAME = ".dispatch.db"
 
-type Db = BunSQLiteDatabase<typeof schema>
+export type Db = BunSQLiteDatabase<typeof schema>
 
 export const createDb = (path?: string): Db => {
   const sqlite = new Database(path ?? DB_NAME)

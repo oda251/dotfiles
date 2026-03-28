@@ -51,9 +51,15 @@ const parseFrontmatter = (content: string): Record<string, unknown> => {
   return result
 }
 
-const scanSkills = (): { typeToSkill: Map<string, string>; contentCache: Map<string, string> } => {
+type ConfigCache = {
+  typeToSkill: Map<string, string>
+  skillContent: Map<string, string>
+  policy: string
+}
+
+const scanConfig = (): ConfigCache => {
   const typeToSkill = new Map<string, string>()
-  const contentCache = new Map<string, string>()
+  const skillContent = new Map<string, string>()
   try {
     const skillsDir = getSkillsDir()
     const dirs = readdirSync(skillsDir, { withFileTypes: true })
@@ -65,7 +71,7 @@ const scanSkills = (): { typeToSkill: Map<string, string>; contentCache: Map<str
       const fm = parseFrontmatter(content)
       const taskTypes = fm["task-types"]
       if (!Array.isArray(taskTypes)) continue
-      contentCache.set(dir.name, content)
+      skillContent.set(dir.name, content)
       for (const tt of taskTypes) {
         typeToSkill.set(tt as string, dir.name)
       }
@@ -73,14 +79,28 @@ const scanSkills = (): { typeToSkill: Map<string, string>; contentCache: Map<str
   } catch {
     // skills dir doesn't exist yet
   }
-  return { typeToSkill, contentCache }
+
+  let policy = ""
+  try {
+    const policyDir = getPolicyDir()
+    policy = readdirSync(policyDir)
+      .filter((f) => f.endsWith(".md"))
+      .sort()
+      .map((f) => readIfExists(join(policyDir, f)))
+      .filter(Boolean)
+      .join("\n\n---\n\n")
+  } catch {
+    // policy dir doesn't exist yet
+  }
+
+  return { typeToSkill, skillContent, policy }
 }
 
-let cache: { home: string; data: ReturnType<typeof scanSkills> } | null = null
+let cache: { home: string; data: ConfigCache } | null = null
 
-const getCache = () => {
+const getCache = (): ConfigCache => {
   const home = getClaudeHome()
-  if (!cache || cache.home !== home) cache = { home, data: scanSkills() }
+  if (!cache || cache.home !== home) cache = { home, data: scanConfig() }
   return cache.data
 }
 
@@ -89,23 +109,10 @@ export const getValidTaskTypes = (): string[] => [...getCache().typeToSkill.keys
 export const isValidTaskType = (value: string): boolean => getCache().typeToSkill.has(value)
 
 export const getSkillContent = (taskType: TaskType): Result<string, string> => {
-  const { typeToSkill, contentCache } = getCache()
+  const { typeToSkill, skillContent } = getCache()
   const skillName = typeToSkill.get(taskType)
   if (!skillName) return err(`No skill found for task type: ${taskType}`)
-  return ok(contentCache.get(skillName) ?? "")
+  return ok(skillContent.get(skillName) ?? "")
 }
 
-export const getPolicyContents = (): string => {
-  try {
-    const policyDir = getPolicyDir()
-    const files = readdirSync(policyDir)
-      .filter((f) => f.endsWith(".md"))
-      .sort()
-    return files
-      .map((f) => readIfExists(join(policyDir, f)))
-      .filter(Boolean)
-      .join("\n\n---\n\n")
-  } catch {
-    return ""
-  }
-}
+export const getPolicyContents = (): string => getCache().policy
