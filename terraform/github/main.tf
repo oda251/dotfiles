@@ -2,7 +2,6 @@ terraform {
   required_version = ">= 1.0"
 
   cloud {
-    organization = "oda251"
     workspaces {
       name = "github"
     }
