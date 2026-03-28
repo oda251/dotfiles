@@ -13,9 +13,9 @@ inputs:
     required: true
 
 outputs:
-  apply_output:
-    description: "Terraform apply output"
-    value: ${{ steps.apply.outputs.apply_output }}
+  apply_text_path:
+    description: "Path to apply output file"
+    value: ${{ steps.apply.outputs.apply_text_path }}
 
 runs:
   using: composite
@@ -32,19 +32,9 @@ runs:
       shell: bash
       working-directory: ${{ inputs.working_directory }}
       run: |
-        OUTPUT=$(terragrunt apply -auto-approve -no-color 2>&1)
-        echo "$OUTPUT"
-
-        # GITHUB_OUTPUT has 1MB limit; truncate if needed
-        if [ ${#OUTPUT} -gt 900000 ]; then
-          OUTPUT="${OUTPUT:0:900000}
-... (truncated, see workflow logs)"
-        fi
-
-        EOF_MARKER=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
-        echo "apply_output<<$EOF_MARKER" >> "$GITHUB_OUTPUT"
-        echo "$OUTPUT" >> "$GITHUB_OUTPUT"
-        echo "$EOF_MARKER" >> "$GITHUB_OUTPUT"
+        APPLY_FILE="$(mktemp)"
+        terragrunt apply -auto-approve -no-color 2>&1 | tee "$APPLY_FILE"
+        echo "apply_text_path=$APPLY_FILE" >> "$GITHUB_OUTPUT"
       env:
         TF_TOKEN_app_terraform_io: ${{ inputs.tf_api_token }}
         TF_CLOUD_ORGANIZATION: ${{ inputs.tf_cloud_organization }}

@@ -13,9 +13,9 @@ inputs:
     required: true
 
 outputs:
-  plan_output:
-    description: "Terraform plan output"
-    value: ${{ steps.plan.outputs.plan_output }}
+  plan_text_path:
+    description: "Path to plan output file"
+    value: ${{ steps.plan.outputs.plan_text_path }}
   has_changes:
     description: "Whether plan has changes"
     value: ${{ steps.plan.outputs.has_changes }}
@@ -35,29 +35,19 @@ runs:
       shell: bash
       working-directory: ${{ inputs.working_directory }}
       run: |
+        PLAN_FILE="$(mktemp)"
+
         set +e
-        OUTPUT=$(terragrunt plan -no-color -detailed-exitcode 2>&1)
-        EXIT_CODE=$?
+        terragrunt plan -no-color -detailed-exitcode 2>&1 | tee "$PLAN_FILE"
+        EXIT_CODE=${PIPESTATUS[0]}
         set -e
+
+        echo "plan_text_path=$PLAN_FILE" >> "$GITHUB_OUTPUT"
 
         # Exit code 0 = no changes, 1 = error, 2 = has changes
         if [ $EXIT_CODE -eq 1 ]; then
-          echo "$OUTPUT"
           exit 1
-        fi
-
-        # GITHUB_OUTPUT has 1MB limit; truncate if needed
-        if [ ${#OUTPUT} -gt 900000 ]; then
-          OUTPUT="${OUTPUT:0:900000}
-... (truncated, see workflow logs)"
-        fi
-
-        EOF_MARKER=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
-        echo "plan_output<<$EOF_MARKER" >> "$GITHUB_OUTPUT"
-        echo "$OUTPUT" >> "$GITHUB_OUTPUT"
-        echo "$EOF_MARKER" >> "$GITHUB_OUTPUT"
-
-        if [ $EXIT_CODE -eq 2 ]; then
+        elif [ $EXIT_CODE -eq 2 ]; then
           echo "has_changes=true" >> "$GITHUB_OUTPUT"
         else
           echo "has_changes=false" >> "$GITHUB_OUTPUT"

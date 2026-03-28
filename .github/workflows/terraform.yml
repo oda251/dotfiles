@@ -39,7 +39,7 @@ jobs:
           pr_number: ${{ github.event.pull_request.number }}
           stack: ${{ env.STACK }}
           command: plan
-          output: ${{ steps.plan.outputs.plan_output }}
+          output_path: ${{ steps.plan.outputs.plan_text_path }}
           has_changes: ${{ steps.plan.outputs.has_changes }}
 
   # Comment-driven: /apply on PR
@@ -80,7 +80,7 @@ jobs:
           pr_number: ${{ github.event.issue.number }}
           stack: ${{ env.STACK }}
           command: apply
-          output: ${{ steps.apply.outputs.apply_output }}
+          output_path: ${{ steps.apply.outputs.apply_text_path }}
 
   # Merge to main: auto apply
   apply-merge:
