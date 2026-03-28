@@ -5,3 +5,7 @@ pre-commit:
       stage_fixed: true
     check-user:
       run: scripts/check_user.sh
+    terraform-fmt:
+      glob: "terraform/**/*.tf"
+      run: terraform fmt -recursive terraform/
+      stage_fixed: true

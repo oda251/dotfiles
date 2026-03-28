@@ -5,9 +5,9 @@ variable "repositories" {
     visibility  = optional(string, "public")
     topics      = optional(list(string), [])
     is_template = optional(bool, false)
-    template         = optional(string)
-    branch_protection = optional(bool, true) # true: 直プッシュ不可+CI必須, false: 直プッシュOK
-    terraform_stacks = optional(list(string), []) # e.g. ["terraform/app"] — 空なら TF workflow を配置しない
+    template          = optional(string)
+    branch_protection = optional(bool, true)         # true: 直プッシュ不可+CI必須, false: 直プッシュOK
+    terraform_stacks  = optional(list(string), [])   # e.g. ["terraform/app"] — 空なら TF workflow を配置しない
   }))
 }
 
@@ -41,10 +41,10 @@ resource "github_repository" "this" {
 resource "github_repository_file" "terraform_workflow" {
   for_each = { for k, v in var.repositories : k => v if length(v.terraform_stacks) > 0 }
 
-  repository          = github_repository.this[each.key].name
-  branch              = "main"
-  file                = ".github/workflows/terraform.yml"
-  content             = templatefile("${path.module}/templates/terraform.yml.tpl", {
+  repository = github_repository.this[each.key].name
+  branch     = "main"
+  file       = ".github/workflows/terraform.yml"
+  content = templatefile("${path.module}/templates/terraform.yml.tpl", {
     stacks = each.value.terraform_stacks
   })
   commit_message      = "chore: update Terraform workflow (managed by Terraform)"
