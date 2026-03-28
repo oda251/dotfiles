@@ -1,12 +1,6 @@
 terraform {
   required_version = ">= 1.0"
 
-  cloud {
-    workspaces {
-      name = "github"
-    }
-  }
-
   required_providers {
     github = {
       source  = "integrations/github"

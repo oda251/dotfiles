@@ -1,5 +1,5 @@
 name: Terraform Plan
-description: Run terraform init and plan
+description: Run terragrunt plan
 
 inputs:
   working_directory:
@@ -18,18 +18,15 @@ runs:
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
 
-    - name: Init
-      shell: bash
-      working-directory: ${{ inputs.working_directory }}
-      run: terraform init
-      env:
-        TF_TOKEN_app_terraform_io: ${{ inputs.tf_api_token }}
-        TF_CLOUD_ORGANIZATION: ${{ inputs.tf_cloud_organization }}
+    - name: Setup Terragrunt
+      uses: autero1/action-terragrunt@v3
+      with:
+        terragrunt-version: latest
 
     - name: Plan
       shell: bash
       working-directory: ${{ inputs.working_directory }}
-      run: terraform plan -no-color
+      run: terragrunt plan -no-color
       env:
         TF_TOKEN_app_terraform_io: ${{ inputs.tf_api_token }}
         TF_CLOUD_ORGANIZATION: ${{ inputs.tf_cloud_organization }}

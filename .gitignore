@@ -14,5 +14,9 @@ dot_zsh/local.zsh
 *.tfstate.backup
 .terraform.lock.hcl
 
+# Terragrunt
+.terragrunt-cache/
+backend.tf
+
 # Environment
 .env
