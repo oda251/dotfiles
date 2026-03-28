@@ -5,9 +5,9 @@ variable "repositories" {
     visibility  = optional(string, "public")
     topics      = optional(list(string), [])
     is_template = optional(bool, false)
-    template           = optional(string)
-    branch_protection  = optional(bool, true) # true: 直プッシュ不可+CI必須, false: 直プッシュOK
-    terraform_stacks   = optional(list(string), []) # e.g. ["terraform/app"] — 空なら TF workflow を配置しない
+    template         = optional(string)
+    branch_protection = optional(bool, true) # true: 直プッシュ不可+CI必須, false: 直プッシュOK
+    terraform_stacks = optional(list(string), []) # e.g. ["terraform/app"] — 空なら TF workflow を配置しない
   }))
 }
 
@@ -54,6 +54,7 @@ resource "github_repository_file" "terraform_workflow" {
 resource "github_branch_protection" "main" {
   for_each = { for k, v in var.repositories : k => v if v.branch_protection }
 
+  depends_on    = [github_repository_file.terraform_workflow]
   repository_id = github_repository.this[each.key].node_id
   pattern       = "main"
 
@@ -63,8 +64,10 @@ resource "github_branch_protection" "main" {
   }
 
   required_status_checks {
-    strict = true
-    contexts = ["ci"]
+    strict   = true
+    contexts = length(each.value.terraform_stacks) > 0 ? [
+      for s in each.value.terraform_stacks : "plan-${replace(s, "/", "-")}"
+    ] : []
   }
 
   enforce_admins = true
