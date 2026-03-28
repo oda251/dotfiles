@@ -5,7 +5,7 @@ import { tmpdir } from "node:os"
 import { createDb } from "../src/db.ts"
 import * as db from "../src/db.ts"
 import * as runner from "../src/runner.ts"
-import { setClaudeHome, getSkillContent, getPolicyContents } from "../src/config.ts"
+import { getSkillContent, getPolicyContents } from "../src/config.ts"
 import { WorkspaceId, TaskId, TaskType, TaskStatus, type WorkspaceRecord, type TaskRecord } from "../src/types.ts"
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite"
 import type * as schema from "../src/schema.ts"
@@ -52,10 +52,10 @@ const setupSkills = (
     mkdirSync(policyDir, { recursive: true })
     writeFileSync(join(policyDir, "test.md"), opts.policy)
   }
-  setClaudeHome(tmpHome)
+  process.env["CLAUDE_HOME"] = tmpHome
   return () => {
     rmSync(tmpHome, { recursive: true })
-    setClaudeHome(join(tmpdir(), "nonexistent-claude-home"))
+    process.env["CLAUDE_HOME"] = join(tmpdir(), "nonexistent-claude-home")
   }
 }
 
@@ -344,8 +344,8 @@ describe("Runner", () => {
 
   test("runNext error on missing skill", () => {
     // No skills set up — should return error
-    setClaudeHome(join(tmpdir(), "nonexistent-claude-home"))
-    cleanup = () => setClaudeHome(join(tmpdir(), "nonexistent-claude-home"))
+    process.env["CLAUDE_HOME"] = join(tmpdir(), "nonexistent-claude-home")
+    cleanup = () => process.env["CLAUDE_HOME"] = join(tmpdir(), "nonexistent-claude-home")
     const ws = createTestWorkspace()
     db.addTask(database, { wsId: ws.id, title: "No skill", type: TaskType.from("unknown-type") })
     const result = runner.runNext(database, ws.id)
@@ -419,10 +419,10 @@ describe("Runner", () => {
       join(skillDir, "SKILL.md"),
       "---\nname: test-skill\ntask-types: [test-type]\n---\n\nDo the thing.",
     )
-    setClaudeHome(tmpHome)
+    process.env["CLAUDE_HOME"] = tmpHome
     cleanup = () => {
       rmSync(tmpHome, { recursive: true })
-      setClaudeHome(join(tmpdir(), "nonexistent-claude-home"))
+      process.env["CLAUDE_HOME"] = join(tmpdir(), "nonexistent-claude-home")
     }
 
     const ws = createTestWorkspace()
@@ -435,8 +435,8 @@ describe("Runner", () => {
   })
 
   test("getSkillContent returns err for unknown type", () => {
-    setClaudeHome(join(tmpdir(), "nonexistent-claude-home"))
-    cleanup = () => setClaudeHome(join(tmpdir(), "nonexistent-claude-home"))
+    process.env["CLAUDE_HOME"] = join(tmpdir(), "nonexistent-claude-home")
+    cleanup = () => process.env["CLAUDE_HOME"] = join(tmpdir(), "nonexistent-claude-home")
     const result = getSkillContent(TaskType.from("nonexistent"))
     expect(result.isErr()).toBe(true)
     if (result.isErr()) {

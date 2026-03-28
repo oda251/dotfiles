@@ -8,17 +8,10 @@ import { readFileSync, readdirSync } from "node:fs"
 import { ok, err, type Result } from "neverthrow"
 import type { TaskType } from "./types.ts"
 
-const DEFAULT_CLAUDE_HOME = join(homedir(), ".claude")
+const getClaudeHome = (): string => process.env["CLAUDE_HOME"] ?? join(homedir(), ".claude")
 
-let claudeHome = DEFAULT_CLAUDE_HOME
-
-export const setClaudeHome = (path: string): void => {
-  claudeHome = path
-  cache = null
-}
-
-const getSkillsDir = () => join(claudeHome, "skills")
-const getPolicyDir = () => join(claudeHome, "references", "policy")
+const getSkillsDir = () => join(getClaudeHome(), "skills")
+const getPolicyDir = () => join(getClaudeHome(), "references", "policy")
 
 const readIfExists = (path: string): string => {
   try {
@@ -71,11 +64,12 @@ const scanSkills = (): { typeToSkill: Map<string, string>; contentCache: Map<str
   return { typeToSkill, contentCache }
 }
 
-let cache: ReturnType<typeof scanSkills> | null = null
+let cache: { home: string; data: ReturnType<typeof scanSkills> } | null = null
 
 const getCache = () => {
-  if (!cache) cache = scanSkills()
-  return cache
+  const home = getClaudeHome()
+  if (!cache || cache.home !== home) cache = { home, data: scanSkills() }
+  return cache.data
 }
 
 export const getValidTaskTypes = (): string[] => [...getCache().typeToSkill.keys()]

@@ -62,8 +62,7 @@ const executeTask = async (database: Db, task: TaskRecord): Promise<string | nul
   for await (const message of query({
     prompt,
     options: {
-      permissionMode: "bypassPermissions",
-      allowDangerouslySkipPermissions: true,
+      permissionMode: "acceptEdits",
       allowedTools: ["Read", "Edit", "Write", "Bash", "Glob", "Grep", "WebSearch", "WebFetch"],
       cwd: process.cwd(),
       settingSources: [],
