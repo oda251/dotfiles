@@ -6,9 +6,20 @@ import { join } from "node:path"
 import { homedir } from "node:os"
 import { readFileSync, readdirSync } from "node:fs"
 import { ok, err, type Result } from "neverthrow"
+import * as v from "valibot"
 import type { TaskType } from "./types.ts"
 
-const getClaudeHome = (): string => process.env["CLAUDE_HOME"] ?? join(homedir(), ".claude")
+const EnvSchema = v.object({
+  CLAUDE_HOME: v.optional(v.string(), join(homedir(), ".claude")),
+  DISPATCH_TASK_ID: v.optional(v.string()),
+  DISPATCH_WS_ID: v.optional(v.string()),
+})
+
+export type Env = v.InferOutput<typeof EnvSchema>
+
+export const loadEnv = (): Env => v.parse(EnvSchema, process.env)
+
+const getClaudeHome = (): string => loadEnv().CLAUDE_HOME
 
 const getSkillsDir = () => join(getClaudeHome(), "skills")
 const getPolicyDir = () => join(getClaudeHome(), "references", "policy")

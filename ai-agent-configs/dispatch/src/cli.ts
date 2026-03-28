@@ -26,9 +26,7 @@ import {
   EditTaskInput,
 } from "./schema.ts"
 import { WorkspaceId, TaskId, TaskType } from "./types.ts"
-
-const ENV_TASK_ID = "DISPATCH_TASK_ID"
-const ENV_WS_ID = "DISPATCH_WS_ID"
+import { loadEnv } from "./config.ts"
 
 const printJson = (obj: unknown): void => {
   console.log(JSON.stringify(obj, null, 2))
@@ -69,13 +67,13 @@ const parseArgs = (argv: string[]): Map<string, string> => {
 }
 
 const resolveWsId = (args: Map<string, string>): WorkspaceId => {
-  const raw = args.get("ws") ?? process.env[ENV_WS_ID]
+  const raw = args.get("ws") ?? loadEnv().DISPATCH_WS_ID
   if (!raw) return die("Error: --ws required (or set DISPATCH_WS_ID env)")
   return WorkspaceId.from(raw)
 }
 
 const resolveTaskId = (args: Map<string, string>): TaskId => {
-  const raw = args.get("id") ?? process.env[ENV_TASK_ID]
+  const raw = args.get("id") ?? loadEnv().DISPATCH_TASK_ID
   if (!raw) return die("Error: --id required (or set DISPATCH_TASK_ID env)")
   return TaskId.from(raw)
 }
@@ -183,7 +181,7 @@ const main = async (): Promise<void> => {
           break
         }
         case "current": {
-          const taskId = process.env[ENV_TASK_ID]
+          const taskId = loadEnv().DISPATCH_TASK_ID
           if (!taskId) return die("No current task (DISPATCH_TASK_ID not set).")
           printJson(unwrapResult(db.getTaskWithContext(database, TaskId.from(taskId))))
           break
