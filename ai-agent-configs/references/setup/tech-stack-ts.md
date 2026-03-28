@@ -20,8 +20,7 @@ TypeScript プロジェクトの技術選定。
 ## Lint / Format: oxlint + oxfmt
 
 - ESLint/Prettier ではなく oxlint + oxfmt を使う
-- `no-explicit-any` を有効にする
-- `no-enum` を有効にする（`as const` + 型推論を使う）
+- `no-explicit-any`, `no-enum`, `no-non-null-assertion`, `no-var` を有効にする
 
 ## テスト: Vitest
 
