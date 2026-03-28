@@ -41,12 +41,11 @@ runs:
       shell: bash
       working-directory: ${{ inputs.working_directory }}
       run: |
+        set -o pipefail
         PLAN_FILE="$(mktemp)"
 
-        set +e
-        terragrunt plan --terragrunt-no-auto-init -no-color -detailed-exitcode 2>&1 | tee "$PLAN_FILE"
-        EXIT_CODE=${PIPESTATUS[0]}
-        set -e
+        EXIT_CODE=0
+        terragrunt plan --terragrunt-no-auto-init -no-color -detailed-exitcode 2>&1 | tee "$PLAN_FILE" || EXIT_CODE=$?
 
         echo "plan_text_path=$PLAN_FILE" >> "$GITHUB_OUTPUT"
 
