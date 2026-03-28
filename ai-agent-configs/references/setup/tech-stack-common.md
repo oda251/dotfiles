@@ -9,14 +9,7 @@ pre-commit で lint + format を必ず実行する。CI で気づくより手元
 - Lefthook を使う（husky/pre-commit ではない）
 - **pre-commit**: lint, format
 - **pre-push**: テスト（必要に応じて）
-
-### 言語別の lint/format
-
-| 言語 | lint | format |
-|---|---|---|
-| TypeScript | `eslint` | `prettier` or `biome` |
-| Python | `ruff check` | `ruff format` |
-| Go | `golangci-lint` | `gofmt` |
+- lint/format ツールの選定は各言語の tech-stack に記載
 
 ## テスト基盤: Testcontainers
 
