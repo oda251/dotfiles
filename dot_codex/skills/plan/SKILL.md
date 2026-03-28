@@ -1,50 +1,37 @@
 ---
 name: plan
-description: 指定されたフェーズを展開し、子タスクファイルを作成する。
+description: ワークスペースのゴールに基づきタスクを分解する。dispatch CLI から呼ばれるプロンプトテンプレート。
 user-invocable: false
 ---
 
 ## 手順
 
-### 1. 指定フェーズの確認
+### 1. ワークスペース情報の確認
 
-引き継がれたタスクファイルとフェーズ番号から、対象フェーズを読み取る。
+プロンプトに含まれるワークスペース情報（背景・ゴール・制約）と先行タスクの成果物を確認する。
 
-### 2. ドメイン判別とガイドライン読み込み
+### 2. ガイドライン読み込み
 
-フェーズ見出しの種別からドメインを判別し、対応するガイドラインを読む:
-- `plan-dev` → `~/.claude/references/dev-plan-guideline.md`
-- `plan-research` → `~/.claude/references/research-plan-guideline.md`
+プロンプトに含まれるガイドラインに従う。
 
-### 3. 先行フェーズの成果物を参照
+### 3. タスク分解
 
-同一タスクファイル内の完了済みフェーズ（✅）に成果物リンク（`[調査結果](...)` 等）があれば読み、計画に反映する。
+ゴールを達成するためのタスクを分解し、dispatch CLI でタスクを追加する。
 
-### 4. 子タスクファイル作成
-
-ガイドラインに従いタスクを分解し、子タスクファイルに書き出す。
-
-`plan-{X}` が子タスクファイルに書けるフェーズ:
+`plan-{X}` が追加できるタスクタイプ:
 - `plan-*`（任意のドメインへの計画委譲。自ドメイン含む）
 - `exec-{X}`（自ドメインの実行のみ。他ドメインの exec は書けない）
 
-保存先: `docs/.tasks/{date}-{chain}-{topic}.md`
+依存関係がある場合は `--depends-on` で指定する。
 
-frontmatter で親タスクファイルを参照する:
-
-```yaml
----
-parent: {親タスクファイル名}
-parent-phase: {フェーズ番号}
----
+```bash
+dispatch task add --ws {ws_id} --title "認証パターン調査" --type exec-research
+dispatch task add --ws {ws_id} --title "認証API実装" --type exec-dev --depends-on {task_id}
 ```
 
-### 5. 親タスクに子ファイルリンクを付記
+調査が必要な場合は `plan-research` タスクを先行させる:
 
+```bash
+dispatch task add --ws {ws_id} --title "認証パターン調査" --type plan-research
+dispatch task add --ws {ws_id} --title "認証API実装" --type exec-dev --depends-on {task_id}
 ```
-- 🔵 a. [認証機能](docs/.tasks/2028-03-28-dev-user-auth.md)
-```
-
-## 次のスキル
-
-→ **dispatch** を呼べ。子タスクファイルのパスを引き継ぐ。

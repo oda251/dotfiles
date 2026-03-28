@@ -18,31 +18,32 @@ description: 「Xを作りたい」「Xを実装して」など構築・設計�
   - 選択肢がある場合は具体的な選択肢を提示する
   - ユーザーが方針を承認してから次に進む。推測で進めない
 
-### 2. タスクファイル作成
+### 2. ワークスペース作成
 
-背景・ゴール・制約を frontmatter に書き、依頼内容に応じたドメインの plan フェーズを1つ書く。タスク分解は plan に任せる。
+dispatch CLI でワークスペースを作成する:
 
-保存先: `docs/.tasks/{date}-{topic}.md`
-
-```markdown
----
-背景: 既存のセッション認証から JWT に移行したい。移行中も既存セッションを切りたくない。
-ゴール:
-  - JWT ベースの認証 API
-  - 既存セッションとの並行稼働期間
-制約:
-  - Express + TypeScript
-  - 既存の connect-redis セッションストアは残す
----
-
-## Phase 1: plan-dev
-- ⬜ a. ゴールの達成
+```bash
+dispatch ws create \
+  --title "JWT認証移行" \
+  --background "既存のセッション認証からJWTに移行したい" \
+  --goal "JWT ベースの認証 API" \
+  --goal "既存セッションとの並行稼働期間" \
+  --constraint "Express + TypeScript" \
+  --constraint "connect-redis は残す"
 ```
 
-ドメインの判断:
+### 3. 初期タスク追加
+
+ドメインを判断し、plan タスクを1つ追加する:
 - 実装・構築 → `plan-dev`
 - 調査・比較・技術選定 → `plan-research`
 
-## 次のスキル
+```bash
+dispatch task add --ws {ws_id} --title "ゴールの達成" --type plan-dev
+```
 
-→ **dispatch** を呼べ。タスクファイルのパスを引き継ぐ。
+### 4. 実行開始
+
+```bash
+dispatch run --ws {ws_id}
+```
