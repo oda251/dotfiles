@@ -10,7 +10,6 @@ from . import runner
 
 
 def _resolve_task_id(args) -> str:
-    """Resolve task ID from --id flag or DISPATCH_TASK_ID env."""
     task_id = getattr(args, "id", None) or runner.get_current_task_id()
     if not task_id:
         print("Error: --id required (or set DISPATCH_TASK_ID env)", file=sys.stderr)
@@ -19,12 +18,22 @@ def _resolve_task_id(args) -> str:
 
 
 def _resolve_ws_id(args) -> str:
-    """Resolve workspace ID from --ws flag or DISPATCH_WS_ID env."""
     ws_id = getattr(args, "ws", None) or runner.get_current_ws_id()
     if not ws_id:
         print("Error: --ws required (or set DISPATCH_WS_ID env)", file=sys.stderr)
         sys.exit(1)
     return ws_id
+
+
+def _print_json(obj) -> None:
+    print(json.dumps(obj, ensure_ascii=False, indent=2))
+
+
+def _require(obj, entity: str, obj_id: str):
+    if not obj:
+        print(f"{entity} {obj_id} not found.", file=sys.stderr)
+        sys.exit(1)
+    return obj
 
 
 def cmd_ws_create(args):
@@ -35,75 +44,40 @@ def cmd_ws_create(args):
         goals=args.goal or [],
         constraints=args.constraint or [],
     )
-    print(json.dumps(ws, ensure_ascii=False, indent=2))
+    _print_json(ws)
 
 
 def cmd_ws_show(args):
     ws_id = _resolve_ws_id(args)
-    ws = db.get_workspace(ws_id)
-    if not ws:
-        print(f"Workspace {ws_id} not found.", file=sys.stderr)
-        sys.exit(1)
-    tasks = db.list_tasks(ws_id)
-    ws["tasks"] = tasks
-    print(json.dumps(ws, ensure_ascii=False, indent=2))
+    ws = _require(db.get_workspace(ws_id), "Workspace", ws_id)
+    ws["tasks"] = db.list_tasks(ws_id)
+    _print_json(ws)
 
 
 def cmd_ws_list(args):
-    workspaces = db.list_workspaces()
-    print(json.dumps(workspaces, ensure_ascii=False, indent=2))
+    _print_json(db.list_workspaces())
 
 
 def cmd_ws_edit(args):
     ws_id = _resolve_ws_id(args)
-    kwargs = {}
-    if args.title:
-        kwargs["title"] = args.title
-    if args.background:
-        kwargs["background"] = args.background
-    if args.add_goal:
-        kwargs["add_goal"] = args.add_goal
-    if args.remove_goal:
-        kwargs["remove_goal"] = args.remove_goal
-    if args.add_constraint:
-        kwargs["add_constraint"] = args.add_constraint
-    if args.remove_constraint:
-        kwargs["remove_constraint"] = args.remove_constraint
-    ws = db.edit_workspace(ws_id, **kwargs)
-    if not ws:
-        print(f"Workspace {ws_id} not found.", file=sys.stderr)
-        sys.exit(1)
-    print(json.dumps(ws, ensure_ascii=False, indent=2))
+    fields = ["title", "background", "add_goal", "remove_goal", "add_constraint", "remove_constraint"]
+    kwargs = {f: getattr(args, f) for f in fields if getattr(args, f, None)}
+    ws = _require(db.edit_workspace(ws_id, **kwargs), "Workspace", ws_id)
+    _print_json(ws)
 
 
 def cmd_task_add(args):
     ws_id = _resolve_ws_id(args)
     depends = args.depends_on.split(",") if args.depends_on else []
-    task = db.add_task(
-        workspace_id=ws_id,
-        title=args.title,
-        task_type=args.type,
-        depends_on=depends,
-    )
-    print(json.dumps(task, ensure_ascii=False, indent=2))
+    _print_json(db.add_task(ws_id, args.title, args.type, depends))
 
 
 def cmd_task_edit(args):
     task_id = _resolve_task_id(args)
-    kwargs = {}
-    if args.title:
-        kwargs["title"] = args.title
-    if args.type:
-        kwargs["type"] = args.type
-    if args.add_dep:
-        kwargs["add_dep"] = args.add_dep
-    if args.remove_dep:
-        kwargs["remove_dep"] = args.remove_dep
-    task = db.edit_task(task_id, **kwargs)
-    if not task:
-        print(f"Task {task_id} not found.", file=sys.stderr)
-        sys.exit(1)
-    print(json.dumps(task, ensure_ascii=False, indent=2))
+    fields = ["title", "type", "add_dep", "remove_dep"]
+    kwargs = {f: getattr(args, f) for f in fields if getattr(args, f, None)}
+    _require(db.edit_task(task_id, **kwargs), "Task", task_id)
+    _print_json(db.get_task_with_context(task_id))
 
 
 def cmd_task_current(args):
@@ -111,27 +85,17 @@ def cmd_task_current(args):
     if not task_id:
         print("No current task (DISPATCH_TASK_ID not set).", file=sys.stderr)
         sys.exit(1)
-    ctx = db.get_task_with_context(task_id)
-    if not ctx:
-        print(f"Task {task_id} not found.", file=sys.stderr)
-        sys.exit(1)
-    print(json.dumps(ctx, ensure_ascii=False, indent=2))
+    _print_json(_require(db.get_task_with_context(task_id), "Task", task_id))
 
 
 def cmd_task_done(args):
     task_id = _resolve_task_id(args)
-    result = runner.complete_and_continue(
-        task_id,
-        result=args.result,
-        use_subprocess=args.auto,
-    )
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+    _print_json(runner.complete_and_continue(task_id, result=args.result, use_subprocess=args.auto))
 
 
 def cmd_run(args):
     ws_id = _resolve_ws_id(args)
-    result = runner.run_next(ws_id, use_subprocess=args.auto)
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+    _print_json(runner.run_next(ws_id, use_subprocess=args.auto))
 
 
 def main():
