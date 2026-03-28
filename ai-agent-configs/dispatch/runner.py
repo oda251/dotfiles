@@ -1,5 +1,6 @@
 """Task runner: executes tasks via claude -p or in-process."""
 
+import os
 import subprocess
 import json
 from pathlib import Path
@@ -23,6 +24,20 @@ TYPE_GUIDELINE_MAP = {
     "exec-dev": "dev-exec-guideline.md",
     "exec-research": "research-exec-guideline.md",
 }
+
+# Environment variable names
+ENV_TASK_ID = "DISPATCH_TASK_ID"
+ENV_WS_ID = "DISPATCH_WS_ID"
+
+
+def get_current_task_id() -> str | None:
+    """Get current task ID from environment."""
+    return os.environ.get(ENV_TASK_ID)
+
+
+def get_current_ws_id() -> str | None:
+    """Get current workspace ID from environment."""
+    return os.environ.get(ENV_WS_ID)
 
 
 def _build_prompt(task: dict) -> str:
@@ -83,11 +98,17 @@ ID: {task['id']}
 def run_task_subprocess(task: dict) -> str | None:
     """Run a task via claude -p in a subprocess."""
     prompt = _build_prompt(task)
+    env = {
+        **os.environ,
+        ENV_TASK_ID: task["id"],
+        ENV_WS_ID: task["workspace_id"],
+    }
     result = subprocess.run(
         ["claude", "-p", prompt],
         capture_output=True,
         text=True,
         cwd=str(Path.cwd()),
+        env=env,
     )
     return result.stdout.strip() if result.returncode == 0 else None
 
