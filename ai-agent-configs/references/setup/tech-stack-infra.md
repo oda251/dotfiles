@@ -22,6 +22,11 @@
 - ワークフローは個別リポジトリで定義（パスフィルタ等はリポジトリ固有）
 - PR 作成時に自動 plan、`/apply` コメントで apply（OWNER のみ）、main マージ時に自動 apply
 
+## Lint / Format: terraform fmt
+
+- `terraform fmt` をセットアップの pre-commit（Lefthook）に入れる
+- `stage_fixed: true` で自動修正をステージングする
+
 ## クラウド: Cloudflare 優先
 
 - 基本は Cloudflare に閉じる（Workers, Pages, D1, R2, KV, Queues 等）
