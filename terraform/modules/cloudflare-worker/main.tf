@@ -8,11 +8,11 @@ terraform {
 }
 
 resource "cloudflare_workers_script" "this" {
-  account_id          = var.account_id
-  script_name         = var.name
-  content             = var.content
-  compatibility_date  = var.compatibility_date
-  main_module         = "index.js"
+  account_id         = var.account_id
+  script_name        = var.name
+  content            = var.content
+  compatibility_date = var.compatibility_date
+  main_module        = "index.js"
 
   dynamic "bindings" {
     for_each = var.kv_bindings

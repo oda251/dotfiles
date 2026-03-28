@@ -18,8 +18,7 @@ env:
   GITHUB_TOKEN: $${{ secrets.GH_PAT }}
 
 jobs:
-%{ for stack in stacks ~}
-  plan-${replace(stack, "/", "-")}:
+  plan:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
@@ -29,7 +28,7 @@ jobs:
         id: plan
         uses: oda251/dotfiles/.github/actions/terraform-plan@main
         with:
-          working_directory: ${stack}
+          working_directory: terraform
           tf_api_token: $${{ secrets.TF_API_TOKEN }}
           tf_cloud_organization: $${{ secrets.TF_CLOUD_ORGANIZATION }}
 
@@ -38,14 +37,14 @@ jobs:
         uses: oda251/dotfiles/.github/actions/terraform-comment@main
         with:
           pr_number: $${{ github.event.pull_request.number }}
-          stack: ${stack}
+          stack: terraform
           command: plan
           output_path: $${{ steps.plan.outputs.plan_text_path }}
           has_changes: $${{ steps.plan.outputs.has_changes }}
           format: $${{ steps.plan.outputs.format }}
           plan_hash: $${{ steps.plan.outputs.plan_hash }}
 
-  apply-merge-${replace(stack, "/", "-")}:
+  apply-merge:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
@@ -53,11 +52,10 @@ jobs:
 
       - uses: oda251/dotfiles/.github/actions/terraform-apply@main
         with:
-          working_directory: ${stack}
+          working_directory: terraform
           tf_api_token: $${{ secrets.TF_API_TOKEN }}
           tf_cloud_organization: $${{ secrets.TF_CLOUD_ORGANIZATION }}
 
-%{ endfor ~}
   apply-comment:
     if: >
       github.event_name == 'issue_comment' &&
@@ -92,23 +90,20 @@ jobs:
         with:
           ref: $${{ steps.pr.outputs.ref }}
 
-%{ for stack in stacks ~}
-      - name: Apply ${stack}
-        id: apply-${replace(stack, "/", "-")}
+      - name: Apply
+        id: apply
         uses: oda251/dotfiles/.github/actions/terraform-apply@main
         with:
-          working_directory: ${stack}
+          working_directory: terraform
           tf_api_token: $${{ secrets.TF_API_TOKEN }}
           tf_cloud_organization: $${{ secrets.TF_CLOUD_ORGANIZATION }}
 
-      - name: Comment ${stack}
-        if: always() && steps.apply-${replace(stack, "/", "-")}.outputs.apply_text_path
+      - name: Comment
+        if: always() && steps.apply.outputs.apply_text_path
         uses: oda251/dotfiles/.github/actions/terraform-comment@main
         with:
           pr_number: $${{ github.event.issue.number }}
-          stack: ${stack}
+          stack: terraform
           command: apply
-          output_path: $${{ steps.apply-${replace(stack, "/", "-")}.outputs.apply_text_path }}
+          output_path: $${{ steps.apply.outputs.apply_text_path }}
           format: diff
-
-%{ endfor ~}
