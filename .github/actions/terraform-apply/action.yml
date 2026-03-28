@@ -35,6 +35,12 @@ runs:
         OUTPUT=$(terragrunt apply -auto-approve -no-color 2>&1)
         echo "$OUTPUT"
 
+        # GITHUB_OUTPUT has 1MB limit; truncate if needed
+        if [ ${#OUTPUT} -gt 900000 ]; then
+          OUTPUT="${OUTPUT:0:900000}
+... (truncated, see workflow logs)"
+        fi
+
         EOF_MARKER=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
         echo "apply_output<<$EOF_MARKER" >> "$GITHUB_OUTPUT"
         echo "$OUTPUT" >> "$GITHUB_OUTPUT"

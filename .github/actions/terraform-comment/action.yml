@@ -24,13 +24,25 @@ runs:
   steps:
     - name: Post comment
       uses: actions/github-script@v7
+      env:
+        TF_OUTPUT: ${{ inputs.output }}
       with:
         script: |
           const stack = '${{ inputs.stack }}';
           const command = '${{ inputs.command }}';
           const hasChanges = '${{ inputs.has_changes }}' === 'true';
-          const output = `${{ inputs.output }}`.slice(0, 60000); // GitHub comment limit
           const marker = `<!-- terraform:${stack}:${command} -->`;
+
+          const MAX_BODY = 65536;
+          const RESERVED = 500; // header, status, details tags
+          const maxOutput = MAX_BODY - RESERVED;
+
+          let output = process.env.TF_OUTPUT || '';
+          let truncated = false;
+          if (output.length > maxOutput) {
+            output = output.slice(0, maxOutput);
+            truncated = true;
+          }
 
           let status;
           if (command === 'plan') {
@@ -39,7 +51,7 @@ runs:
             status = '🚀 Applied';
           }
 
-          const body = [
+          const parts = [
             marker,
             `### Terraform ${command}: \`${stack}\``,
             '',
@@ -48,14 +60,19 @@ runs:
             '<details>',
             `<summary>Output</summary>`,
             '',
-            '```',
+            '```diff',
             output,
             '```',
             '',
             '</details>',
-          ].join('\n');
+          ];
 
-          // Find existing comment to update
+          if (truncated) {
+            parts.push('', '> ⚠️ Output truncated. See workflow logs for full output.');
+          }
+
+          const body = parts.join('\n');
+
           const { data: comments } = await github.rest.issues.listComments({
             owner: context.repo.owner,
             repo: context.repo.repo,
