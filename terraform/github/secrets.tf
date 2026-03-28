@@ -16,21 +16,18 @@ variable "gh_pat" {
   sensitive   = true
 }
 
-# dotfilesリポジトリのCI/CDに必要なシークレット
-resource "github_actions_secret" "tf_api_token" {
-  repository      = github_repository.this["dotfiles"].name
-  secret_name     = "TF_API_TOKEN"
-  plaintext_value = var.tf_api_token
+locals {
+  cd_secrets = {
+    TF_API_TOKEN          = var.tf_api_token
+    TF_CLOUD_ORGANIZATION = var.tf_cloud_organization
+    GH_PAT                = var.gh_pat
+  }
 }
 
-resource "github_actions_secret" "tf_cloud_organization" {
-  repository      = github_repository.this["dotfiles"].name
-  secret_name     = "TF_CLOUD_ORGANIZATION"
-  plaintext_value = var.tf_cloud_organization
-}
+resource "github_actions_secret" "this" {
+  for_each = local.cd_secrets
 
-resource "github_actions_secret" "gh_pat" {
   repository      = github_repository.this["dotfiles"].name
-  secret_name     = "GH_PAT"
-  plaintext_value = var.gh_pat
+  secret_name     = each.key
+  plaintext_value = each.value
 }
