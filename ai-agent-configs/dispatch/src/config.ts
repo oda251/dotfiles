@@ -9,6 +9,7 @@ import type { TaskType } from "./types.ts"
 
 const CLAUDE_HOME = join(homedir(), ".claude")
 const SKILLS_DIR = join(CLAUDE_HOME, "skills")
+const POLICY_DIR = join(CLAUDE_HOME, "references", "policy")
 
 const readIfExists = (path: string): string => {
   try {
@@ -77,4 +78,18 @@ export const getSkillContent = (taskType: TaskType): string => {
   const skillName = typeToSkill.get(taskType)
   if (!skillName) return ""
   return contentCache.get(skillName) ?? ""
+}
+
+export const getPolicyContents = (): string => {
+  try {
+    const files = readdirSync(POLICY_DIR)
+      .filter((f) => f.endsWith(".md"))
+      .sort()
+    return files
+      .map((f) => readIfExists(join(POLICY_DIR, f)))
+      .filter(Boolean)
+      .join("\n\n---\n\n")
+  } catch {
+    return ""
+  }
 }
