@@ -15,26 +15,6 @@ useEffect はほぼ全てのケースで別の手段に置き換えられる。
 
 ## コンポーネント設計
 
-### 純粋なコンポーネント
-
-コンポーネントは props に対してビジュアルが一意に定まる純関数にする。データ取得・ビジネスロジック・副作用をコンポーネント内に書かない。
-
-```tsx
-// NG: コンポーネント内にロジック
-const UserCard = ({ userId }: { userId: string }) => {
-  const user = useQuery(...)        // データ取得
-  const plan = calcPlan(user.data)  // ビジネスロジック
-  return <div>{plan.name}</div>
-}
-
-// OK: 表示に専念
-const UserCard = ({ name, plan }: { name: string; plan: string }) => (
-  <div>{name} - {plan}</div>
-)
-```
-
-データ取得やロジックは呼び出し側の hooks / コンテナに置く。
-
 ### Compound Pattern
 
 関連するコンポーネントを親に紐付けてまとめる。
