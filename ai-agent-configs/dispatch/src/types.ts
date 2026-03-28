@@ -4,20 +4,22 @@
 
 // --- Branded Types ---
 
+const generateShortId = (): string => crypto.randomUUID().slice(0, 8)
+
 export type WorkspaceId = string & { readonly __brand: unique symbol }
 
 export const WorkspaceId = {
   from: (value: string): WorkspaceId => value as WorkspaceId,
-  generate: (): WorkspaceId =>
-    crypto.randomUUID().slice(0, 8) as unknown as WorkspaceId,
+  generate: (): WorkspaceId => generateShortId() as unknown as WorkspaceId,
+  unwrap: (id: WorkspaceId): string => id as string,
 } as const
 
 export type TaskId = string & { readonly __brand: unique symbol }
 
 export const TaskId = {
   from: (value: string): TaskId => value as TaskId,
-  generate: (): TaskId =>
-    crypto.randomUUID().slice(0, 8) as unknown as TaskId,
+  generate: (): TaskId => generateShortId() as unknown as TaskId,
+  unwrap: (id: TaskId): string => id as string,
 } as const
 
 // --- Task Status ---

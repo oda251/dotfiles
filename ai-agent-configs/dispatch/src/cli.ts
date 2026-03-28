@@ -14,6 +14,7 @@
  *   dispatch run [--ws ID] [--auto]
  */
 
+import type { Result } from "neverthrow"
 import { createDb } from "./db.ts"
 import * as db from "./db.ts"
 import * as runner from "./runner.ts"
@@ -35,6 +36,16 @@ const printJson = (obj: unknown): void => {
 const die = (message: string): never => {
   console.error(message)
   process.exit(1)
+}
+
+const unwrapResult = <T>(result: Result<T, string>): T => {
+  if (result.isErr()) return die(result.error)
+  return result.value
+}
+
+const unwrapParse = <T>(result: { success: true; data: T } | { success: false; error: { issues: unknown[] } }): T => {
+  if (!result.success) return die(`Validation error: ${JSON.stringify(result.error.issues)}`)
+  return result.data
 }
 
 const parseArgs = (argv: string[]): Map<string, string> => {
@@ -93,24 +104,19 @@ const main = async (): Promise<void> => {
     case "ws": {
       switch (subcommand) {
         case "create": {
-          const goals = collectMultiple(argv, "goal")
-          const constraints = collectMultiple(argv, "constraint")
-          const parsed = CreateWorkspaceInput.safeParse({
+          const data = unwrapParse(CreateWorkspaceInput.safeParse({
             title: args.get("title"),
             background: args.get("background") ?? "",
-            goals,
-            constraints,
-          })
-          if (!parsed.success) return die(`Validation error: ${JSON.stringify(parsed.error.issues)}`)
-          printJson(db.createWorkspace(database, parsed.data))
+            goals: collectMultiple(argv, "goal"),
+            constraints: collectMultiple(argv, "constraint"),
+          }))
+          printJson(db.createWorkspace(database, data))
           break
         }
         case "show": {
           const wsId = resolveWsId(args)
-          const wsResult = db.getWorkspace(database, wsId)
-          if (wsResult.isErr()) return die(wsResult.error)
-          const tasks = db.listTasks(database, wsId)
-          printJson({ ...wsResult.value, tasks })
+          const ws = unwrapResult(db.getWorkspace(database, wsId))
+          printJson({ ...ws, tasks: db.listTasks(database, wsId) })
           break
         }
         case "list": {
@@ -119,19 +125,16 @@ const main = async (): Promise<void> => {
         }
         case "edit": {
           const wsId = resolveWsId(args)
-          const parsed = EditWorkspaceInput.safeParse({
-            wsId: wsId as string,
+          const data = unwrapParse(EditWorkspaceInput.safeParse({
+            wsId: WorkspaceId.unwrap(wsId),
             title: args.get("title"),
             background: args.get("background"),
             addGoal: args.get("add-goal"),
             removeGoal: args.get("remove-goal"),
             addConstraint: args.get("add-constraint"),
             removeConstraint: args.get("remove-constraint"),
-          })
-          if (!parsed.success) return die(`Validation error: ${JSON.stringify(parsed.error.issues)}`)
-          const result = db.editWorkspace(database, wsId, parsed.data)
-          if (result.isErr()) return die(result.error)
-          printJson(result.value)
+          }))
+          printJson(unwrapResult(db.editWorkspace(database, wsId, data)))
           break
         }
         default:
@@ -145,58 +148,48 @@ const main = async (): Promise<void> => {
           const wsId = resolveWsId(args)
           const dependsOnRaw = args.get("depends-on")
           const dependsOn = dependsOnRaw ? dependsOnRaw.split(",") : []
-          const parsed = AddTaskInput.safeParse({
-            wsId: wsId as string,
+          const data = unwrapParse(AddTaskInput.safeParse({
+            wsId: WorkspaceId.unwrap(wsId),
             title: args.get("title"),
             type: args.get("type"),
             dependsOn,
-          })
-          if (!parsed.success) return die(`Validation error: ${JSON.stringify(parsed.error.issues)}`)
-          printJson(
-            db.addTask(database, {
-              wsId,
-              title: parsed.data.title,
-              type: parsed.data.type as TaskType,
-              dependsOn: dependsOn.map(TaskId.from),
-            }),
-          )
+          }))
+          printJson(db.addTask(database, {
+            wsId,
+            title: data.title,
+            type: data.type as TaskType,
+            dependsOn: dependsOn.map(TaskId.from),
+          }))
           break
         }
         case "edit": {
           const taskId = resolveTaskId(args)
-          const parsed = EditTaskInput.safeParse({
-            id: taskId as string,
+          const data = unwrapParse(EditTaskInput.safeParse({
+            id: TaskId.unwrap(taskId),
             title: args.get("title"),
             type: args.get("type"),
             addDep: args.get("add-dep"),
             removeDep: args.get("remove-dep"),
-          })
-          if (!parsed.success) return die(`Validation error: ${JSON.stringify(parsed.error.issues)}`)
-          const editResult = db.editTask(database, taskId, {
-            title: parsed.data.title,
-            type: parsed.data.type as TaskType | undefined,
-            addDep: parsed.data.addDep ? TaskId.from(parsed.data.addDep) : undefined,
-            removeDep: parsed.data.removeDep ? TaskId.from(parsed.data.removeDep) : undefined,
-          })
-          if (editResult.isErr()) return die(editResult.error)
-          const ctx = db.getTaskWithContext(database, taskId)
-          if (ctx.isErr()) return die(ctx.error)
-          printJson(ctx.value)
+          }))
+          unwrapResult(db.editTask(database, taskId, {
+            title: data.title,
+            type: data.type as TaskType | undefined,
+            addDep: data.addDep ? TaskId.from(data.addDep) : undefined,
+            removeDep: data.removeDep ? TaskId.from(data.removeDep) : undefined,
+          }))
+          printJson(unwrapResult(db.getTaskWithContext(database, taskId)))
           break
         }
         case "current": {
           const taskId = process.env[ENV_TASK_ID]
           if (!taskId) return die("No current task (DISPATCH_TASK_ID not set).")
-          const ctx = db.getTaskWithContext(database, TaskId.from(taskId))
-          if (ctx.isErr()) return die(ctx.error)
-          printJson(ctx.value)
+          printJson(unwrapResult(db.getTaskWithContext(database, TaskId.from(taskId))))
           break
         }
         case "done": {
           const taskId = resolveTaskId(args)
           const resultText = args.get("result")
-          const auto = args.has("auto")
-          if (auto) {
+          if (args.has("auto")) {
             printJson(await runner.completeAndContinueAuto(database, taskId, resultText))
           } else {
             printJson(runner.completeAndContinue(database, taskId, resultText))
@@ -210,8 +203,7 @@ const main = async (): Promise<void> => {
     }
     case "run": {
       const wsId = resolveWsId(args)
-      const auto = args.has("auto")
-      if (auto) {
+      if (args.has("auto")) {
         printJson(await runner.runAuto(database, wsId))
       } else {
         printJson(runner.runNext(database, wsId))

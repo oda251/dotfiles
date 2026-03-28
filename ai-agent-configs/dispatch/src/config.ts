@@ -4,7 +4,7 @@
 
 import { join } from "node:path"
 import { homedir } from "node:os"
-import { readFileSync, existsSync } from "node:fs"
+import { readFileSync } from "node:fs"
 import type { TaskType } from "./types.ts"
 
 const CLAUDE_HOME = join(homedir(), ".claude")
@@ -36,5 +36,10 @@ export const getGuidelineContent = (taskType: TaskType): string => {
   return readIfExists(join(CLAUDE_HOME, "references", fileName))
 }
 
-const readIfExists = (path: string): string =>
-  existsSync(path) ? readFileSync(path, "utf-8") : ""
+const readIfExists = (path: string): string => {
+  try {
+    return readFileSync(path, "utf-8")
+  } catch {
+    return ""
+  }
+}

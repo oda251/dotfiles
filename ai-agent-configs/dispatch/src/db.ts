@@ -85,6 +85,30 @@ const toTaskRecord = (row: typeof schema.tasks.$inferSelect): TaskRecord => ({
   createdAt: row.createdAt,
 })
 
+const removeFirst = (arr: string[], item: string): void => {
+  const idx = arr.indexOf(item)
+  if (idx >= 0) arr.splice(idx, 1)
+}
+
+const findRelatedTasks = (
+  db: Db,
+  id: TaskId,
+  direction: "deps" | "dependents",
+): TaskRecord[] => {
+  const [joinCol, whereCol] =
+    direction === "deps"
+      ? [schema.dependencies.dependsOn, schema.dependencies.taskId]
+      : [schema.dependencies.taskId, schema.dependencies.dependsOn]
+
+  return db
+    .select({ task: schema.tasks })
+    .from(schema.dependencies)
+    .innerJoin(schema.tasks, eq(schema.tasks.id, joinCol))
+    .where(eq(whereCol, TaskIdCompanion.unwrap(id)))
+    .all()
+    .map((r) => toTaskRecord(r.task))
+}
+
 // --- Workspace operations ---
 
 export const createWorkspace = (
@@ -93,7 +117,7 @@ export const createWorkspace = (
 ): WorkspaceRecord => {
   const id = WorkspaceIdCompanion.generate()
   const record = {
-    id: id as string,
+    id: WorkspaceIdCompanion.unwrap(id),
     title: input.title,
     background: input.background ?? "",
     goals: input.goals ?? [],
@@ -105,7 +129,7 @@ export const createWorkspace = (
 }
 
 export const getWorkspace = (db: Db, id: WorkspaceId): Result<WorkspaceRecord, string> => {
-  const row = db.select().from(schema.workspaces).where(eq(schema.workspaces.id, id as string)).get()
+  const row = db.select().from(schema.workspaces).where(eq(schema.workspaces.id, WorkspaceIdCompanion.unwrap(id))).get()
   return row ? ok(toWorkspaceRecord(row)) : err(`Workspace ${id} not found`)
 }
 
@@ -132,7 +156,7 @@ export const editWorkspace = (
   const existing = db
     .select()
     .from(schema.workspaces)
-    .where(eq(schema.workspaces.id, id as string))
+    .where(eq(schema.workspaces.id, WorkspaceIdCompanion.unwrap(id)))
     .get()
   if (!existing) return err(`Workspace ${id} not found`)
 
@@ -141,15 +165,9 @@ export const editWorkspace = (
   const constraints = [...current.constraints]
 
   if (changes.addGoal) goals.push(changes.addGoal)
-  if (changes.removeGoal) {
-    const idx = goals.indexOf(changes.removeGoal)
-    if (idx >= 0) goals.splice(idx, 1)
-  }
+  if (changes.removeGoal) removeFirst(goals, changes.removeGoal)
   if (changes.addConstraint) constraints.push(changes.addConstraint)
-  if (changes.removeConstraint) {
-    const idx = constraints.indexOf(changes.removeConstraint)
-    if (idx >= 0) constraints.splice(idx, 1)
-  }
+  if (changes.removeConstraint) removeFirst(constraints, changes.removeConstraint)
 
   db.update(schema.workspaces)
     .set({
@@ -158,10 +176,16 @@ export const editWorkspace = (
       goals,
       constraints,
     })
-    .where(eq(schema.workspaces.id, id as string))
+    .where(eq(schema.workspaces.id, WorkspaceIdCompanion.unwrap(id)))
     .run()
 
-  return getWorkspace(db, id)
+  return ok(toWorkspaceRecord({
+    ...existing,
+    title: changes.title ?? current.title,
+    background: changes.background ?? current.background,
+    goals,
+    constraints,
+  }))
 }
 
 // --- Task operations ---
@@ -172,8 +196,8 @@ export const addTask = (
 ): TaskRecord => {
   const id = TaskIdCompanion.generate()
   const record = {
-    id: id as string,
-    workspaceId: input.wsId as string,
+    id: TaskIdCompanion.unwrap(id),
+    workspaceId: WorkspaceIdCompanion.unwrap(input.wsId),
     title: input.title,
     type: input.type,
     status: TaskStatus.Pending,
@@ -182,9 +206,10 @@ export const addTask = (
   }
   db.insert(schema.tasks).values(record).run()
 
-  for (const depId of input.dependsOn ?? []) {
+  const deps = input.dependsOn ?? []
+  if (deps.length > 0) {
     db.insert(schema.dependencies)
-      .values({ taskId: id as string, dependsOn: depId as string })
+      .values(deps.map((depId) => ({ taskId: TaskIdCompanion.unwrap(id), dependsOn: TaskIdCompanion.unwrap(depId) })))
       .run()
   }
 
@@ -196,10 +221,11 @@ export const editTask = (
   id: TaskId,
   changes: { title?: string; type?: TaskType; addDep?: TaskId; removeDep?: TaskId },
 ): Result<TaskRecord, string> => {
+  const idStr = TaskIdCompanion.unwrap(id)
   const existing = db
     .select()
     .from(schema.tasks)
-    .where(eq(schema.tasks.id, id as string))
+    .where(eq(schema.tasks.id, idStr))
     .get()
   if (!existing) return err(`Task ${id} not found`)
 
@@ -209,13 +235,13 @@ export const editTask = (
         title: changes.title ?? existing.title,
         type: changes.type ?? existing.type,
       })
-      .where(eq(schema.tasks.id, id as string))
+      .where(eq(schema.tasks.id, idStr))
       .run()
   }
 
   if (changes.addDep) {
     db.insert(schema.dependencies)
-      .values({ taskId: id as string, dependsOn: changes.addDep as string })
+      .values({ taskId: idStr, dependsOn: TaskIdCompanion.unwrap(changes.addDep) })
       .onConflictDoNothing()
       .run()
   }
@@ -223,37 +249,40 @@ export const editTask = (
     db.delete(schema.dependencies)
       .where(
         and(
-          eq(schema.dependencies.taskId, id as string),
-          eq(schema.dependencies.dependsOn, changes.removeDep as string),
+          eq(schema.dependencies.taskId, idStr),
+          eq(schema.dependencies.dependsOn, TaskIdCompanion.unwrap(changes.removeDep)),
         ),
       )
       .run()
   }
 
-  return ok(toTaskRecord(
-    db.select().from(schema.tasks).where(eq(schema.tasks.id, id as string)).get()!,
-  ))
+  return ok(toTaskRecord({
+    ...existing,
+    title: changes.title ?? existing.title,
+    type: changes.type ?? existing.type,
+  }))
 }
 
 export const listTasks = (db: Db, wsId: WorkspaceId, status?: TaskStatus): TaskRecord[] => {
-  const base = db.select().from(schema.tasks)
-  const rows = status
-    ? base
-        .where(and(eq(schema.tasks.workspaceId, wsId as string), eq(schema.tasks.status, status)))
-        .orderBy(sql`created_at`)
-        .all()
-    : base
-        .where(eq(schema.tasks.workspaceId, wsId as string))
-        .orderBy(sql`created_at`)
-        .all()
-  return rows.map(toTaskRecord)
+  const wsIdStr = WorkspaceIdCompanion.unwrap(wsId)
+  const condition = status
+    ? and(eq(schema.tasks.workspaceId, wsIdStr), eq(schema.tasks.status, status))
+    : eq(schema.tasks.workspaceId, wsIdStr)
+
+  return db
+    .select()
+    .from(schema.tasks)
+    .where(condition)
+    .orderBy(sql`created_at`)
+    .all()
+    .map(toTaskRecord)
 }
 
 export const getTaskWithContext = (db: Db, id: TaskId): Result<TaskWithContext, string> => {
   const task = db
     .select()
     .from(schema.tasks)
-    .where(eq(schema.tasks.id, id as string))
+    .where(eq(schema.tasks.id, TaskIdCompanion.unwrap(id)))
     .get()
   if (!task) return err(`Task ${id} not found`)
 
@@ -264,27 +293,11 @@ export const getTaskWithContext = (db: Db, id: TaskId): Result<TaskWithContext, 
     .get()
   if (!ws) return err(`Workspace ${task.workspaceId} not found`)
 
-  const deps = db
-    .select({ task: schema.tasks })
-    .from(schema.dependencies)
-    .innerJoin(schema.tasks, eq(schema.tasks.id, schema.dependencies.dependsOn))
-    .where(eq(schema.dependencies.taskId, id as string))
-    .all()
-    .map((r) => toTaskRecord(r.task))
-
-  const dependedBy = db
-    .select({ task: schema.tasks })
-    .from(schema.dependencies)
-    .innerJoin(schema.tasks, eq(schema.tasks.id, schema.dependencies.taskId))
-    .where(eq(schema.dependencies.dependsOn, id as string))
-    .all()
-    .map((r) => toTaskRecord(r.task))
-
   return ok({
     ...toTaskRecord(task),
     workspace: toWorkspaceRecord(ws),
-    dependencies: deps,
-    dependedBy,
+    dependencies: findRelatedTasks(db, id, "deps"),
+    dependedBy: findRelatedTasks(db, id, "dependents"),
   })
 }
 
@@ -302,33 +315,50 @@ export const getAllRunnableTasks = (db: Db, wsId: WorkspaceId): TaskRecord[] => 
          )
        ORDER BY t.created_at`,
     )
-    .all(wsId as string, TaskStatus.Pending, TaskStatus.Done) as Array<typeof schema.tasks.$inferSelect>
+    .all(WorkspaceIdCompanion.unwrap(wsId), TaskStatus.Pending, TaskStatus.Done) as Array<typeof schema.tasks.$inferSelect>
 
   return rows.map(toTaskRecord)
 }
 
 export const getNextTask = (db: Db, wsId: WorkspaceId): TaskRecord | null => {
-  const tasks = getAllRunnableTasks(db, wsId)
-  return tasks[0] ?? null
+  // LIMIT 1 for efficiency — no need to load all runnable tasks
+  const sqlite = (db as unknown as { session: { client: Database } }).session.client
+  const row = sqlite
+    .prepare(
+      `SELECT t.* FROM tasks t
+       WHERE t.workspace_id = ?
+         AND t.status = ?
+         AND NOT EXISTS (
+           SELECT 1 FROM dependencies d
+           JOIN tasks dep ON dep.id = d.depends_on
+           WHERE d.task_id = t.id AND dep.status != ?
+         )
+       ORDER BY t.created_at
+       LIMIT 1`,
+    )
+    .get(WorkspaceIdCompanion.unwrap(wsId), TaskStatus.Pending, TaskStatus.Done) as typeof schema.tasks.$inferSelect | null
+
+  return row ? toTaskRecord(row) : null
 }
 
 export const startTask = (db: Db, id: TaskId): void => {
   db.update(schema.tasks)
     .set({ status: TaskStatus.Running })
-    .where(eq(schema.tasks.id, id as string))
+    .where(eq(schema.tasks.id, TaskIdCompanion.unwrap(id)))
     .run()
 }
 
 export const completeTask = (db: Db, id: TaskId, result?: string): Result<TaskRecord, string> => {
+  const idStr = TaskIdCompanion.unwrap(id)
   db.update(schema.tasks)
     .set({ status: TaskStatus.Done, result: result ?? null })
-    .where(eq(schema.tasks.id, id as string))
+    .where(eq(schema.tasks.id, idStr))
     .run()
 
   const task = db
     .select()
     .from(schema.tasks)
-    .where(eq(schema.tasks.id, id as string))
+    .where(eq(schema.tasks.id, idStr))
     .get()
   return task ? ok(toTaskRecord(task)) : err(`Task ${id} not found`)
 }
@@ -338,7 +368,7 @@ export const isWorkspaceComplete = (db: Db, wsId: WorkspaceId): boolean => {
     .select({ count: sql<number>`COUNT(*)` })
     .from(schema.tasks)
     .where(
-      and(eq(schema.tasks.workspaceId, wsId as string), sql`status != ${TaskStatus.Done}`),
+      and(eq(schema.tasks.workspaceId, WorkspaceIdCompanion.unwrap(wsId)), sql`status != ${TaskStatus.Done}`),
     )
     .get()
   return (row?.count ?? 0) === 0
