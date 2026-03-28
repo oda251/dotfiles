@@ -111,9 +111,14 @@ runs:
             }).join('\n');
           }
 
-          // Read and format
+          // Read, filter noise, and format
           const raw = fs.readFileSync('${{ inputs.output_path }}', 'utf8');
-          const formatted = formatDiff(raw);
+          const filtered = raw.split('\n').filter(line =>
+            !line.match(/^.*Refreshing state\.\.\./) &&
+            !line.match(/^.*Reading\.\.\./) &&
+            !line.match(/^.*Read complete after/)
+          ).join('\n');
+          const formatted = formatDiff(filtered);
           const lines = formatted.split('\n');
           const truncMsg = 'Plan is too large to fit in a PR comment. See the full plan in the workflow log.';
           let outputLines = [];
