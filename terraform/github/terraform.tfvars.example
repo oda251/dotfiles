@@ -1,7 +1,16 @@
+github_owner = "oda251"
+
 repositories = {
+  template = {
+    description = "Template repository with CI boilerplate"
+    visibility  = "public"
+    is_template = true
+  }
+
   dotfiles = {
     description = "chezmoi dotfiles"
     visibility  = "public"
     topics      = ["dotfiles", "chezmoi"]
+    template    = "template"
   }
 }

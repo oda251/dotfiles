@@ -4,6 +4,8 @@ variable "repositories" {
     description = optional(string, "")
     visibility  = optional(string, "public")
     topics      = optional(list(string), [])
+    is_template = optional(bool, false)
+    template    = optional(string, "template")
   }))
 }
 
@@ -14,6 +16,7 @@ resource "github_repository" "this" {
   description = each.value.description
   visibility  = each.value.visibility
   topics      = each.value.topics
+  is_template = each.value.is_template
 
   has_issues   = true
   has_projects = false
@@ -23,6 +26,14 @@ resource "github_repository" "this" {
   allow_squash_merge     = true
   allow_merge_commit     = false
   allow_rebase_merge     = false
+
+  dynamic "template" {
+    for_each = each.value.is_template ? [] : [1]
+    content {
+      owner      = var.github_owner
+      repository = each.value.template
+    }
+  }
 }
 
 resource "github_branch_protection" "main" {
