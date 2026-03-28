@@ -45,7 +45,7 @@ runs:
           const hasChanges = '${{ inputs.has_changes }}' === 'true';
           const format = '${{ inputs.format }}';
           const planHash = '${{ inputs.plan_hash }}';
-          const MAX_BODY = 60000;
+          const MAX_BODY = 65000;
 
           // Metadata marker for identifying and updating comments
           const meta = { workspace, plan_hash: planHash, format };
