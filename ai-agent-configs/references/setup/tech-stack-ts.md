@@ -19,6 +19,12 @@ TypeScript プロジェクトの技術選定。
 - DB カラムの型変更が DTO に自動伝播する
 - 動的バリデーションは `v.check()` で対応
 
+## テスト: Vitest
+
+- Bun プロジェクト以外では Vitest を使う
+- ESM ネイティブ、HMR による高速な watch モード
+- `vi.mock()` より依存注入を優先する（`coding/testing-guideline.md` 参照）
+
 ## エラーハンドリング: neverthrow
 
 - 例外ではなく `Result<T, E>` 型でエラーを表現
