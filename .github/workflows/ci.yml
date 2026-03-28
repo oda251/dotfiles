@@ -1,19 +1,10 @@
 name: CI
 
-on:
-  workflow_call:
+on: [push, pull_request]
 
 jobs:
   ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup
-        run: make setup
-
-      - name: Lint
-        run: make lint
-
-      - name: Test
-        run: make test
+      - uses: oda251/dotfiles/.github/actions/ci@main

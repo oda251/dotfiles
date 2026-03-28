@@ -9,7 +9,7 @@
 
 - リポジトリ設定、ブランチ保護、Actions 設定を Terraform で管理する
 - main 直プッシュ禁止、CI 通過を PR マージの必須条件にする
-- CI は GitHub Reusable Workflows で共通化し、各リポジトリから `uses:` で呼ぶ
+- CI は composite action (`oda251/dotfiles/.github/actions/ci`) で共通化し、各リポジトリからステップとして呼ぶ
 - tfstate はローカル管理（リモートバックエンド不要）。`.gitignore` で除外
 - Terraform コードは `terraform/github/` に配置
 
