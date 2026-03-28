@@ -1,6 +1,6 @@
 # TypeScript + React ガイドライン
 
-React プロジェクト固有のルール。`~/.claude/references/policy/ts.md` と併せて適用する。
+React プロジェクト固有のルール。ts.md と併せて適用する。
 
 ## useEffect を使わない
 
@@ -15,28 +15,7 @@ useEffect はほぼ全てのケースで別の手段に置き換えられる。
 
 ## コンポーネント設計
 
-### Compound Pattern
-
-関連するコンポーネントを親に紐付けてまとめる。
-
-```tsx
-const Menu = ({ children }: { children: ReactNode }) => (
-  <nav>{children}</nav>
-)
-
-Menu.Item = ({ label, href }: { label: string; href: string }) => (
-  <a href={href}>{label}</a>
-)
-
-Menu.Divider = () => <hr />
-
-// 使用側
-<Menu>
-  <Menu.Item label="Home" href="/" />
-  <Menu.Divider />
-  <Menu.Item label="Settings" href="/settings" />
-</Menu>
-```
+- **Compound Pattern**: 関連するコンポーネントを親に紐付けてまとめる
 
 ## 状態管理の優先順位
 
