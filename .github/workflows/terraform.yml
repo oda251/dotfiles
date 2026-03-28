@@ -97,7 +97,7 @@ jobs:
           stack: ${{ env.STACK }}
           command: apply
           output_path: ${{ steps.apply.outputs.apply_text_path }}
-          format: text
+          format: diff
 
   # Merge to main: auto apply
   apply-merge:
