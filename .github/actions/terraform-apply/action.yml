@@ -1,5 +1,5 @@
 name: Terraform Apply
-description: Run terragrunt apply
+description: Run terragrunt apply and capture output
 
 inputs:
   working_directory:
@@ -12,6 +12,11 @@ inputs:
     description: "Terraform Cloud organization"
     required: true
 
+outputs:
+  apply_output:
+    description: "Terraform apply output"
+    value: ${{ steps.apply.outputs.apply_output }}
+
 runs:
   using: composite
   steps:
@@ -23,9 +28,17 @@ runs:
         tf_cloud_organization: ${{ inputs.tf_cloud_organization }}
 
     - name: Apply
+      id: apply
       shell: bash
       working-directory: ${{ inputs.working_directory }}
-      run: terragrunt apply -auto-approve -no-color
+      run: |
+        OUTPUT=$(terragrunt apply -auto-approve -no-color 2>&1)
+        echo "$OUTPUT"
+
+        EOF_MARKER=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+        echo "apply_output<<$EOF_MARKER" >> "$GITHUB_OUTPUT"
+        echo "$OUTPUT" >> "$GITHUB_OUTPUT"
+        echo "$EOF_MARKER" >> "$GITHUB_OUTPUT"
       env:
         TF_TOKEN_app_terraform_io: ${{ inputs.tf_api_token }}
         TF_CLOUD_ORGANIZATION: ${{ inputs.tf_cloud_organization }}
