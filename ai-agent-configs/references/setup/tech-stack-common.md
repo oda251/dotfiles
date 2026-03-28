@@ -4,11 +4,9 @@
 
 ## Git Hooks: Lefthook
 
-pre-commit で lint + format を必ず実行する。CI で気づくより手元で弾く。
-
 - Lefthook を使う（husky/pre-commit ではない）
-- **pre-commit**: lint, format
-- **pre-push**: テスト（必要に応じて）
+- pre-commit: lint, format
+- pre-push: テスト（必要に応じて）
 
 ## テスト基盤: Testcontainers
 

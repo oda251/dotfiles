@@ -15,9 +15,7 @@ TypeScript プロジェクトの技術選定。
 
 ## バリデーション: Valibot
 
-- drizzle テーブル定義からスキーマ自動生成 → DTO は omit/merge で派生
-- DB カラムの型変更が DTO に自動伝播する
-- 動的バリデーションは `v.check()` で対応
+- drizzle テーブル定義からバリデーションスキーマを自動生成できる（drizzle-valibot）
 
 ## Lint / Format: oxlint + oxfmt
 
@@ -27,13 +25,10 @@ TypeScript プロジェクトの技術選定。
 ## テスト: Vitest
 
 - Bun プロジェクト以外では Vitest を使う
-- ESM ネイティブ、HMR による高速な watch モード
-- `vi.mock()` より依存注入を優先する（`policy/testing.md` 参照）
 
 ## エラーハンドリング: neverthrow
 
-- 例外ではなく `Result<T, E>` 型でエラーを表現
-- エラーパスを型で追跡し、ハンドリング漏れをコンパイル時に検出
+- 例外ではなく `Result<T, E>` 型でエラーを表現する
 
 ## サブエージェント実行: Claude Agent SDK
 
