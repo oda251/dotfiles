@@ -55,11 +55,12 @@ const scanSkills = (): { typeToSkill: Map<string, string>; contentCache: Map<str
   const typeToSkill = new Map<string, string>()
   const contentCache = new Map<string, string>()
   try {
-    const dirs = readdirSync(getSkillsDir(), { withFileTypes: true })
+    const skillsDir = getSkillsDir()
+    const dirs = readdirSync(skillsDir, { withFileTypes: true })
       .filter((d) => d.isDirectory())
 
     for (const dir of dirs) {
-      const content = readIfExists(join(getSkillsDir(), dir.name, "SKILL.md"))
+      const content = readIfExists(join(skillsDir, dir.name, "SKILL.md"))
       if (!content) continue
       const fm = parseFrontmatter(content)
       const taskTypes = fm["task-types"]
@@ -96,11 +97,12 @@ export const getSkillContent = (taskType: TaskType): Result<string, string> => {
 
 export const getPolicyContents = (): string => {
   try {
-    const files = readdirSync(getPolicyDir())
+    const policyDir = getPolicyDir()
+    const files = readdirSync(policyDir)
       .filter((f) => f.endsWith(".md"))
       .sort()
     return files
-      .map((f) => readIfExists(join(getPolicyDir(), f)))
+      .map((f) => readIfExists(join(policyDir, f)))
       .filter(Boolean)
       .join("\n\n---\n\n")
   } catch {
