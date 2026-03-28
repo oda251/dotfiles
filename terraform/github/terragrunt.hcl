@@ -3,6 +3,7 @@ include "root" {
 }
 
 inputs = {
+  github_owner = "oda251"
   repositories = {
     dotfiles = {
       description = "chezmoi dotfiles"

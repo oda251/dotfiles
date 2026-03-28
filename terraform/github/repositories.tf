@@ -31,7 +31,7 @@ resource "github_repository" "this" {
   dynamic "template" {
     for_each = each.value.template != null ? [1] : []
     content {
-      owner      = "oda251"
+      owner      = var.github_owner
       repository = each.value.template
     }
   }

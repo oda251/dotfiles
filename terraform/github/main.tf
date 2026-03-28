@@ -10,5 +10,10 @@ terraform {
 }
 
 provider "github" {
-  owner = "oda251"
+  owner = var.github_owner
+}
+
+variable "github_owner" {
+  description = "GitHub organization or user"
+  type        = string
 }
