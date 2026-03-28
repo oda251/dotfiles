@@ -41,6 +41,7 @@ dispatch task add --title "認証 API エンドポイント実装（POST /auth/l
 
 ## plan-dev 固有
 
+- 技術選定・ライブラリ追加を伴う場合は `~/.claude/references/setup/` を参照する
 - 対象言語・フレームワークに対応するガイドラインがあれば読む:
   - `~/.claude/references/{lang}.md`（例: `ts.md`）
   - `~/.claude/references/{lang}-{framework}.md`（例: `ts-react.md`）
