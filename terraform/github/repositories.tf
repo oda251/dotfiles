@@ -5,7 +5,8 @@ variable "repositories" {
     visibility  = optional(string, "public")
     topics      = optional(list(string), [])
     is_template = optional(bool, false)
-    template    = optional(string)
+    template           = optional(string)
+    branch_protection  = optional(bool, true)
   }))
 }
 
@@ -37,7 +38,7 @@ resource "github_repository" "this" {
 }
 
 resource "github_branch_protection" "main" {
-  for_each = var.repositories
+  for_each = { for k, v in var.repositories : k => v if v.branch_protection }
 
   repository_id = github_repository.this[each.key].node_id
   pattern       = "main"
