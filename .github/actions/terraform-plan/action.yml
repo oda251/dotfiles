@@ -44,7 +44,7 @@ runs:
         PLAN_FILE="$(mktemp)"
 
         set +e
-        terragrunt plan -no-color -detailed-exitcode 2>&1 | tee "$PLAN_FILE"
+        terragrunt plan --terragrunt-no-auto-init -no-color -detailed-exitcode 2>&1 | tee "$PLAN_FILE"
         EXIT_CODE=${PIPESTATUS[0]}
         set -e
 

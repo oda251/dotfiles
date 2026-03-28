@@ -32,9 +32,10 @@ runs:
       shell: bash
       working-directory: ${{ inputs.working_directory }}
       run: |
+        set -o pipefail
         APPLY_FILE="$(mktemp)"
-        terragrunt apply -auto-approve -no-color 2>&1 | tee "$APPLY_FILE"
         echo "apply_text_path=$APPLY_FILE" >> "$GITHUB_OUTPUT"
+        terragrunt apply --terragrunt-no-auto-init -auto-approve -no-color 2>&1 | tee "$APPLY_FILE"
       env:
         TF_TOKEN_app_terraform_io: ${{ inputs.tf_api_token }}
         TF_CLOUD_ORGANIZATION: ${{ inputs.tf_cloud_organization }}

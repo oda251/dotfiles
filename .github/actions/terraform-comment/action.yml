@@ -81,7 +81,6 @@ runs:
 
           // Determine code block format
           const codeFormat = format === 'diff' ? 'diff' : '';
-          const formatSuffix = format === 'text' ? '' : '';
 
           // Build skeleton to measure reserved space
           const skeleton = [
@@ -100,6 +99,12 @@ runs:
           function formatDiff(text) {
             if (format !== 'diff') return text;
             return text.split('\n').map(line => {
+              // Blank lines
+              if (line.trim() === '') return '';
+              // Comment lines like "# aws_instance.example will be created"
+              if (line.match(/^\s*#/)) return line;
+              // Summary lines like "Plan: 1 to add..."
+              if (line.match(/^Plan:|^No changes|^Changes to Outputs/)) return line;
               // Match lines like "  + resource" or "      + ami = ..."
               const m = line.match(/^(\s*)([\+\-~])\s(.*)$/);
               if (m) {
