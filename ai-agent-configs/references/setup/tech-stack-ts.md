@@ -28,7 +28,7 @@ TypeScript プロジェクトの技術選定。
 
 - Bun プロジェクト以外では Vitest を使う
 - ESM ネイティブ、HMR による高速な watch モード
-- `vi.mock()` より依存注入を優先する（`coding/testing-guideline.md` 参照）
+- `vi.mock()` より依存注入を優先する（`policy/testing.md` 参照）
 
 ## エラーハンドリング: neverthrow
 

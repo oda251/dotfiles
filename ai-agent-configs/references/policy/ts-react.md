@@ -1,6 +1,6 @@
 # TypeScript + React ガイドライン
 
-React プロジェクト固有のルール。`~/.claude/references/coding/ts.md` と併せて適用する。
+React プロジェクト固有のルール。`~/.claude/references/policy/ts.md` と併せて適用する。
 
 ## useEffect を使わない
 
