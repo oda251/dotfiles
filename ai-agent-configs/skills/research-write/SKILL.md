@@ -2,6 +2,7 @@
 name: research-write
 description: 収集結果を元に調査ドキュメントを作成する。サブエージェントが読む実行指示。
 user-invocable: false
+task-types: [exec-research-write]
 ---
 
 収集結果を元に調査ドキュメントを作成せよ。
