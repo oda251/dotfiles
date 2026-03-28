@@ -5,6 +5,7 @@
 import { join } from "node:path"
 import { homedir } from "node:os"
 import { readFileSync, readdirSync } from "node:fs"
+import { ok, err, type Result } from "neverthrow"
 import type { TaskType } from "./types.ts"
 
 const DEFAULT_CLAUDE_HOME = join(homedir(), ".claude")
@@ -81,11 +82,11 @@ export const getValidTaskTypes = (): string[] => [...getCache().typeToSkill.keys
 
 export const isValidTaskType = (value: string): boolean => getCache().typeToSkill.has(value)
 
-export const getSkillContent = (taskType: TaskType): string => {
+export const getSkillContent = (taskType: TaskType): Result<string, string> => {
   const { typeToSkill, contentCache } = getCache()
   const skillName = typeToSkill.get(taskType)
-  if (!skillName) return ""
-  return contentCache.get(skillName) ?? ""
+  if (!skillName) return err(`No skill found for task type: ${taskType}`)
+  return ok(contentCache.get(skillName) ?? "")
 }
 
 export const getPolicyContents = (): string => {

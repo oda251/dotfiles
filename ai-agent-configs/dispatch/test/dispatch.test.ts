@@ -33,6 +33,32 @@ const createTestDag = (): { ws: WorkspaceRecord; t1: TaskRecord; t2: TaskRecord 
   return { ws, t1, t2 }
 }
 
+/** Set up a tmpdir with skill files for the given task types. Returns cleanup function. */
+const setupSkills = (
+  taskTypes: string[],
+  opts?: { policy?: string },
+): (() => void) => {
+  const tmpHome = join(tmpdir(), `dispatch-test-${Date.now()}-${Math.random().toString(36).slice(2)}`)
+  for (const tt of taskTypes) {
+    const skillDir = join(tmpHome, "skills", tt)
+    mkdirSync(skillDir, { recursive: true })
+    writeFileSync(
+      join(skillDir, "SKILL.md"),
+      `---\nname: ${tt}\ntask-types: [${tt}]\n---\n\nSkill for ${tt}.`,
+    )
+  }
+  if (opts?.policy) {
+    const policyDir = join(tmpHome, "references", "policy")
+    mkdirSync(policyDir, { recursive: true })
+    writeFileSync(join(policyDir, "test.md"), opts.policy)
+  }
+  setClaudeHome(tmpHome)
+  return () => {
+    rmSync(tmpHome, { recursive: true })
+    setClaudeHome(join(tmpdir(), "nonexistent-claude-home"))
+  }
+}
+
 // --- Workspace tests ---
 
 describe("Workspace", () => {
@@ -281,7 +307,15 @@ describe("Context", () => {
 // --- Runner (sync operations only, no SDK calls) ---
 
 describe("Runner", () => {
+  let cleanup: (() => void) | null = null
+
+  afterEach(() => {
+    cleanup?.()
+    cleanup = null
+  })
+
   test("runNext picks task", () => {
+    cleanup = setupSkills(["exec-research", "exec-dev"])
     const { ws, t1 } = createTestDag()
     const result = runner.runNext(database, ws.id)
     expect(result.status).toBe("ready")
@@ -291,6 +325,7 @@ describe("Runner", () => {
   })
 
   test("runNext complete", () => {
+    cleanup = setupSkills(["exec-dev"])
     const ws = createTestWorkspace()
     const t = db.addTask(database, { wsId: ws.id, title: "Only", type: TaskType.from("exec-dev") })
     db.startTask(database, t.id)
@@ -300,13 +335,28 @@ describe("Runner", () => {
   })
 
   test("runNext blocked", () => {
+    cleanup = setupSkills(["exec-research", "exec-dev"])
     const { ws, t1 } = createTestDag()
     db.startTask(database, t1.id)
     const result = runner.runNext(database, ws.id)
     expect(result.status).toBe("blocked")
   })
 
+  test("runNext error on missing skill", () => {
+    // No skills set up — should return error
+    setClaudeHome(join(tmpdir(), "nonexistent-claude-home"))
+    cleanup = () => setClaudeHome(join(tmpdir(), "nonexistent-claude-home"))
+    const ws = createTestWorkspace()
+    db.addTask(database, { wsId: ws.id, title: "No skill", type: TaskType.from("unknown-type") })
+    const result = runner.runNext(database, ws.id)
+    expect(result.status).toBe("error")
+    if (result.status === "error") {
+      expect(result.message).toContain("No skill found")
+    }
+  })
+
   test("completeAndContinue", () => {
+    cleanup = setupSkills(["exec-research", "exec-dev"])
     const { t1, t2 } = createTestDag()
     db.startTask(database, t1.id)
     const result = runner.completeAndContinue(database, t1.id, "res.md")
@@ -317,6 +367,7 @@ describe("Runner", () => {
   })
 
   test("completeAndContinue all done", () => {
+    cleanup = setupSkills(["exec-dev"])
     const ws = createTestWorkspace()
     const t = db.addTask(database, { wsId: ws.id, title: "Only", type: TaskType.from("exec-dev") })
     db.startTask(database, t.id)
@@ -325,8 +376,10 @@ describe("Runner", () => {
   })
 
   test("prompt includes workspace", () => {
-    const { ws, t1 } = createTestDag()
+    cleanup = setupSkills(["exec-research", "exec-dev"])
+    const { ws } = createTestDag()
     const result = runner.runNext(database, ws.id)
+    expect(result.status).toBe("ready")
     if (result.status === "ready") {
       expect(result.prompt).toContain("Test Project")
       expect(result.prompt).toContain("Goal A")
@@ -334,31 +387,28 @@ describe("Runner", () => {
   })
 
   test("prompt includes dep results", () => {
+    cleanup = setupSkills(["exec-research", "exec-dev"])
     const { ws, t1 } = createTestDag()
     db.startTask(database, t1.id)
     db.completeTask(database, t1.id, "docs/research.md")
     const result = runner.runNext(database, ws.id)
+    expect(result.status).toBe("ready")
     if (result.status === "ready") {
       expect(result.prompt).toContain("docs/research.md")
     }
   })
 
   test("prompt includes policy", () => {
-    const tmpHome = join(tmpdir(), `dispatch-test-${Date.now()}`)
-    const policyDir = join(tmpHome, "references", "policy")
-    mkdirSync(policyDir, { recursive: true })
-    writeFileSync(join(policyDir, "ts.md"), "# TS Policy\nUse strict types.")
-    setClaudeHome(tmpHome)
-
+    cleanup = setupSkills(["exec-research", "exec-dev"], {
+      policy: "# TS Policy\nUse strict types.",
+    })
     const { ws } = createTestDag()
     const result = runner.runNext(database, ws.id)
+    expect(result.status).toBe("ready")
     if (result.status === "ready") {
       expect(result.prompt).toContain("TS Policy")
       expect(result.prompt).toContain("Use strict types.")
     }
-
-    rmSync(tmpHome, { recursive: true })
-    setClaudeHome(join(tmpdir(), "nonexistent-claude-home"))
   })
 
   test("prompt includes skill content", () => {
@@ -370,15 +420,27 @@ describe("Runner", () => {
       "---\nname: test-skill\ntask-types: [test-type]\n---\n\nDo the thing.",
     )
     setClaudeHome(tmpHome)
+    cleanup = () => {
+      rmSync(tmpHome, { recursive: true })
+      setClaudeHome(join(tmpdir(), "nonexistent-claude-home"))
+    }
 
     const ws = createTestWorkspace()
     db.addTask(database, { wsId: ws.id, title: "Test task", type: TaskType.from("test-type") })
     const result = runner.runNext(database, ws.id)
+    expect(result.status).toBe("ready")
     if (result.status === "ready") {
       expect(result.prompt).toContain("Do the thing.")
     }
+  })
 
-    rmSync(tmpHome, { recursive: true })
+  test("getSkillContent returns err for unknown type", () => {
     setClaudeHome(join(tmpdir(), "nonexistent-claude-home"))
+    cleanup = () => setClaudeHome(join(tmpdir(), "nonexistent-claude-home"))
+    const result = getSkillContent(TaskType.from("nonexistent"))
+    expect(result.isErr()).toBe(true)
+    if (result.isErr()) {
+      expect(result.error).toContain("No skill found")
+    }
   })
 })

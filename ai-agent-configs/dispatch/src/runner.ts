@@ -17,9 +17,9 @@ import { getSkillContent, getPolicyContents } from "./config.ts"
 
 type Db = BunSQLiteDatabase<typeof schemaModule>
 
-const buildPrompt = (database: Db, task: TaskRecord): string => {
+const buildPrompt = (database: Db, task: TaskRecord): Result<string, string> => {
   const ctxResult = db.getTaskWithContext(database, task.id)
-  if (ctxResult.isErr()) return ""
+  if (ctxResult.isErr()) return err(ctxResult.error)
   const ctx = ctxResult.value
   const ws = ctx.workspace
 
@@ -28,7 +28,10 @@ const buildPrompt = (database: Db, task: TaskRecord): string => {
     .map((dep) => `- ${dep.title}: ${dep.result}`)
     .join("\n")
 
-  const skill = getSkillContent(task.type)
+  const skillResult = getSkillContent(task.type)
+  if (skillResult.isErr()) return err(skillResult.error)
+  const skill = skillResult.value
+
   const policy = getPolicyContents()
 
   let prompt = `## ワークスペース
@@ -47,11 +50,13 @@ ID: ${task.id}
   if (skill) prompt += `## スキル\n${skill}\n\n`
   if (policy) prompt += `## ポリシー\n${policy}\n`
 
-  return prompt
+  return ok(prompt)
 }
 
 const executeTask = async (database: Db, task: TaskRecord): Promise<string | null> => {
-  const prompt = buildPrompt(database, task)
+  const promptResult = buildPrompt(database, task)
+  if (promptResult.isErr()) return null
+  const prompt = promptResult.value
   let result: string | null = null
 
   for await (const message of query({
@@ -82,8 +87,13 @@ export const runNext = (database: Db, wsId: WorkspaceId): RunResult => {
     return { status: "blocked", message: "No runnable tasks. Dependencies not met." }
   }
 
+  const promptResult = buildPrompt(database, task)
+  if (promptResult.isErr()) {
+    return { status: "error", message: promptResult.error }
+  }
+
   db.startTask(database, task.id)
-  return { status: "ready", task, prompt: buildPrompt(database, task) }
+  return { status: "ready", task, prompt: promptResult.value }
 }
 
 export const runAuto = async (database: Db, wsId: WorkspaceId): Promise<RunResult> => {
@@ -94,6 +104,13 @@ export const runAuto = async (database: Db, wsId: WorkspaceId): Promise<RunResul
         return { status: "complete", message: "All tasks done." }
       }
       return { status: "blocked", message: "No runnable tasks. Dependencies not met." }
+    }
+
+    for (const t of tasks) {
+      const promptResult = buildPrompt(database, t)
+      if (promptResult.isErr()) {
+        return { status: "error", message: promptResult.error }
+      }
     }
 
     for (const t of tasks) {
