@@ -2,6 +2,11 @@
 
 言語非依存の技術選定。
 
+## ツールバージョン管理 / 環境変数: mise
+
+- asdf/direnv ではなく mise を使う
+- `mise.toml` でツールバージョンと `.env` 読み込みを一元管理する
+
 ## CI インターフェース: Makefile
 
 - CI は `make lint` と `make test` で統一する。言語・ツールに依存しない

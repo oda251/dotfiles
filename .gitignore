@@ -14,3 +14,6 @@ dot_zsh/local.zsh
 *.tfstate.backup
 *.tfvars
 .terraform.lock.hcl
+
+# Environment
+.env
