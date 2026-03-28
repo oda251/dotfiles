@@ -1,0 +1,33 @@
+name: "Terraform: GitHub"
+
+on:
+  pull_request:
+    paths: [terraform/github/**]
+  push:
+    branches: [main]
+    paths: [terraform/github/**]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  plan:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oda251/dotfiles/.github/actions/terraform-plan@main
+        with:
+          working_directory: terraform/github
+          tf_api_token: ${{ secrets.TF_API_TOKEN }}
+
+  apply:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oda251/dotfiles/.github/actions/terraform-apply@main
+        with:
+          working_directory: terraform/github
+          tf_api_token: ${{ secrets.TF_API_TOKEN }}
