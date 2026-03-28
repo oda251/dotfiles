@@ -12,7 +12,7 @@ Python プロジェクトの技術選定。
 
 - `ruff check` + `ruff format` で lint と format を統一
 - Lefthook の pre-commit で実行する
-- ルール: `UP006`, `UP007`, `B` (bugbear), `SIM` (simplify), `I` (isort)
+- ルール: `UP006`, `UP007`, `B` (bugbear), `SIM` (simplify), `I` (isort), `TRY003`, `BLE001`, `RUF`, `PT`, `T20`, `ERA`
 
 ## 型チェック: Pyright
 
