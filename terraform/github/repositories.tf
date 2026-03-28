@@ -1,13 +1,13 @@
 variable "repositories" {
   description = "Map of repository name to config"
   type = map(object({
-    description = optional(string, "")
-    visibility  = optional(string, "public")
-    topics      = optional(list(string), [])
-    is_template = optional(bool, false)
+    description       = optional(string, "")
+    visibility        = optional(string, "public")
+    topics            = optional(list(string), [])
+    is_template       = optional(bool, false)
     template          = optional(string)
-    branch_protection = optional(bool, true)         # true: 直プッシュ不可+CI必須, false: 直プッシュOK
-    terraform_stacks  = optional(list(string), [])   # e.g. ["terraform/app"] — 空なら TF workflow を配置しない
+    branch_protection = optional(bool, true)       # true: 直プッシュ不可+CI必須, false: 直プッシュOK
+    terraform_stacks  = optional(list(string), []) # e.g. ["terraform/app"] — 空なら TF workflow を配置しない
   }))
 }
 
@@ -64,7 +64,7 @@ resource "github_branch_protection" "main" {
   }
 
   required_status_checks {
-    strict   = true
+    strict = true
     contexts = length(each.value.terraform_stacks) > 0 ? [
       for s in each.value.terraform_stacks : "plan-${replace(s, "/", "-")}"
     ] : []
