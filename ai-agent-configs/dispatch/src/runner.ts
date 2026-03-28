@@ -13,7 +13,7 @@ import {
   type RunResult,
 } from "./types.ts"
 import * as db from "./db.ts"
-import { getSkillContent, getGuidelineContent } from "./config.ts"
+import { getSkillContent } from "./config.ts"
 
 type Db = BunSQLiteDatabase<typeof schemaModule>
 
@@ -28,7 +28,6 @@ const buildPrompt = (database: Db, task: TaskRecord): string => {
     .map((dep) => `- ${dep.title}: ${dep.result}`)
     .join("\n")
 
-  const guideline = getGuidelineContent(task.type)
   const skill = getSkillContent(task.type)
 
   let prompt = `## ワークスペース
@@ -44,7 +43,6 @@ ID: ${task.id}
 
 `
   if (depContext) prompt += `## 先行タスクの成果物\n${depContext}\n\n`
-  if (guideline) prompt += `## ガイドライン\n${guideline}\n\n`
   if (skill) prompt += `## スキル\n${skill}\n`
 
   return prompt
