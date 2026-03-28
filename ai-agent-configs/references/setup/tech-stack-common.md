@@ -2,6 +2,22 @@
 
 言語非依存の技術選定。
 
+## Git Hooks: Lefthook
+
+pre-commit で lint + format を必ず実行する。CI で気づくより手元で弾く。
+
+- Lefthook を使う（husky/pre-commit ではない）
+- **pre-commit**: lint, format
+- **pre-push**: テスト（必要に応じて）
+
+### 言語別の lint/format
+
+| 言語 | lint | format |
+|---|---|---|
+| TypeScript | `eslint` | `prettier` or `biome` |
+| Python | `ruff check` | `ruff format` |
+| Go | `golangci-lint` | `gofmt` |
+
 ## テスト基盤: Testcontainers
 
 DB・キャッシュ・メッセージキュー等の外部依存をテスト時に Docker コンテナで起動する。mock ではなく本物を使う（`coding/testing-guideline.md` の「ローカルで再現できる依存は本物を立てる」に対応）。
