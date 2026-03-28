@@ -7,6 +7,8 @@ mise.toml
 ai-agent-configs
 scripts
 docs
+terraform
+.github
 
 # Windows専用（Linux/macOSでは不要）
 {{ if ne .chezmoi.os "windows" }}
