@@ -85,11 +85,9 @@ const config = {
 
 ### エラーハンドリング
 
-neverthrow を使い、例外ではなく Result 型でエラーを表現する。
+例外ではなく Result 型でエラーを表現する。
 
 ```ts
-import { ok, err, Result } from 'neverthrow'
-
 const parseConfig = (raw: string): Result<Config, ParseError> => {
   // ...
 }

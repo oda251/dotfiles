@@ -20,7 +20,6 @@ TypeScript プロジェクトの技術選定。
 ## Lint / Format: oxlint + oxfmt
 
 - ESLint/Prettier ではなく oxlint + oxfmt を使う
-- Lefthook の pre-commit で実行する
 
 ## テスト: Vitest
 
