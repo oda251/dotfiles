@@ -22,7 +22,7 @@ locals {
     TF_CLOUD_ORGANIZATION = var.tf_cloud_organization
     GH_PAT                = var.gh_pat
   }
-  repos_with_terraform = { for k, v in var.repositories : k => v if length(v.terraform_stacks) > 0 }
+  repos_with_terraform = { for k, v in var.repositories : k => v if v.has_terraform }
   # Cross product: repo × secret
   repo_secrets = { for pair in flatten([
     for repo_key, repo in local.repos_with_terraform : [
