@@ -5,7 +5,7 @@ variable "repositories" {
     visibility  = optional(string, "public")
     topics      = optional(list(string), [])
     is_template = optional(bool, false)
-    template    = optional(string, "template")
+    template    = optional(string)
   }))
 }
 
@@ -28,7 +28,7 @@ resource "github_repository" "this" {
   allow_rebase_merge     = false
 
   dynamic "template" {
-    for_each = each.value.is_template ? [] : [1]
+    for_each = each.value.template != null ? [1] : []
     content {
       owner      = var.github_owner
       repository = each.value.template
