@@ -95,29 +95,13 @@ const parseConfig = (raw: string): Result<Config, ParseError> => {
 
 ## 型安全
 
-### `any` 禁止
-
-`any` の代わりに `unknown` で受けて narrowing する。
-
-```ts
-// NG
-const parse = (data: any) => data.name
-
-// OK
-const parse = (data: unknown) => {
-  if (typeof data === 'object' && data !== null && 'name' in data) {
-    return (data as { name: string }).name
-  }
-}
-```
+`any` 禁止（→ common.md）。`unknown` で受けて narrowing する。
 
 ## バリデーション
 
-外部入力（API リクエスト、フォーム、環境変数等）のバリデーションには valibot を使う。`v.parse()` ではなく `v.safeParse()` を使い、例外を投げずに扱う。
+外部境界のバリデーション（→ common.md）には valibot を使う。`v.safeParse()` で例外を投げずに扱う。
 
 ```ts
-import * as v from "valibot"
-
 const result = v.safeParse(schema, input)
 if (!result.success) {
   // result.issues で処理
