@@ -24,8 +24,20 @@ user-invocable: false
 
 `--depends-on` で依存関係を指定する。ルートタスク以外は必ず依存先がある。
 
+### タスクタイトルの書き方
+
+タスクタイトルは実装者がそれだけ読んで何をすべきか理解できる粒度で書く。
+
 ```bash
-# 調査してから実装
-dispatch task add --title "認証パターン調査" --type plan-research --depends-on {parent_task_id}
-dispatch task add --title "認証API実装" --type exec-dev --depends-on {research_task_id}
+# NG: 曖昧
+dispatch task add --title "認証" --type exec-dev ...
+dispatch task add --title "調査" --type exec-research ...
+
+# NG: ワークスペースのゴールをそのまま書いただけ
+dispatch task add --title "認証APIを作る" --type exec-dev ...
+
+# OK: 何をどうするか、成果物が想像できる
+dispatch task add --title "JWT / Session / OAuth の認証方式比較（Express + TS 環境での推奨ライブラリ含む）" --type plan-research --depends-on {parent}
+dispatch task add --title "認証ミドルウェア実装（JWT 検証 + リフレッシュトークンローテーション）" --type exec-dev --depends-on {research}
+dispatch task add --title "認証 API エンドポイント実装（POST /auth/login, POST /auth/refresh, DELETE /auth/logout）" --type exec-dev --depends-on {middleware}
 ```
