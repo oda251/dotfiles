@@ -2,6 +2,7 @@
 name: dev-impl
 description: タスクを実装する。TDD 適用はサブエージェントが判断する。
 user-invocable: false
+task-types: [exec-dev]
 ---
 
 タスクを実装せよ。

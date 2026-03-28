@@ -2,6 +2,7 @@
 name: plan
 description: ワークスペースのゴールに基づきタスクを分解する。dispatch CLI から呼ばれるプロンプトテンプレート。
 user-invocable: false
+task-types: [plan-dev, plan-research]
 ---
 
 ## 手順

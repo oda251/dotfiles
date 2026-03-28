@@ -2,6 +2,7 @@
 name: research-gather
 description: 調査観点に基づき情報を収集する。サブエージェントが読む実行指示。
 user-invocable: false
+task-types: [exec-research]
 ---
 
 指示された観点について調査せよ。
