@@ -115,11 +115,13 @@ const parse = (data: unknown) => {
 
 ## バリデーション
 
-外部入力（API リクエスト、フォーム、環境変数等）のバリデーションには zod を使う。`.parse()` ではなく `.safeParse()` を使い、例外を投げずに Result として扱う。
+外部入力（API リクエスト、フォーム、環境変数等）のバリデーションには valibot を使う。`v.parse()` ではなく `v.safeParse()` を使い、例外を投げずに扱う。
 
 ```ts
-const result = schema.safeParse(input)
+import * as v from "valibot"
+
+const result = v.safeParse(schema, input)
 if (!result.success) {
-  // result.error で処理
+  // result.issues で処理
 }
 ```
