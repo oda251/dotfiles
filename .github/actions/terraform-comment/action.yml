@@ -95,9 +95,26 @@ runs:
           const reservedSize = Buffer.byteLength(skeleton, 'utf8');
           const maxOutput = MAX_BODY - reservedSize;
 
-          // Read and truncate line-by-line
+          // Format plan output for diff syntax highlighting
+          // Move +/-/~ from indented position to line start so GitHub colors them
+          function formatDiff(text) {
+            if (format !== 'diff') return text;
+            return text.split('\n').map(line => {
+              // Match lines like "  + resource" or "      + ami = ..."
+              const m = line.match(/^(\s*)([\+\-~])\s(.*)$/);
+              if (m) {
+                const [, indent, symbol, rest] = m;
+                const prefix = symbol === '~' ? '!' : symbol;
+                return `${prefix} ${indent}${rest}`;
+              }
+              return `  ${line}`;
+            }).join('\n');
+          }
+
+          // Read and format
           const raw = fs.readFileSync('${{ inputs.output_path }}', 'utf8');
-          const lines = raw.split('\n');
+          const formatted = formatDiff(raw);
+          const lines = formatted.split('\n');
           const truncMsg = 'Plan is too large to fit in a PR comment. See the full plan in the workflow log.';
           let outputLines = [];
           let totalSize = 0;
