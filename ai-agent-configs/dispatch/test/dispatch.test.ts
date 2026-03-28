@@ -2,7 +2,7 @@ import { describe, test, expect, beforeEach } from "bun:test"
 import { createDb } from "../src/db.ts"
 import * as db from "../src/db.ts"
 import * as runner from "../src/runner.ts"
-import { WorkspaceId, TaskId, TaskStatus, type WorkspaceRecord, type TaskRecord } from "../src/types.ts"
+import { WorkspaceId, TaskId, TaskType, TaskStatus, type WorkspaceRecord, type TaskRecord } from "../src/types.ts"
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite"
 import type * as schema from "../src/schema.ts"
 
@@ -24,8 +24,8 @@ const createTestWorkspace = (): WorkspaceRecord =>
 
 const createTestDag = (): { ws: WorkspaceRecord; t1: TaskRecord; t2: TaskRecord } => {
   const ws = createTestWorkspace()
-  const t1 = db.addTask(database, { wsId: ws.id, title: "Research auth patterns", type: "exec-research" })
-  const t2 = db.addTask(database, { wsId: ws.id, title: "Implement auth API", type: "exec-dev", dependsOn: [t1.id] })
+  const t1 = db.addTask(database, { wsId: ws.id, title: "Research auth patterns", type: TaskType.from("exec-research") })
+  const t2 = db.addTask(database, { wsId: ws.id, title: "Implement auth API", type: TaskType.from("exec-dev"), dependsOn: [t1.id] })
   return { ws, t1, t2 }
 }
 
@@ -95,15 +95,15 @@ describe("Workspace", () => {
 describe("Task", () => {
   test("add", () => {
     const ws = createTestWorkspace()
-    const task = db.addTask(database, { wsId: ws.id, title: "Test task", type: "exec-dev" })
+    const task = db.addTask(database, { wsId: ws.id, title: "Test task", type: TaskType.from("exec-dev") })
     expect(task.title).toBe("Test task")
     expect(task.status).toBe(TaskStatus.Pending)
   })
 
   test("add with deps", () => {
     const ws = createTestWorkspace()
-    const t1 = db.addTask(database, { wsId: ws.id, title: "First", type: "exec-research" })
-    const t2 = db.addTask(database, { wsId: ws.id, title: "Second", type: "exec-dev", dependsOn: [t1.id] })
+    const t1 = db.addTask(database, { wsId: ws.id, title: "First", type: TaskType.from("exec-research") })
+    const t2 = db.addTask(database, { wsId: ws.id, title: "Second", type: TaskType.from("exec-dev"), dependsOn: [t1.id] })
     const ctx = db.getTaskWithContext(database, t2.id)
     expect(ctx.isOk()).toBe(true)
     if (ctx.isOk()) {
@@ -114,7 +114,7 @@ describe("Task", () => {
 
   test("edit title", () => {
     const ws = createTestWorkspace()
-    const task = db.addTask(database, { wsId: ws.id, title: "Old", type: "exec-dev" })
+    const task = db.addTask(database, { wsId: ws.id, title: "Old", type: TaskType.from("exec-dev") })
     const result = db.editTask(database, task.id, { title: "New" })
     expect(result.isOk()).toBe(true)
     if (result.isOk()) expect(result.value.title).toBe("New")
@@ -122,8 +122,8 @@ describe("Task", () => {
 
   test("edit add dep", () => {
     const ws = createTestWorkspace()
-    const t1 = db.addTask(database, { wsId: ws.id, title: "A", type: "exec-research" })
-    const t2 = db.addTask(database, { wsId: ws.id, title: "B", type: "exec-dev" })
+    const t1 = db.addTask(database, { wsId: ws.id, title: "A", type: TaskType.from("exec-research") })
+    const t2 = db.addTask(database, { wsId: ws.id, title: "B", type: TaskType.from("exec-dev") })
     db.editTask(database, t2.id, { addDep: t1.id })
     const ctx = db.getTaskWithContext(database, t2.id)
     expect(ctx.isOk()).toBe(true)
@@ -178,9 +178,9 @@ describe("DAG", () => {
 
   test("all runnable parallel", () => {
     const ws = createTestWorkspace()
-    const t1 = db.addTask(database, { wsId: ws.id, title: "A", type: "exec-research" })
-    const t2 = db.addTask(database, { wsId: ws.id, title: "B", type: "exec-research" })
-    const t3 = db.addTask(database, { wsId: ws.id, title: "C", type: "exec-dev", dependsOn: [t1.id, t2.id] })
+    const t1 = db.addTask(database, { wsId: ws.id, title: "A", type: TaskType.from("exec-research") })
+    const t2 = db.addTask(database, { wsId: ws.id, title: "B", type: TaskType.from("exec-research") })
+    const t3 = db.addTask(database, { wsId: ws.id, title: "C", type: TaskType.from("exec-dev"), dependsOn: [t1.id, t2.id] })
     const runnable = db.getAllRunnableTasks(database, ws.id)
     expect(runnable.length).toBe(2)
     const ids = new Set(runnable.map((t) => t.id))
@@ -196,10 +196,10 @@ describe("DAG", () => {
     // B   C
     //  \ /
     //   D
-    const a = db.addTask(database, { wsId: ws.id, title: "A", type: "exec-research" })
-    const b = db.addTask(database, { wsId: ws.id, title: "B", type: "exec-dev", dependsOn: [a.id] })
-    const c = db.addTask(database, { wsId: ws.id, title: "C", type: "exec-dev", dependsOn: [a.id] })
-    const d = db.addTask(database, { wsId: ws.id, title: "D", type: "exec-dev", dependsOn: [b.id, c.id] })
+    const a = db.addTask(database, { wsId: ws.id, title: "A", type: TaskType.from("exec-research") })
+    const b = db.addTask(database, { wsId: ws.id, title: "B", type: TaskType.from("exec-dev"), dependsOn: [a.id] })
+    const c = db.addTask(database, { wsId: ws.id, title: "C", type: TaskType.from("exec-dev"), dependsOn: [a.id] })
+    const d = db.addTask(database, { wsId: ws.id, title: "D", type: TaskType.from("exec-dev"), dependsOn: [b.id, c.id] })
 
     // Only A is runnable
     expect(db.getNextTask(database, ws.id)?.id).toBe(a.id)
@@ -288,7 +288,7 @@ describe("Runner", () => {
 
   test("runNext complete", () => {
     const ws = createTestWorkspace()
-    const t = db.addTask(database, { wsId: ws.id, title: "Only", type: "exec-dev" })
+    const t = db.addTask(database, { wsId: ws.id, title: "Only", type: TaskType.from("exec-dev") })
     db.startTask(database, t.id)
     db.completeTask(database, t.id)
     const result = runner.runNext(database, ws.id)
@@ -314,7 +314,7 @@ describe("Runner", () => {
 
   test("completeAndContinue all done", () => {
     const ws = createTestWorkspace()
-    const t = db.addTask(database, { wsId: ws.id, title: "Only", type: "exec-dev" })
+    const t = db.addTask(database, { wsId: ws.id, title: "Only", type: TaskType.from("exec-dev") })
     db.startTask(database, t.id)
     const result = runner.completeAndContinue(database, t.id)
     expect(result.status).toBe("complete")

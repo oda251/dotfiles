@@ -24,7 +24,7 @@ import {
   AddTaskInput,
   EditTaskInput,
 } from "./schema.ts"
-import { WorkspaceId, TaskId, type TaskType } from "./types.ts"
+import { WorkspaceId, TaskId, TaskType } from "./types.ts"
 
 const ENV_TASK_ID = "DISPATCH_TASK_ID"
 const ENV_WS_ID = "DISPATCH_WS_ID"
@@ -157,7 +157,7 @@ const main = async (): Promise<void> => {
           printJson(db.addTask(database, {
             wsId,
             title: data.title,
-            type: data.type as TaskType,
+            type: TaskType.from(data.type),
             dependsOn: dependsOn.map(TaskId.from),
           }))
           break
@@ -173,7 +173,7 @@ const main = async (): Promise<void> => {
           }))
           unwrapResult(db.editTask(database, taskId, {
             title: data.title,
-            type: data.type as TaskType | undefined,
+            type: data.type ? TaskType.from(data.type) : undefined,
             addDep: data.addDep ? TaskId.from(data.addDep) : undefined,
             removeDep: data.removeDep ? TaskId.from(data.removeDep) : undefined,
           }))

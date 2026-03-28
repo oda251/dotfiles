@@ -34,19 +34,14 @@ type TaskStatus = (typeof TaskStatus)[keyof typeof TaskStatus]
 
 export { TaskStatus }
 
-// --- Task Type ---
+// --- Task Type (branded, validated at runtime via skill frontmatter) ---
 
-const TaskType = {
-  ExecDev: "exec-dev",
-  ExecResearch: "exec-research",
-  ExecResearchWrite: "exec-research-write",
-  PlanDev: "plan-dev",
-  PlanResearch: "plan-research",
+export type TaskType = string & { readonly __brand: unique symbol }
+
+export const TaskType = {
+  from: (value: string): TaskType => value as TaskType,
+  unwrap: (tt: TaskType): string => tt as string,
 } as const
-
-type TaskType = (typeof TaskType)[keyof typeof TaskType]
-
-export { TaskType }
 
 // --- Run Result (Discriminated Union) ---
 

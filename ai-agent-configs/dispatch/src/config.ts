@@ -66,6 +66,10 @@ const getSkillMap = (): Map<string, string> => {
   return skillMap
 }
 
+export const getValidTaskTypes = (): string[] => [...getSkillMap().keys()]
+
+export const isValidTaskType = (value: string): boolean => getSkillMap().has(value)
+
 export const getSkillContent = (taskType: TaskType): string => {
   const skillName = getSkillMap().get(taskType)
   if (!skillName) return ""

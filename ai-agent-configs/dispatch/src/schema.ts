@@ -4,7 +4,9 @@
 
 import { sqliteTable, text, primaryKey } from "drizzle-orm/sqlite-core"
 import { z } from "zod/v4"
-import { TaskStatus, TaskType } from "./types.ts"
+import { TaskStatus } from "./types.ts"
+import type { TaskType } from "./types.ts"
+import { isValidTaskType } from "./config.ts"
 
 // --- Drizzle Schema ---
 
@@ -44,7 +46,7 @@ export const dependencies = sqliteTable(
 
 // --- Zod Schemas (CLI input validation) ---
 
-const taskTypeValues = Object.values(TaskType) as [string, ...string[]]
+const taskTypeSchema = z.string().refine(isValidTaskType, { message: "Unknown task type" })
 
 export const CreateWorkspaceInput = z.object({
   title: z.string().min(1),
@@ -68,7 +70,7 @@ export type EditWorkspaceInput = z.infer<typeof EditWorkspaceInput>
 export const AddTaskInput = z.object({
   wsId: z.string().min(1),
   title: z.string().min(1),
-  type: z.enum(taskTypeValues),
+  type: taskTypeSchema,
   dependsOn: z.array(z.string()).optional().default([]),
 })
 export type AddTaskInput = z.infer<typeof AddTaskInput>
@@ -76,7 +78,7 @@ export type AddTaskInput = z.infer<typeof AddTaskInput>
 export const EditTaskInput = z.object({
   id: z.string().min(1),
   title: z.string().optional(),
-  type: z.enum(taskTypeValues).optional(),
+  type: taskTypeSchema.optional(),
   addDep: z.string().optional(),
   removeDep: z.string().optional(),
 })
