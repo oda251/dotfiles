@@ -8,6 +8,10 @@ inputs:
   stack:
     description: "Stack directory name"
     required: true
+  workspace:
+    description: "Terraform workspace name"
+    required: false
+    default: ""
   command:
     description: "Command that was run (plan or apply)"
     required: true
@@ -18,6 +22,14 @@ inputs:
     description: "Whether there are changes"
     required: false
     default: "true"
+  format:
+    description: "Output format: diff or text"
+    required: false
+    default: "diff"
+  plan_hash:
+    description: "Hash of plan output for dedup"
+    required: false
+    default: ""
 
 runs:
   using: composite
@@ -28,10 +40,37 @@ runs:
         script: |
           const fs = require('fs');
           const stack = '${{ inputs.stack }}';
+          const workspace = '${{ inputs.workspace }}' || stack.split('/').pop();
           const command = '${{ inputs.command }}';
           const hasChanges = '${{ inputs.has_changes }}' === 'true';
-          const marker = `<!-- terraform:${stack}:${command} -->`;
-          const MAX_BODY = 50000;
+          const format = '${{ inputs.format }}';
+          const planHash = '${{ inputs.plan_hash }}';
+          const MAX_BODY = 60000;
+
+          // Metadata marker for identifying and updating comments
+          const meta = { workspace, plan_hash: planHash, format };
+          const marker = `<!-- terraform:${stack}:${command} ${JSON.stringify(meta)} -->`;
+          const markerPrefix = `<!-- terraform:${stack}:${command} `;
+
+          // Check if existing comment has same plan_hash -> skip update
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: Number('${{ inputs.pr_number }}'),
+          });
+          const existing = comments.find(c => c.body.startsWith(markerPrefix));
+
+          if (existing && planHash) {
+            try {
+              const existingMeta = JSON.parse(
+                existing.body.split('-->')[0].replace(markerPrefix, '')
+              );
+              if (existingMeta.plan_hash === planHash) {
+                core.info('Plan unchanged, skipping comment update');
+                return;
+              }
+            } catch {}
+          }
 
           let status;
           if (command === 'plan') {
@@ -40,20 +79,17 @@ runs:
             status = '🚀 Applied';
           }
 
-          // Build comment skeleton without output to measure reserved space
+          // Determine code block format
+          const codeFormat = format === 'diff' ? 'diff' : '';
+          const formatSuffix = format === 'text' ? '' : '';
+
+          // Build skeleton to measure reserved space
           const skeleton = [
             marker,
-            `### Terraform ${command}: \`${stack}\``,
-            '',
-            status,
-            '',
-            '<details>',
-            '<summary>Output</summary>',
-            '',
-            '```diff',
-            '',  // placeholder for output
-            '```',
-            '',
+            `### Terraform ${command}: \`${workspace}\``,
+            '', status, '',
+            '<details>', '<summary>Output</summary>', '',
+            '```' + codeFormat, '', '```', '',
             '</details>',
           ].join('\n');
           const reservedSize = Buffer.byteLength(skeleton, 'utf8');
@@ -78,30 +114,26 @@ runs:
             totalSize += lineSize;
           }
 
-          const output = outputLines.join('\n');
+          // Track truncation in format
+          const actualFormat = truncated ? format + '-trunc' : format;
+          const actualMeta = { workspace, plan_hash: planHash, format: actualFormat };
+          const actualMarker = `<!-- terraform:${stack}:${command} ${JSON.stringify(actualMeta)} -->`;
 
           const body = [
-            marker,
-            `### Terraform ${command}: \`${stack}\``,
+            actualMarker,
+            `### Terraform ${command}: \`${workspace}\``,
             '',
             status,
             '',
             '<details>',
             '<summary>Output</summary>',
             '',
-            '```diff',
-            output,
+            '```' + codeFormat,
+            outputLines.join('\n'),
             '```',
             '',
             '</details>',
           ].join('\n');
-
-          const { data: comments } = await github.rest.issues.listComments({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: Number('${{ inputs.pr_number }}'),
-          });
-          const existing = comments.find(c => c.body.includes(marker));
 
           if (existing) {
             await github.rest.issues.updateComment({
