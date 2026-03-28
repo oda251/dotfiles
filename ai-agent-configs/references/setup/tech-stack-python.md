@@ -12,11 +12,12 @@ Python プロジェクトの技術選定。
 
 - `ruff check` + `ruff format` で lint と format を統一
 - Lefthook の pre-commit で実行する
+- `UP006`（use-pep585-annotation）、`UP007`（use-pep604-annotation）を有効にする
 
 ## 型チェック: Pyright
 
 - mypy ではなく Pyright を使う
-- `reportAny` を有効にする
+- `reportAny`、`reportMissingParameterType`、`reportUnknownParameterType` を有効にする
 
 ## バリデーション: Pydantic
 

@@ -24,19 +24,6 @@ export const User = {
 } as const
 ```
 
-### enum を使わない
-
-`enum` の代わりに `as const` + 型推論を使う。
-
-```ts
-// NG
-enum Status { Active, Inactive }
-
-// OK
-const Status = { Active: 'active', Inactive: 'inactive' } as const
-type Status = (typeof Status)[keyof typeof Status]
-```
-
 ### Discriminated Union + Exhaustive Check
 
 Union 型にタグフィールドを持たせ、switch + `never` で全パターン網羅をコンパイル時に保証する。

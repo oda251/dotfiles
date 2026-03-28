@@ -4,48 +4,6 @@
 
 ## 型
 
-### 型ヒントを必ず付ける
-
-関数の引数・戻り値には型ヒントを付ける。
-
-```python
-# NG
-def fetch_user(user_id):
-    ...
-
-# OK
-def fetch_user(user_id: str) -> User | None:
-    ...
-```
-
-### コレクションは組み込み型を使う
-
-`typing.List`, `typing.Dict` ではなく `list`, `dict` を使う（Python 3.9+）。
-
-```python
-# NG
-from typing import List, Dict
-def process(items: List[str]) -> Dict[str, int]: ...
-
-# OK
-def process(items: list[str]) -> dict[str, int]: ...
-```
-
-### Union は `|` 構文を使う
-
-`typing.Union`, `typing.Optional` ではなく `|` を使う（Python 3.10+）。
-
-```python
-# NG
-from typing import Optional, Union
-def find(key: str) -> Optional[User]: ...
-def parse(value: Union[str, int]) -> Result: ...
-
-# OK
-def find(key: str) -> User | None: ...
-def parse(value: str | int) -> Result: ...
-```
-
 ### TypedDict / dataclass / Pydantic の使い分け
 
 | 用途 | 使うもの |

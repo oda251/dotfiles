@@ -21,6 +21,7 @@ TypeScript プロジェクトの技術選定。
 
 - ESLint/Prettier ではなく oxlint + oxfmt を使う
 - `no-explicit-any` を有効にする
+- `no-enum` を有効にする（`as const` + 型推論を使う）
 
 ## テスト: Vitest
 
