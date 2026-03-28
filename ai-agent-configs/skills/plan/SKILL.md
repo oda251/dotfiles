@@ -22,16 +22,10 @@ user-invocable: false
 - `plan-*`（任意のドメインへの計画委譲。自ドメイン含む）
 - `exec-{X}`（自ドメインの実行のみ。他ドメインの exec は書けない）
 
-依存関係がある場合は `--depends-on` で指定する。
+`--depends-on` で依存関係を指定する。ルートタスク以外は必ず依存先がある。
 
 ```bash
-dispatch task add --ws {ws_id} --title "認証パターン調査" --type exec-research
-dispatch task add --ws {ws_id} --title "認証API実装" --type exec-dev --depends-on {task_id}
-```
-
-調査が必要な場合は `plan-research` タスクを先行させる:
-
-```bash
-dispatch task add --ws {ws_id} --title "認証パターン調査" --type plan-research
-dispatch task add --ws {ws_id} --title "認証API実装" --type exec-dev --depends-on {task_id}
+# 調査してから実装
+dispatch task add --ws {ws_id} --title "認証パターン調査" --type plan-research --depends-on {parent_task_id}
+dispatch task add --ws {ws_id} --title "認証API実装" --type exec-dev --depends-on {research_task_id}
 ```
