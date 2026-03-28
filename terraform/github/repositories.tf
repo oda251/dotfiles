@@ -6,7 +6,7 @@ variable "repositories" {
     topics      = optional(list(string), [])
     is_template = optional(bool, false)
     template           = optional(string)
-    branch_protection  = optional(bool, true)
+    branch_protection  = optional(bool, true) # true: 直プッシュ不可+CI必須, false: 直プッシュOK
   }))
 }
 
