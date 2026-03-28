@@ -11,3 +11,7 @@
 ## テスト基盤: Testcontainers
 
 外部依存（DB, キャッシュ等）は mock ではなく Testcontainers で本物を立てる。
+
+## E2E テスト: Playwright
+
+- ブラウザテストには Playwright を使う
