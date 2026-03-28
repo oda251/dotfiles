@@ -6,6 +6,6 @@ user-invocable: false
 
 変更をレビューせよ。
 
-- 対象言語のガイドライン（`~/.claude/references/{lang}.md`, `{lang}-{framework}.md`）があれば従う
-- テストがある場合: `~/.claude/references/testing-guideline.md` に従う
+- 対象言語のガイドライン（`~/.claude/references/coding/{lang}.md`, `{lang}-{framework}.md`）があれば従う
+- テストがある場合: `~/.claude/references/coding/testing-guideline.md` に従う
 - 問題があれば具体的な修正案を示すこと

@@ -7,8 +7,8 @@ task-types: [exec-dev]
 
 タスクを実装せよ。
 
-- 対象言語のガイドライン（`~/.claude/references/{lang}.md`, `{lang}-{framework}.md`）があれば従う
-- `~/.claude/references/testing-guideline.md` に従う
+- 対象言語のガイドライン（`~/.claude/references/coding/{lang}.md`, `{lang}-{framework}.md`）があれば従う
+- `~/.claude/references/coding/testing-guideline.md` に従う
 
 ## TDD 適用判断
 
