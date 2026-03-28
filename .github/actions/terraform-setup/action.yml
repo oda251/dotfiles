@@ -1,0 +1,39 @@
+name: Terraform Setup
+description: Install Terraform/Terragrunt and set TFC workspace to local execution
+
+inputs:
+  working_directory:
+    description: "Terraform working directory"
+    required: true
+  tf_api_token:
+    description: "Terraform Cloud API token"
+    required: true
+  tf_cloud_organization:
+    description: "Terraform Cloud organization"
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+
+    - name: Setup Terragrunt
+      uses: autero1/action-terragrunt@v3
+      with:
+        terragrunt-version: latest
+
+    - name: Set workspace to local execution
+      shell: bash
+      working-directory: ${{ inputs.working_directory }}
+      run: |
+        WORKSPACE=$(basename "$PWD")
+        curl -sf \
+          --header "Authorization: Bearer $TF_TOKEN_app_terraform_io" \
+          --header "Content-Type: application/vnd.api+json" \
+          --request PATCH \
+          "https://app.terraform.io/api/v2/organizations/$TF_CLOUD_ORGANIZATION/workspaces/$WORKSPACE" \
+          --data '{"data":{"type":"workspaces","attributes":{"execution-mode":"local"}}}'
+      env:
+        TF_TOKEN_app_terraform_io: ${{ inputs.tf_api_token }}
+        TF_CLOUD_ORGANIZATION: ${{ inputs.tf_cloud_organization }}
