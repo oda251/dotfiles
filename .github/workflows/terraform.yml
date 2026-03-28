@@ -50,7 +50,8 @@ jobs:
     if: >
       github.event_name == 'issue_comment' &&
       github.event.issue.pull_request &&
-      github.event.comment.body == '/apply'
+      github.event.comment.body == '/apply' &&
+      github.event.comment.author_association == 'OWNER'
     runs-on: ubuntu-latest
     steps:
       - name: Get PR ref
