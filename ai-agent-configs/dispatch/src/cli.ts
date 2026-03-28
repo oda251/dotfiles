@@ -15,6 +15,7 @@
  */
 
 import type { Result } from "neverthrow"
+import * as v from "valibot"
 import { createDb } from "./db.ts"
 import * as db from "./db.ts"
 import * as runner from "./runner.ts"
@@ -43,9 +44,10 @@ const unwrapResult = <T>(result: Result<T, string>): T => {
   return result.value
 }
 
-const unwrapParse = <T>(result: { success: true; data: T } | { success: false; error: { issues: unknown[] } }): T => {
-  if (!result.success) return die(`Validation error: ${JSON.stringify(result.error.issues)}`)
-  return result.data
+const unwrapParse = <T>(schema: v.GenericSchema<unknown, T>, input: unknown): T => {
+  const result = v.safeParse(schema, input)
+  if (!result.success) return die(`Validation error: ${JSON.stringify(result.issues)}`)
+  return result.output
 }
 
 const parseArgs = (argv: string[]): Map<string, string> => {
@@ -104,12 +106,12 @@ const main = async (): Promise<void> => {
     case "ws": {
       switch (subcommand) {
         case "create": {
-          const data = unwrapParse(CreateWorkspaceInput.safeParse({
+          const data = unwrapParse(CreateWorkspaceInput, {
             title: args.get("title"),
             background: args.get("background") ?? "",
             goals: collectMultiple(argv, "goal"),
             constraints: collectMultiple(argv, "constraint"),
-          }))
+          })
           printJson(db.createWorkspace(database, data))
           break
         }
@@ -125,7 +127,7 @@ const main = async (): Promise<void> => {
         }
         case "edit": {
           const wsId = resolveWsId(args)
-          const data = unwrapParse(EditWorkspaceInput.safeParse({
+          const data = unwrapParse(EditWorkspaceInput, {
             wsId: WorkspaceId.unwrap(wsId),
             title: args.get("title"),
             background: args.get("background"),
@@ -133,7 +135,7 @@ const main = async (): Promise<void> => {
             removeGoal: args.get("remove-goal"),
             addConstraint: args.get("add-constraint"),
             removeConstraint: args.get("remove-constraint"),
-          }))
+          })
           printJson(unwrapResult(db.editWorkspace(database, wsId, data)))
           break
         }
@@ -148,12 +150,12 @@ const main = async (): Promise<void> => {
           const wsId = resolveWsId(args)
           const dependsOnRaw = args.get("depends-on")
           const dependsOn = dependsOnRaw ? dependsOnRaw.split(",") : []
-          const data = unwrapParse(AddTaskInput.safeParse({
+          const data = unwrapParse(AddTaskInput, {
             wsId: WorkspaceId.unwrap(wsId),
             title: args.get("title"),
             type: args.get("type"),
             dependsOn,
-          }))
+          })
           printJson(db.addTask(database, {
             wsId,
             title: data.title,
@@ -164,13 +166,13 @@ const main = async (): Promise<void> => {
         }
         case "edit": {
           const taskId = resolveTaskId(args)
-          const data = unwrapParse(EditTaskInput.safeParse({
+          const data = unwrapParse(EditTaskInput, {
             id: TaskId.unwrap(taskId),
             title: args.get("title"),
             type: args.get("type"),
             addDep: args.get("add-dep"),
             removeDep: args.get("remove-dep"),
-          }))
+          })
           unwrapResult(db.editTask(database, taskId, {
             title: data.title,
             type: data.type ? TaskType.from(data.type) : undefined,

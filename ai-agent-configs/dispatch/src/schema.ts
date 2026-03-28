@@ -1,9 +1,11 @@
 /**
- * Drizzle schema + Zod validation for dispatch DB.
+ * Drizzle schema + Valibot validation for dispatch DB.
+ * DTOs are derived from drizzle-valibot's createInsertSchema (single source of truth).
  */
 
 import { sqliteTable, text, primaryKey } from "drizzle-orm/sqlite-core"
-import { z } from "zod/v4"
+import * as v from "valibot"
+import { createInsertSchema } from "drizzle-valibot"
 import { TaskStatus } from "./types.ts"
 import type { TaskType } from "./types.ts"
 import { isValidTaskType } from "./config.ts"
@@ -44,42 +46,50 @@ export const dependencies = sqliteTable(
   (table) => [primaryKey({ columns: [table.taskId, table.dependsOn] })],
 )
 
-// --- Zod Schemas (CLI input validation) ---
+// --- Base schemas from drizzle-valibot ---
 
-const taskTypeSchema = z.string().refine(isValidTaskType, { message: "Unknown task type" })
-
-export const CreateWorkspaceInput = z.object({
-  title: z.string().min(1),
-  background: z.string().optional().default(""),
-  goals: z.array(z.string()).optional().default([]),
-  constraints: z.array(z.string()).optional().default([]),
+const baseWorkspaceInsert = createInsertSchema(workspaces, {
+  title: v.pipe(v.string(), v.minLength(1)),
 })
-export type CreateWorkspaceInput = z.infer<typeof CreateWorkspaceInput>
 
-export const EditWorkspaceInput = z.object({
-  wsId: z.string().min(1),
-  title: z.string().optional(),
-  background: z.string().optional(),
-  addGoal: z.string().optional(),
-  removeGoal: z.string().optional(),
-  addConstraint: z.string().optional(),
-  removeConstraint: z.string().optional(),
+const baseTaskInsert = createInsertSchema(tasks, {
+  title: v.pipe(v.string(), v.minLength(1)),
+  type: v.pipe(v.string(), v.check(isValidTaskType, "Unknown task type")),
 })
-export type EditWorkspaceInput = z.infer<typeof EditWorkspaceInput>
 
-export const AddTaskInput = z.object({
-  wsId: z.string().min(1),
-  title: z.string().min(1),
-  type: taskTypeSchema,
-  dependsOn: z.array(z.string()).optional().default([]),
-})
-export type AddTaskInput = z.infer<typeof AddTaskInput>
+// --- CLI input DTOs (derived from base schemas) ---
 
-export const EditTaskInput = z.object({
-  id: z.string().min(1),
-  title: z.string().optional(),
-  type: taskTypeSchema.optional(),
-  addDep: z.string().optional(),
-  removeDep: z.string().optional(),
+export const CreateWorkspaceInput = v.object({
+  ...v.omit(baseWorkspaceInsert, ["id", "createdAt"]).entries,
+  background: v.optional(v.string(), ""),
+  goals: v.optional(v.array(v.string()), []),
+  constraints: v.optional(v.array(v.string()), []),
 })
-export type EditTaskInput = z.infer<typeof EditTaskInput>
+export type CreateWorkspaceInput = v.InferOutput<typeof CreateWorkspaceInput>
+
+export const EditWorkspaceInput = v.object({
+  wsId: v.pipe(v.string(), v.minLength(1)),
+  title: v.optional(v.string()),
+  background: v.optional(v.string()),
+  addGoal: v.optional(v.string()),
+  removeGoal: v.optional(v.string()),
+  addConstraint: v.optional(v.string()),
+  removeConstraint: v.optional(v.string()),
+})
+export type EditWorkspaceInput = v.InferOutput<typeof EditWorkspaceInput>
+
+export const AddTaskInput = v.object({
+  ...v.omit(baseTaskInsert, ["id", "workspaceId", "status", "result", "createdAt"]).entries,
+  wsId: v.pipe(v.string(), v.minLength(1)),
+  dependsOn: v.optional(v.array(v.string()), []),
+})
+export type AddTaskInput = v.InferOutput<typeof AddTaskInput>
+
+export const EditTaskInput = v.object({
+  id: v.pipe(v.string(), v.minLength(1)),
+  title: v.optional(v.string()),
+  type: v.optional(v.pipe(v.string(), v.check(isValidTaskType, "Unknown task type"))),
+  addDep: v.optional(v.string()),
+  removeDep: v.optional(v.string()),
+})
+export type EditTaskInput = v.InferOutput<typeof EditTaskInput>
