@@ -9,6 +9,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup
+        run: make setup
+
       - name: Lint
         run: make lint
 
