@@ -19,6 +19,11 @@ TypeScript プロジェクトの技術選定。
 - DB カラムの型変更が DTO に自動伝播する
 - 動的バリデーションは `v.check()` で対応
 
+## Lint / Format: oxlint + oxfmt
+
+- ESLint/Prettier ではなく oxlint + oxfmt を使う
+- Lefthook の pre-commit で実行する
+
 ## テスト: Vitest
 
 - Bun プロジェクト以外では Vitest を使う
