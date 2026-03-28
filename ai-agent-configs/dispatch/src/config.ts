@@ -1,5 +1,5 @@
 /**
- * Dynamic configuration: scan skills/ for task-type mappings.
+ * Dynamic configuration: scan skills/ and policy/ directories.
  */
 
 import { join } from "node:path"
@@ -7,9 +7,17 @@ import { homedir } from "node:os"
 import { readFileSync, readdirSync } from "node:fs"
 import type { TaskType } from "./types.ts"
 
-const CLAUDE_HOME = join(homedir(), ".claude")
-const SKILLS_DIR = join(CLAUDE_HOME, "skills")
-const POLICY_DIR = join(CLAUDE_HOME, "references", "policy")
+const DEFAULT_CLAUDE_HOME = join(homedir(), ".claude")
+
+let claudeHome = DEFAULT_CLAUDE_HOME
+
+export const setClaudeHome = (path: string): void => {
+  claudeHome = path
+  cache = null
+}
+
+const getSkillsDir = () => join(claudeHome, "skills")
+const getPolicyDir = () => join(claudeHome, "references", "policy")
 
 const readIfExists = (path: string): string => {
   try {
@@ -42,11 +50,11 @@ const scanSkills = (): { typeToSkill: Map<string, string>; contentCache: Map<str
   const typeToSkill = new Map<string, string>()
   const contentCache = new Map<string, string>()
   try {
-    const dirs = readdirSync(SKILLS_DIR, { withFileTypes: true })
+    const dirs = readdirSync(getSkillsDir(), { withFileTypes: true })
       .filter((d) => d.isDirectory())
 
     for (const dir of dirs) {
-      const content = readIfExists(join(SKILLS_DIR, dir.name, "SKILL.md"))
+      const content = readIfExists(join(getSkillsDir(), dir.name, "SKILL.md"))
       if (!content) continue
       const fm = parseFrontmatter(content)
       const taskTypes = fm["task-types"]
@@ -82,11 +90,11 @@ export const getSkillContent = (taskType: TaskType): string => {
 
 export const getPolicyContents = (): string => {
   try {
-    const files = readdirSync(POLICY_DIR)
+    const files = readdirSync(getPolicyDir())
       .filter((f) => f.endsWith(".md"))
       .sort()
     return files
-      .map((f) => readIfExists(join(POLICY_DIR, f)))
+      .map((f) => readIfExists(join(getPolicyDir(), f)))
       .filter(Boolean)
       .join("\n\n---\n\n")
   } catch {

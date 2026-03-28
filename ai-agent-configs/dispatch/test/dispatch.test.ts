@@ -1,7 +1,11 @@
-import { describe, test, expect, beforeEach } from "bun:test"
+import { describe, test, expect, beforeEach, afterEach } from "bun:test"
+import { mkdirSync, writeFileSync, rmSync } from "node:fs"
+import { join } from "node:path"
+import { tmpdir } from "node:os"
 import { createDb } from "../src/db.ts"
 import * as db from "../src/db.ts"
 import * as runner from "../src/runner.ts"
+import { setClaudeHome, getSkillContent, getPolicyContents } from "../src/config.ts"
 import { WorkspaceId, TaskId, TaskType, TaskStatus, type WorkspaceRecord, type TaskRecord } from "../src/types.ts"
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite"
 import type * as schema from "../src/schema.ts"
@@ -337,5 +341,44 @@ describe("Runner", () => {
     if (result.status === "ready") {
       expect(result.prompt).toContain("docs/research.md")
     }
+  })
+
+  test("prompt includes policy", () => {
+    const tmpHome = join(tmpdir(), `dispatch-test-${Date.now()}`)
+    const policyDir = join(tmpHome, "references", "policy")
+    mkdirSync(policyDir, { recursive: true })
+    writeFileSync(join(policyDir, "ts.md"), "# TS Policy\nUse strict types.")
+    setClaudeHome(tmpHome)
+
+    const { ws } = createTestDag()
+    const result = runner.runNext(database, ws.id)
+    if (result.status === "ready") {
+      expect(result.prompt).toContain("TS Policy")
+      expect(result.prompt).toContain("Use strict types.")
+    }
+
+    rmSync(tmpHome, { recursive: true })
+    setClaudeHome(join(tmpdir(), "nonexistent-claude-home"))
+  })
+
+  test("prompt includes skill content", () => {
+    const tmpHome = join(tmpdir(), `dispatch-test-${Date.now()}`)
+    const skillDir = join(tmpHome, "skills", "test-skill")
+    mkdirSync(skillDir, { recursive: true })
+    writeFileSync(
+      join(skillDir, "SKILL.md"),
+      "---\nname: test-skill\ntask-types: [test-type]\n---\n\nDo the thing.",
+    )
+    setClaudeHome(tmpHome)
+
+    const ws = createTestWorkspace()
+    db.addTask(database, { wsId: ws.id, title: "Test task", type: TaskType.from("test-type") })
+    const result = runner.runNext(database, ws.id)
+    if (result.status === "ready") {
+      expect(result.prompt).toContain("Do the thing.")
+    }
+
+    rmSync(tmpHome, { recursive: true })
+    setClaudeHome(join(tmpdir(), "nonexistent-claude-home"))
   })
 })
