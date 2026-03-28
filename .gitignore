@@ -7,3 +7,10 @@
 *.bak
 *~
 dot_zsh/local.zsh
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+.terraform.lock.hcl
