@@ -11,6 +11,10 @@ permissions:
   contents: read
   pull-requests: write
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+  TF_VAR_github_owner: ${{ github.repository_owner }}
+
 jobs:
   plan:
     if: github.event_name == 'pull_request'
@@ -21,6 +25,7 @@ jobs:
         with:
           working_directory: terraform/github
           tf_api_token: ${{ secrets.TF_API_TOKEN }}
+          tf_cloud_organization: ${{ secrets.TF_CLOUD_ORGANIZATION }}
 
   apply:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -31,3 +36,4 @@ jobs:
         with:
           working_directory: terraform/github
           tf_api_token: ${{ secrets.TF_API_TOKEN }}
+          tf_cloud_organization: ${{ secrets.TF_CLOUD_ORGANIZATION }}

@@ -8,6 +8,9 @@ inputs:
   tf_api_token:
     description: "Terraform Cloud API token"
     required: true
+  tf_cloud_organization:
+    description: "Terraform Cloud organization"
+    required: true
 
 runs:
   using: composite
@@ -21,6 +24,7 @@ runs:
       run: terraform init
       env:
         TF_TOKEN_app_terraform_io: ${{ inputs.tf_api_token }}
+        TF_CLOUD_ORGANIZATION: ${{ inputs.tf_cloud_organization }}
 
     - name: Apply
       shell: bash
@@ -28,3 +32,4 @@ runs:
       run: terraform apply -auto-approve -no-color
       env:
         TF_TOKEN_app_terraform_io: ${{ inputs.tf_api_token }}
+        TF_CLOUD_ORGANIZATION: ${{ inputs.tf_cloud_organization }}
