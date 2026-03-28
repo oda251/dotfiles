@@ -37,8 +37,9 @@ const parseFrontmatter = (content: string): Record<string, unknown> => {
   return result
 }
 
-const buildSkillMap = (): Map<string, string> => {
-  const map = new Map<string, string>()
+const scanSkills = (): { typeToSkill: Map<string, string>; contentCache: Map<string, string> } => {
+  const typeToSkill = new Map<string, string>()
+  const contentCache = new Map<string, string>()
   try {
     const dirs = readdirSync(SKILLS_DIR, { withFileTypes: true })
       .filter((d) => d.isDirectory())
@@ -49,29 +50,31 @@ const buildSkillMap = (): Map<string, string> => {
       const fm = parseFrontmatter(content)
       const taskTypes = fm["task-types"]
       if (!Array.isArray(taskTypes)) continue
+      contentCache.set(dir.name, content)
       for (const tt of taskTypes) {
-        map.set(tt as string, dir.name)
+        typeToSkill.set(tt as string, dir.name)
       }
     }
   } catch {
     // skills dir doesn't exist yet
   }
-  return map
+  return { typeToSkill, contentCache }
 }
 
-let skillMap: Map<string, string> | null = null
+let cache: ReturnType<typeof scanSkills> | null = null
 
-const getSkillMap = (): Map<string, string> => {
-  if (!skillMap) skillMap = buildSkillMap()
-  return skillMap
+const getCache = () => {
+  if (!cache) cache = scanSkills()
+  return cache
 }
 
-export const getValidTaskTypes = (): string[] => [...getSkillMap().keys()]
+export const getValidTaskTypes = (): string[] => [...getCache().typeToSkill.keys()]
 
-export const isValidTaskType = (value: string): boolean => getSkillMap().has(value)
+export const isValidTaskType = (value: string): boolean => getCache().typeToSkill.has(value)
 
 export const getSkillContent = (taskType: TaskType): string => {
-  const skillName = getSkillMap().get(taskType)
+  const { typeToSkill, contentCache } = getCache()
+  const skillName = typeToSkill.get(taskType)
   if (!skillName) return ""
-  return readIfExists(join(SKILLS_DIR, skillName, "SKILL.md"))
+  return contentCache.get(skillName) ?? ""
 }

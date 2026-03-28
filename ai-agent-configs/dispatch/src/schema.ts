@@ -52,9 +52,11 @@ const baseWorkspaceInsert = createInsertSchema(workspaces, {
   title: v.pipe(v.string(), v.minLength(1)),
 })
 
+const taskTypeSchema = v.pipe(v.string(), v.check(isValidTaskType, "Unknown task type"))
+
 const baseTaskInsert = createInsertSchema(tasks, {
   title: v.pipe(v.string(), v.minLength(1)),
-  type: v.pipe(v.string(), v.check(isValidTaskType, "Unknown task type")),
+  type: taskTypeSchema,
 })
 
 // --- CLI input DTOs (derived from base schemas) ---
@@ -88,7 +90,7 @@ export type AddTaskInput = v.InferOutput<typeof AddTaskInput>
 export const EditTaskInput = v.object({
   id: v.pipe(v.string(), v.minLength(1)),
   title: v.optional(v.string()),
-  type: v.optional(v.pipe(v.string(), v.check(isValidTaskType, "Unknown task type"))),
+  type: v.optional(taskTypeSchema),
   addDep: v.optional(v.string()),
   removeDep: v.optional(v.string()),
 })
