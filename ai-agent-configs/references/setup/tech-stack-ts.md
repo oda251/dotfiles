@@ -20,6 +20,7 @@ TypeScript プロジェクトの技術選定。
 ## Lint / Format: oxlint + oxfmt
 
 - ESLint/Prettier ではなく oxlint + oxfmt を使う
+- `no-explicit-any` を有効にする
 
 ## テスト: Vitest
 

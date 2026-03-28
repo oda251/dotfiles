@@ -16,6 +16,7 @@ Python プロジェクトの技術選定。
 ## 型チェック: Pyright
 
 - mypy ではなく Pyright を使う
+- `reportAny` を有効にする
 
 ## バリデーション: Pydantic
 
