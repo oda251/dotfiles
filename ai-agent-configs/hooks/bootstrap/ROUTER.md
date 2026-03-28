@@ -1,11 +1,9 @@
----
-name: bootstrap
-description: session-start hook で自動注入されるルータースキル。ユーザーメッセージを受け取るたびに適切なスキルを判断する。
-disable-model-invocation: true
----
+# Bootstrap ルーター
+
+session-start hook で自動注入される。ユーザーメッセージを受け取るたびに適切なスキルを判断する。
 
 <SUBAGENT-STOP>
-サブエージェントとしてタスク実行中なら、このスキルをスキップせよ。
+サブエージェントとしてタスク実行中なら、このルーターをスキップせよ。
 </SUBAGENT-STOP>
 
 ## スキル発動ルール
