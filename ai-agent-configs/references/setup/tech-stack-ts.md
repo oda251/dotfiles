@@ -22,7 +22,7 @@ TypeScript プロジェクトの技術選定。
 - ESLint/Prettier ではなく oxlint + oxfmt を使う
 - `no-explicit-any`, `no-enum`, `no-non-null-assertion`, `no-var` を有効にする
 - `switch-exhaustiveness-check`, `prefer-const`, `eqeqeq`, `consistent-type-imports`, `no-unused-vars` を有効にする
-- `no-restricted-imports` で `../` パターンを禁止する（`./` は許可。パスエイリアスまたはバレルを使う）
+- `no-restricted-imports` で `../` パターンを禁止する（`./` は許可。パスエイリアスを使う）
 
 ## テスト: Vitest
 
