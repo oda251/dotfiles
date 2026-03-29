@@ -47,8 +47,8 @@ resource "grafana_dashboard" "claude_code_overview" {
           y = 0
         }
         targets = [{
-          datasource = { type = "prometheus" }
-          expr       = "sum(increase(claude_code_cost_usage_total[1d]))"
+          datasource   = { type = "prometheus" }
+          expr         = "sum(increase(claude_code_cost_usage_total[1d]))"
           legendFormat = "Cost"
         }]
         fieldConfig = {
@@ -69,8 +69,8 @@ resource "grafana_dashboard" "claude_code_overview" {
         }
         targets = [
           {
-            datasource = { type = "prometheus" }
-            expr       = "sum by (type) (increase(claude_code_token_usage_total[1d]))"
+            datasource   = { type = "prometheus" }
+            expr         = "sum by (type) (increase(claude_code_token_usage_total[1d]))"
             legendFormat = "{{type}}"
           }
         ]
@@ -86,8 +86,8 @@ resource "grafana_dashboard" "claude_code_overview" {
           y = 8
         }
         targets = [{
-          datasource = { type = "prometheus" }
-          expr       = "sum(increase(claude_code_session_count_total[1d]))"
+          datasource   = { type = "prometheus" }
+          expr         = "sum(increase(claude_code_session_count_total[1d]))"
           legendFormat = "Sessions"
         }]
       },
@@ -102,8 +102,8 @@ resource "grafana_dashboard" "claude_code_overview" {
           y = 8
         }
         targets = [{
-          datasource = { type = "prometheus" }
-          expr       = "sum(increase(claude_code_lines_of_code_count_total[1d]))"
+          datasource   = { type = "prometheus" }
+          expr         = "sum(increase(claude_code_lines_of_code_count_total[1d]))"
           legendFormat = "Lines"
         }]
       },
@@ -118,8 +118,8 @@ resource "grafana_dashboard" "claude_code_overview" {
           y = 8
         }
         targets = [{
-          datasource = { type = "prometheus" }
-          expr       = "sum(increase(claude_code_commit_count_total[1d]))"
+          datasource   = { type = "prometheus" }
+          expr         = "sum(increase(claude_code_commit_count_total[1d]))"
           legendFormat = "Commits"
         }]
       },
@@ -134,8 +134,8 @@ resource "grafana_dashboard" "claude_code_overview" {
           y = 8
         }
         targets = [{
-          datasource = { type = "prometheus" }
-          expr       = "sum(increase(claude_code_pull_request_count_total[1d]))"
+          datasource   = { type = "prometheus" }
+          expr         = "sum(increase(claude_code_pull_request_count_total[1d]))"
           legendFormat = "PRs"
         }]
       },
@@ -150,8 +150,8 @@ resource "grafana_dashboard" "claude_code_overview" {
           y = 12
         }
         targets = [{
-          datasource = { type = "prometheus" }
-          expr       = "sum(increase(claude_code_active_time_total[1d]))"
+          datasource   = { type = "prometheus" }
+          expr         = "sum(increase(claude_code_active_time_total[1d]))"
           legendFormat = "Active Time"
         }]
         fieldConfig = {
@@ -171,8 +171,8 @@ resource "grafana_dashboard" "claude_code_overview" {
           y = 12
         }
         targets = [{
-          datasource = { type = "prometheus" }
-          expr       = "sum by (tool) (increase(claude_code_code_edit_tool_decision_total[7d]))"
+          datasource   = { type = "prometheus" }
+          expr         = "sum by (tool) (increase(claude_code_code_edit_tool_decision_total[7d]))"
           legendFormat = "{{tool}}"
         }]
       },

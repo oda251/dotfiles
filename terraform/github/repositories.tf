@@ -1,11 +1,11 @@
 variable "repositories" {
   description = "Map of repository name to config"
   type = map(object({
-    description       = optional(string, "")
-    visibility        = optional(string, "public")
-    topics            = optional(list(string), [])
-    is_template       = optional(bool, false)
-    template          = optional(string)
+    description   = optional(string, "")
+    visibility    = optional(string, "public")
+    topics        = optional(list(string), [])
+    is_template   = optional(bool, false)
+    template      = optional(string)
     has_terraform = optional(bool, false) # true なら TF workflow を配置
   }))
 }
@@ -40,10 +40,10 @@ resource "github_repository" "this" {
 resource "github_repository_file" "gate_workflow" {
   for_each = var.repositories
 
-  repository = github_repository.this[each.key].name
-  branch     = "main"
-  file       = ".github/workflows/gate.yml"
-  content    = templatefile("${path.module}/templates/gate.yml.tpl", {})
+  repository          = github_repository.this[each.key].name
+  branch              = "main"
+  file                = ".github/workflows/gate.yml"
+  content             = templatefile("${path.module}/templates/gate.yml.tpl", {})
   commit_message      = "chore: add gate workflow (managed by Terraform)"
   overwrite_on_create = true
 
@@ -55,10 +55,10 @@ resource "github_repository_file" "gate_workflow" {
 resource "github_repository_file" "terraform_workflow" {
   for_each = { for k, v in var.repositories : k => v if v.has_terraform }
 
-  repository = github_repository.this[each.key].name
-  branch     = "main"
-  file       = ".github/workflows/terraform.yml"
-  content    = templatefile("${path.module}/templates/terraform.yml.tpl", {})
+  repository          = github_repository.this[each.key].name
+  branch              = "main"
+  file                = ".github/workflows/terraform.yml"
+  content             = templatefile("${path.module}/templates/terraform.yml.tpl", {})
   commit_message      = "chore: update Terraform workflow (managed by Terraform)"
   overwrite_on_create = true
 
