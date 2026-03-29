@@ -9,7 +9,7 @@ variable "name" {
 }
 
 variable "content" {
-  description = "Worker script content (file path)"
+  description = "Worker script content (JavaScript/TypeScript source code)"
   type        = string
 }
 

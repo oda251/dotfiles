@@ -26,4 +26,8 @@ resource "grafana_dashboard" "claude_code_overview" {
   provider    = grafana.instance
   folder      = grafana_folder.claude_code.id
   config_json = file("${path.module}/dashboards/claude-code-overview.json")
+
+  lifecycle {
+    ignore_changes = [config_json]
+  }
 }
