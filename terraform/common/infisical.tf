@@ -2,7 +2,7 @@
 # TF ensures secrets exist; user fills in values via Infisical UI.
 
 locals {
-  env_slug = "prod"
+  secret_folders = toset(["terraform", "generated"])
 
   # User-managed secrets: TF creates the entry, user sets the value.
   user_secrets = {
@@ -13,16 +13,11 @@ locals {
   }
 }
 
-resource "infisical_secret_folder" "terraform" {
-  name         = "terraform"
-  env_slug     = local.env_slug
-  workspace_id = var.infisical_project_id
-  folder_path  = "/"
-}
+resource "infisical_secret_folder" "this" {
+  for_each = local.secret_folders
 
-resource "infisical_secret_folder" "generated" {
-  name         = "generated"
-  env_slug     = local.env_slug
+  name         = each.value
+  env_slug     = var.env_slug
   workspace_id = var.infisical_project_id
   folder_path  = "/"
 }
@@ -33,11 +28,11 @@ resource "infisical_secret" "user_managed" {
   name         = each.key
   value        = ""
   comment      = each.value.comment
-  env_slug     = local.env_slug
+  env_slug     = var.env_slug
   workspace_id = var.infisical_project_id
   folder_path  = each.value.folder
 
-  depends_on = [infisical_secret_folder.terraform]
+  depends_on = [infisical_secret_folder.this["terraform"]]
 
   lifecycle {
     ignore_changes  = [value]
@@ -61,4 +56,3 @@ resource "infisical_identity" "github_actions" {
 resource "infisical_identity_universal_auth" "github_actions" {
   identity_id = infisical_identity.github_actions.id
 }
-

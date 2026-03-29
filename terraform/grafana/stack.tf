@@ -9,27 +9,14 @@ resource "grafana_cloud_access_policy" "otlp_write" {
   display_name = "OTLP Write Access"
   region       = var.grafana_stack_region
 
-  scopes {
-    action = "metrics:write"
-    realm {
-      type       = "stack"
-      identifier = grafana_cloud_stack.this.id
-    }
-  }
-
-  scopes {
-    action = "logs:write"
-    realm {
-      type       = "stack"
-      identifier = grafana_cloud_stack.this.id
-    }
-  }
-
-  scopes {
-    action = "traces:write"
-    realm {
-      type       = "stack"
-      identifier = grafana_cloud_stack.this.id
+  dynamic "scopes" {
+    for_each = toset(["metrics:write", "logs:write", "traces:write"])
+    content {
+      action = scopes.value
+      realm {
+        type       = "stack"
+        identifier = grafana_cloud_stack.this.id
+      }
     }
   }
 }
