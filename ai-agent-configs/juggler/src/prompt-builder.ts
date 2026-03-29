@@ -10,11 +10,11 @@ export function buildWorkerPrompt(
   sections.push(`## 共通フロー
 
 1. タスク内容と inputs を確認する
-2. 要件不足 → juggler reject '{"reason": "理由"}'
+2. 要件不足 → juggler の reject ツールを呼ぶ（taskId: "${taskId}", reason: "理由"）
 3. 実行する（以下のワークフローに従う）
 4. セルフレビュー
-5a. OK → juggler done${formatOutputArgs(workflow.outputs)}
-5b. 問題あり → juggler reject '{"reason": "理由"}'
+5a. OK → juggler の done ツールを呼ぶ（taskId: "${taskId}"${formatOutputHint(workflow.outputs)}）
+5b. 問題あり → juggler の reject ツールを呼ぶ（taskId: "${taskId}", reason: "理由"）
 
 タスクID: ${taskId}`);
 
@@ -35,9 +35,8 @@ export function buildWorkerPrompt(
   return sections.join("\n");
 }
 
-function formatOutputArgs(outputs: Record<string, string>): string {
+function formatOutputHint(outputs: Record<string, string>): string {
   const keys = Object.keys(outputs);
   if (keys.length === 0) return "";
-  const example = Object.fromEntries(keys.map((k) => [k, "..."]));
-  return ` '${JSON.stringify(example)}'`;
+  return `, output: {${keys.map((k) => ` ${k}: "..." `).join(",")}}`;
 }

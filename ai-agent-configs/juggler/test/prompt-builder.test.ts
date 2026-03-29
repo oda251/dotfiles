@@ -28,8 +28,8 @@ describe("buildWorkerPrompt", () => {
     expect(prompt).toContain("src/auth/");
     expect(prompt).toContain("Write the code following TDD.");
     expect(prompt).toContain("changes");
-    expect(prompt).toContain('juggler done \'{"changes":"..."}\'');
-    expect(prompt).toContain("juggler reject");
+    expect(prompt).toContain("done ツール");
+    expect(prompt).toContain("reject ツール");
   });
 
   it("omits outputs section when no then chain", () => {
