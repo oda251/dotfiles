@@ -2,6 +2,6 @@ pre-commit:
   commands:
     lint:
       glob: "*.{ts,tsx}"
-      run: npx oxlint -c oxlintrc.json {staged_files}
+      run: bun x oxlint -c oxlintrc.json {staged_files}
     typecheck:
-      run: npx tsc --noEmit
+      run: bun x tsc --noEmit
