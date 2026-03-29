@@ -1,7 +1,9 @@
 output "name" {
-  value = cloudflare_pages_project.this.name
+  description = "Cloudflare Pages project name"
+  value       = cloudflare_pages_project.this.name
 }
 
 output "subdomain" {
-  value = "${cloudflare_pages_project.this.name}.pages.dev"
+  description = "Default Pages deployment subdomain"
+  value       = "${cloudflare_pages_project.this.name}.pages.dev"
 }
