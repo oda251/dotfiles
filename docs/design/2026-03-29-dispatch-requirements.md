@@ -1,0 +1,192 @@
+---
+tags:
+  - design
+  - dispatch
+  - agent-orchestration
+  - mcp
+---
+# dispatch — エージェントワークフローオーケストレーター
+
+## 概要
+
+dispatch は Claude Code メインエージェントとワーカーエージェントの間に立つオーケストレーター。
+MCP サーバーとしてデーモン動作し、ワークフロー定義に基づいてタスクの委譲・チェーン実行・通知を行う。
+
+## アーキテクチャ
+
+```
+CC メインエージェント ←MCP(ツール+Channel)→ dispatch daemon ←CLI→ ワーカーエージェント
+```
+
+- **メインエージェント**: ユーザーと対話し、タスクを分解して dispatch に投入する（plan）
+- **dispatch**: MCP サーバーとしてツール提供 + Channel で通知。ワーカーの起動・管理を行う
+- **ワーカー**: CC サブプロセスとして起動。ワークフロー定義に従い作業を実行する
+
+### 設計原則
+
+- plan と exec の境界は絶対。メインエージェントは実行しない、ワーカーは対話しない
+- メインエージェントの行動指針（hooks）はワーカーに漏洩させない（コンテキスト分離）
+- ワークフローの追加はディレクトリとファイルを足すだけ（動的バインド）
+- dispatch は CC セッションを跨いでデーモンとして動作する
+
+## MCP インターフェース
+
+### ツール（CC → dispatch）
+
+| ツール | 引数 | 返り値 | 説明 |
+|---|---|---|---|
+| `workflows` | なし | ワークフロー一覧 | callable なエントリポイントの description と inputs を返す |
+| `run` | `type`, `inputs`, `title` | taskId | ワーカーを起動してタスクを開始する |
+| `status` | `taskId?` | タスク状態一覧 | 実行中・完了・rejected のタスク一覧を返す |
+
+### Channel 通知（dispatch → CC）
+
+| イベント | 発火条件 | 内容 |
+|---|---|---|
+| `task.done` | then チェーンが全完了した時 | taskId, title, result |
+| `task.rejected` | ワーカーが reject した時 | taskId, title, reason |
+
+## CLI インターフェース（ワーカー → dispatch）
+
+| コマンド | 引数 | 動作 |
+|---|---|---|
+| `dispatch done` | `--output key=value ...` | then があれば次ステップを起動、なければ CC に通知 |
+| `dispatch reject` | `--reason "..."` | CC に通知 |
+
+## ワークフロー定義
+
+### ディレクトリ構造
+
+```
+workflows/
+  dev/
+    impl.md       # callable, then: review
+    review.md     # callable: false
+  research/
+    gather.md     # callable, then: write
+    write.md      # callable: false
+```
+
+### フロントマター仕様
+
+```yaml
+---
+description: string          # ワークフローの目的（workflows ツールで表示）
+inputs:                      # 入力パラメータ（key: 説明）
+  key1: 説明1
+  key2: 説明2
+requires-approval: bool      # ユーザー承認が必要か（デフォルト: false）
+then: string                 # 後続ステップのファイル名（拡張子なし）
+callable: bool               # workflows 一覧に出るか（デフォルト: true）
+---
+```
+
+### フロントマター各フィールドの責務
+
+| フィールド | デフォルト | 説明 |
+|---|---|---|
+| `description` | （必須） | ワークフローの目的。メインエージェントが委譲先を判断する材料 |
+| `inputs` | （必須） | 呼び出しに必要な入力。全て埋まらないと呼び出せない |
+| `requires-approval` | `false` | `true` の場合、メインエージェントがユーザーに承認を求める |
+| `then` | なし | 後続ステップ。同一ドメインディレクトリ内のファイル名 |
+| `callable` | `true` | `false` のステップは `workflows` ツールの一覧に含まれない |
+
+## then チェーンの動作
+
+### outputs の自動解決
+
+1. dispatch がエントリポイントの `then` を辿り、後続ステップの `inputs` を取得する
+2. 後続ステップの `inputs` からエントリポイントの `inputs` を引いた差分を outputs とする
+3. ワーカー起動時に「完了時にこの output を返せ」と共通フローで伝える
+4. ワーカーが `dispatch done --output key=value` で完了する
+5. dispatch が前ステップの inputs + outputs を次ステップの inputs として渡す
+
+### 例: dev/impl → dev/review
+
+```
+dev/impl の inputs:  { what, where, spec }
+dev/review の inputs: { changes }
+
+→ impl の outputs は { changes }（自動解決）
+→ ワーカーには「完了時に changes を返せ」と伝える
+→ impl 完了後、review に { changes } を渡す
+```
+
+## ワーカー起動
+
+dispatch がワーカーを起動する際、以下をプロンプトとして注入する:
+
+### 1. 共通フロー
+
+全ワーカーに共通の実行フロー:
+
+```
+1. タスク内容と inputs を確認する
+2. 要件不足 → dispatch reject --reason "理由"
+3. 実行する（ワークフロー本文に従う）
+4. セルフレビュー
+5a. OK → dispatch done --output key=value ...
+5b. 問題あり → dispatch reject --reason "理由"
+```
+
+### 2. ワークフロー本文
+
+該当する `.md` ファイルのフロントマター以降の本文。
+
+### 3. inputs
+
+メインエージェントが `run` ツールで渡した入力値、
+または前ステップから引き継いだ値。
+
+### 4. outputs 定義（then がある場合）
+
+「完了時に以下の output を返せ」として、
+後続ステップの inputs から逆算した output パラメータ名と説明。
+
+## データモデル
+
+```typescript
+interface Task {
+  id: string
+  type: string           // "dev/impl"
+  title: string          // "JWT検証ミドルウェア実装"
+  inputs: Record<string, string>
+  status: "running" | "done" | "rejected"
+  output?: Record<string, string>
+  reason?: string        // reject 時
+  then?: string          // "review"
+  chainParent?: string   // チェーン元の taskId
+}
+```
+
+## 承認制御
+
+メインエージェントは `requires-approval: true` のタスクを投入する前に、
+ユーザーに一括で提示して承認を得る。
+
+```
+[自動実行]
+- JWT vs Session 比較（research/gather）
+
+[承認待ち]
+- JWT検証ミドルウェア実装（dev/impl）
+- 認証APIエンドポイント実装（dev/impl）
+
+承認 / 修正 / 却下
+```
+
+`requires-approval: false` のタスクは確認なしで即実行する。
+
+## 技術スタック
+
+- TypeScript
+- MCP SDK（`@modelcontextprotocol/sdk`）
+- stdio transport（CC がサブプロセスとして起動）
+- Channel capability（`claude/channel`）で通知
+
+## 拡張ポイント
+
+- **新ドメイン追加**: `workflows/` にディレクトリとファイルを足すだけ
+- **スケジュール実行**: `schedule` ツールを追加し、cron で `run` を呼ぶ
+- **外部承認**: Channel の permission capability で Slack 等に承認を飛ばす
+- **タスク永続化**: ファイルベースの状態保存で CC セッション跨ぎ
