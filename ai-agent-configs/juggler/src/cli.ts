@@ -67,36 +67,34 @@ function runLint(dir: string) {
 }
 
 function runDone(args: string[]) {
-  const output: Record<string, string> = {};
-
-  for (let i = 0; i < args.length; i++) {
-    if (args[i] === "--output" && args[i + 1]) {
-      const pair = args[i + 1];
-      const eq = pair.indexOf("=");
-      if (eq === -1) {
-        console.error(`Invalid output format: ${pair} (expected key=value)`);
-        process.exit(1);
-      }
-      output[pair.slice(0, eq)] = pair.slice(eq + 1);
-      i++;
-    }
+  const json = args[0];
+  if (!json) {
+    console.error("Usage: juggler done '{\"key\": \"value\"}'");
+    process.exit(1);
   }
 
-  console.log(JSON.stringify({ action: "done", output }));
+  let output: unknown;
+  try {
+    output = JSON.parse(json);
+  } catch {
+    console.error(`Invalid JSON: ${json}`);
+    process.exit(1);
+  }
+
+  const parsed = v.safeParse(v.record(v.string(), v.string()), output);
+  if (!parsed.success) {
+    console.error("Output must be a JSON object with string values");
+    process.exit(1);
+  }
+
+  console.log(JSON.stringify({ action: "done", output: parsed.output }));
 }
 
 function runReject(args: string[]) {
-  let reason = "";
-
-  for (let i = 0; i < args.length; i++) {
-    if (args[i] === "--reason" && args[i + 1]) {
-      reason = args[i + 1];
-      break;
-    }
-  }
+  const reason = args.join(" ").trim();
 
   if (!reason) {
-    console.error("--reason is required");
+    console.error("Usage: juggler reject <reason>");
     process.exit(1);
   }
 
@@ -109,6 +107,6 @@ function printUsage() {
 Commands:
   serve [--dir path]            Start MCP server
   lint [--dir path]             Validate workflow definitions
-  done --output key=value ...   Complete current task with outputs
-  reject --reason "..."         Reject current task with reason`);
+  done '<json>'                 Complete current task with JSON outputs
+  reject <reason...>            Reject current task with reason`);
 }

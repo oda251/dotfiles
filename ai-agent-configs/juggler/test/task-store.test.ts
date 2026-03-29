@@ -69,6 +69,48 @@ describe("TaskStore", () => {
     expect(result._unsafeUnwrapErr()).toContain("not found");
   });
 
+  it("returns error on rejecting unknown task id", () => {
+    const store = new TaskStore();
+    const result = store.reject("nonexistent", "reason");
+    expect(result.isErr()).toBe(true);
+    expect(result._unsafeUnwrapErr()).toContain("not found");
+  });
+
+  it("returns error on rejecting already-rejected task", () => {
+    const store = new TaskStore();
+    const task = store.create({
+      type: "dev/impl",
+      title: "Test",
+      inputs: { what: "test" },
+    });
+    store.reject(task.id, "first");
+
+    const result = store.reject(task.id, "second");
+    expect(result.isErr()).toBe(true);
+    expect(result._unsafeUnwrapErr()).toContain("not running");
+  });
+
+  it("stores then and chainParent", () => {
+    const store = new TaskStore();
+    const task = store.create({
+      type: "dev/impl",
+      title: "Test",
+      inputs: {},
+      then: "review",
+      chainParent: "parent-123",
+    });
+
+    expect(task.then).toBe("review");
+    expect(task.chainParent).toBe("parent-123");
+  });
+
+  it("generates unique IDs", () => {
+    const store = new TaskStore();
+    const a = store.create({ type: "dev/impl", title: "A", inputs: {} });
+    const b = store.create({ type: "dev/impl", title: "B", inputs: {} });
+    expect(a.id).not.toBe(b.id);
+  });
+
   it("lists tasks", () => {
     const store = new TaskStore();
     store.create({ type: "dev/impl", title: "A", inputs: {} });
