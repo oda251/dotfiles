@@ -206,6 +206,92 @@ describe("status tool", () => {
   });
 });
 
+describe("done tool", () => {
+  it("completes a running task", async () => {
+    setupWorkflows();
+    const server = createServer(tmpDir);
+    const runResult = await callTool(server, "run", {
+      type: "dev/impl",
+      title: "Task A",
+      inputs: { what: "a", where: "b" },
+    });
+    const { taskId } = JSON.parse(runResult.content[0].text);
+
+    const result = await callTool(server, "done", {
+      taskId,
+      output: { changes: "src/foo.ts" },
+    });
+
+    expect(result.isError).toBeUndefined();
+    const data = JSON.parse(result.content[0].text);
+    expect(data.status).toBe("done");
+    expect(data.output.changes).toBe("src/foo.ts");
+  });
+
+  it("rejects invalid task ID", async () => {
+    setupWorkflows();
+    const server = createServer(tmpDir);
+    const result = await callTool(server, "done", {
+      taskId: "nonexistent",
+      output: { changes: "x" },
+    });
+
+    expect(result.isError).toBe(true);
+  });
+
+  it("rejects missing arguments", async () => {
+    setupWorkflows();
+    const server = createServer(tmpDir);
+    const result = await callTool(server, "done", {});
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain("Invalid arguments");
+  });
+});
+
+describe("reject tool", () => {
+  it("rejects a running task", async () => {
+    setupWorkflows();
+    const server = createServer(tmpDir);
+    const runResult = await callTool(server, "run", {
+      type: "dev/impl",
+      title: "Task A",
+      inputs: { what: "a", where: "b" },
+    });
+    const { taskId } = JSON.parse(runResult.content[0].text);
+
+    const result = await callTool(server, "reject", {
+      taskId,
+      reason: "Requirements unclear",
+    });
+
+    expect(result.isError).toBeUndefined();
+    const data = JSON.parse(result.content[0].text);
+    expect(data.status).toBe("rejected");
+    expect(data.reason).toBe("Requirements unclear");
+  });
+
+  it("rejects invalid task ID", async () => {
+    setupWorkflows();
+    const server = createServer(tmpDir);
+    const result = await callTool(server, "reject", {
+      taskId: "nonexistent",
+      reason: "bad",
+    });
+
+    expect(result.isError).toBe(true);
+  });
+
+  it("rejects missing arguments", async () => {
+    setupWorkflows();
+    const server = createServer(tmpDir);
+    const result = await callTool(server, "reject", {});
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain("Invalid arguments");
+  });
+});
+
 describe("unknown tool", () => {
   it("returns error", async () => {
     setupWorkflows();
@@ -218,15 +304,17 @@ describe("unknown tool", () => {
 });
 
 describe("tools list", () => {
-  it("exposes three tools", async () => {
+  it("exposes five tools", async () => {
     setupWorkflows();
     const server = createServer(tmpDir);
     const result = await listTools(server);
 
-    expect(result.tools).toHaveLength(3);
+    expect(result.tools).toHaveLength(5);
     const names = result.tools.map((t: { name: string }) => t.name);
     expect(names).toContain("workflows");
     expect(names).toContain("run");
+    expect(names).toContain("done");
+    expect(names).toContain("reject");
     expect(names).toContain("status");
   });
 });

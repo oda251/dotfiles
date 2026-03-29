@@ -20,6 +20,16 @@ const StatusArgsSchema = v.object({
   taskId: v.optional(v.string()),
 });
 
+const DoneArgsSchema = v.object({
+  taskId: v.pipe(v.string(), v.minLength(1)),
+  output: v.record(v.string(), v.string()),
+});
+
+const RejectArgsSchema = v.object({
+  taskId: v.pipe(v.string(), v.minLength(1)),
+  reason: v.pipe(v.string(), v.minLength(1)),
+});
+
 function textResponse(text: string) {
   return { content: [{ type: "text" as const, text }] };
 }
@@ -30,6 +40,10 @@ function errorResponse(text: string) {
 
 function jsonResponse(data: unknown) {
   return textResponse(JSON.stringify(data, null, 2));
+}
+
+function validationError(issues: v.BaseIssue<unknown>[]) {
+  return errorResponse(`Invalid arguments: ${issues.map((i) => i.message).join("; ")}`);
 }
 
 export function createServer(workflowsDir: string) {
@@ -81,6 +95,33 @@ export function createServer(workflowsDir: string) {
         },
       },
       {
+        name: "done",
+        description: "Complete a running task with output values",
+        inputSchema: {
+          type: "object" as const,
+          properties: {
+            taskId: { type: "string", description: "Task ID to complete" },
+            output: {
+              type: "object",
+              description: "Output key-value pairs",
+            },
+          },
+          required: ["taskId", "output"],
+        },
+      },
+      {
+        name: "reject",
+        description: "Reject a running task with a reason",
+        inputSchema: {
+          type: "object" as const,
+          properties: {
+            taskId: { type: "string", description: "Task ID to reject" },
+            reason: { type: "string", description: "Rejection reason" },
+          },
+          required: ["taskId", "reason"],
+        },
+      },
+      {
         name: "status",
         description: "Get status of tasks",
         inputSchema: {
@@ -104,6 +145,10 @@ export function createServer(workflowsDir: string) {
         return handleWorkflows(workflows);
       case "run":
         return handleRun(workflows, store, args);
+      case "done":
+        return handleDone(store, args);
+      case "reject":
+        return handleReject(store, args);
       case "status":
         return handleStatus(store, args);
       default:
@@ -112,10 +157,6 @@ export function createServer(workflowsDir: string) {
   });
 
   return { server, store, workflows };
-}
-
-function validationError(issues: v.BaseIssue<unknown>[]) {
-  return errorResponse(`Invalid arguments: ${issues.map((i) => i.message).join("; ")}`);
 }
 
 function handleWorkflows(workflows: Map<string, Workflow>) {
@@ -167,6 +208,30 @@ function handleRun(
   const prompt = buildWorkerPrompt(workflow, inputs, task.id);
 
   return jsonResponse({ taskId: task.id, status: "running", prompt });
+}
+
+function handleDone(store: TaskStore, args: unknown) {
+  const parsed = v.safeParse(DoneArgsSchema, args);
+  if (!parsed.success) return validationError(parsed.issues);
+
+  const { taskId, output } = parsed.output;
+  const result = store.complete(taskId, output);
+
+  if (result.isErr()) return errorResponse(result.error);
+
+  return jsonResponse({ taskId, status: "done", output });
+}
+
+function handleReject(store: TaskStore, args: unknown) {
+  const parsed = v.safeParse(RejectArgsSchema, args);
+  if (!parsed.success) return validationError(parsed.issues);
+
+  const { taskId, reason } = parsed.output;
+  const result = store.reject(taskId, reason);
+
+  if (result.isErr()) return errorResponse(result.error);
+
+  return jsonResponse({ taskId, status: "rejected", reason });
 }
 
 function handleStatus(store: TaskStore, args: unknown) {
