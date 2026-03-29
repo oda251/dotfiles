@@ -4,62 +4,80 @@
 
 ## 前提
 
-- Bitwarden アカウント作成済み
+- Infisical アカウント作成済み（https://app.infisical.com）
 - Grafana Cloud アカウント作成済み
-- `bw login` 済み（chezmoi が `bw` コマンドを利用）
+- Infisical プロジェクト作成済み
 
 ## 手順
 
-### 1. 環境変数ファイルの設定
+### 1. Infisical プロジェクトと Machine Identity の準備
 
-`terraform/.env.bw` にBitwarden 認証情報を記入:
+1. Infisical Web UI でプロジェクトを作成
+2. Machine Identity を作成（Universal Auth）し、プロジェクトにアクセス権を付与
+3. 以下の情報を控える:
+   - Organization ID
+   - Project ID
+   - Machine Identity の Client ID / Client Secret
+
+### 2. 環境変数ファイルの設定
+
+`terraform/.env.infisical` に認証情報を記入:
 
 ```
-TF_VAR_bw_email=<your-bitwarden-email>
-TF_VAR_bw_master_password=<your-master-password>
-TF_CLOUD_ORGANIZATION=<your-tf-cloud-org>
+export INFISICAL_UNIVERSAL_AUTH_CLIENT_ID=<client-id>
+export INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET=<client-secret>
+export INFISICAL_ORG_ID=<org-id>
+export TF_VAR_infisical_project_id=<project-id>
 ```
 
-### 2. common スタック (Bitwarden アイテム作成)
+### 3. common スタック (Infisical シークレット枠の作成)
+
+```sh
+make tf-init
+```
+
+または手動:
 
 ```sh
 cd terraform/common
-source ../.env.bw && terragrunt apply
+source ../.env.infisical && terragrunt apply
 ```
 
-apply 後、Bitwarden UI で各アイテムに値を設定:
+apply 後、Infisical Web UI で `/terraform` フォルダ内の各シークレットに値を設定:
 
-| アイテム | フィールド | 値 |
-|---|---|---|
-| `github-pat` | password | GitHub PAT |
-| `terraform-cloud` | password | TF Cloud API token |
-| `terraform-cloud` | organization (カスタムフィールド) | TF Cloud org 名 |
-| `grafana-cloud` | api-key (カスタムフィールド) | Grafana Cloud org-level API key |
+| シークレット | 値 |
+|---|---|
+| `GITHUB_PAT` | GitHub Personal Access Token |
+| `TF_API_TOKEN` | Terraform Cloud API token |
+| `TF_CLOUD_ORG` | Terraform Cloud organization 名 |
+| `GRAFANA_API_KEY` | Grafana Cloud org-level API key |
 
-### 3. 残りのスタックを一括 apply
-
-```sh
-cd terraform
-source .env.bw && terragrunt run-all apply
-```
-
-### 4. chezmoi apply
-
-```sh
-chezmoi apply
-```
-
-settings.json に OTel 環境変数が注入される。
-
-### 全スタック一括 (2 回目以降)
+### 4. 残りのスタックを一括 apply
 
 ```sh
 make tf-apply
 ```
 
-または:
+github スタックが GH Actions secrets に Infisical 認証情報を配布し、
+grafana スタックが OTLP credentials を `/generated` フォルダに書き込む。
+
+### 5. chezmoi apply
 
 ```sh
-cd terraform
-source .env.bw && terragrunt run-all apply
+infisical login
+chezmoi apply
 ```
+
+settings.json に OTel 環境変数が注入される。
+
+## 全スタック一括 (2 回目以降)
+
+```sh
+make tf-apply
+```
+
+## CI/CD
+
+GitHub Actions は Infisical Universal Auth で認証。
+`INFISICAL_CLIENT_ID` / `INFISICAL_CLIENT_SECRET` が GH Actions secrets に、
+`INFISICAL_PROJECT_ID` が GH Actions variables に自動配布される。

@@ -5,8 +5,8 @@
     "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
     "OTEL_METRICS_EXPORTER": "otlp",
     "OTEL_LOGS_EXPORTER": "otlp",
-    "OTEL_EXPORTER_OTLP_ENDPOINT": "{{ (bitwardenFields "item" "grafana-cloud-otlp").endpoint.value }}",
-    "OTEL_EXPORTER_OTLP_HEADERS": "Authorization=Basic {{ (bitwardenFields "item" "grafana-cloud-otlp").basic-auth.value }}",
+    "OTEL_EXPORTER_OTLP_ENDPOINT": "{{ output "infisical" "secrets" "get" "GRAFANA_OTLP_ENDPOINT" "--plain" "--silent" "--env" "prod" "--path" "/generated" | trim }}",
+    "OTEL_EXPORTER_OTLP_HEADERS": "Authorization=Basic {{ output "infisical" "secrets" "get" "GRAFANA_OTLP_BASIC_AUTH" "--plain" "--silent" "--env" "prod" "--path" "/generated" | trim }}",
     "OTEL_LOG_USER_PROMPTS": "1"
   },
   "enabledPlugins": {

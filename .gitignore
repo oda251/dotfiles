@@ -18,7 +18,7 @@ dot_zsh/local.zsh
 # Terragrunt
 .terragrunt-cache/
 backend.tf
-provider_bitwarden.tf
+provider_infisical.tf
 
 # Environment
 .env

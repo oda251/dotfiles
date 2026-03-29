@@ -5,12 +5,6 @@ inputs:
   working_directory:
     description: "Terraform working directory"
     required: true
-  tf_api_token:
-    description: "Terraform Cloud API token"
-    required: true
-  tf_cloud_organization:
-    description: "Terraform Cloud organization"
-    required: true
 
 outputs:
   apply_text_path:
@@ -24,8 +18,6 @@ runs:
       uses: oda251/dotfiles/.github/actions/terraform-setup@main
       with:
         working_directory: ${{ inputs.working_directory }}
-        tf_api_token: ${{ inputs.tf_api_token }}
-        tf_cloud_organization: ${{ inputs.tf_cloud_organization }}
 
     - name: Apply
       id: apply
@@ -37,5 +29,5 @@ runs:
         echo "apply_text_path=$APPLY_FILE" >> "$GITHUB_OUTPUT"
         terragrunt apply --terragrunt-no-auto-init -auto-approve -no-color 2>&1 | tee "$APPLY_FILE"
       env:
-        TF_TOKEN_app_terraform_io: ${{ inputs.tf_api_token }}
-        TF_CLOUD_ORGANIZATION: ${{ inputs.tf_cloud_organization }}
+        TF_TOKEN_app_terraform_io: ${{ env.TF_API_TOKEN }}
+        TF_CLOUD_ORGANIZATION: ${{ env.TF_CLOUD_ORG }}

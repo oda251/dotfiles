@@ -5,12 +5,6 @@ inputs:
   working_directory:
     description: "Terraform working directory"
     required: true
-  tf_api_token:
-    description: "Terraform Cloud API token"
-    required: true
-  tf_cloud_organization:
-    description: "Terraform Cloud organization"
-    required: true
 
 runs:
   using: composite
@@ -28,8 +22,8 @@ runs:
       working-directory: ${{ inputs.working_directory }}
       run: terragrunt init -no-color
       env:
-        TF_TOKEN_app_terraform_io: ${{ inputs.tf_api_token }}
-        TF_CLOUD_ORGANIZATION: ${{ inputs.tf_cloud_organization }}
+        TF_TOKEN_app_terraform_io: ${{ env.TF_API_TOKEN }}
+        TF_CLOUD_ORGANIZATION: ${{ env.TF_CLOUD_ORG }}
 
     - name: Set workspace to local execution
       shell: bash
@@ -43,5 +37,5 @@ runs:
           "https://app.terraform.io/api/v2/organizations/$TF_CLOUD_ORGANIZATION/workspaces/$WORKSPACE" \
           --data '{"data":{"type":"workspaces","attributes":{"execution-mode":"local"}}}'
       env:
-        TF_TOKEN_app_terraform_io: ${{ inputs.tf_api_token }}
-        TF_CLOUD_ORGANIZATION: ${{ inputs.tf_cloud_organization }}
+        TF_TOKEN_app_terraform_io: ${{ env.TF_API_TOKEN }}
+        TF_CLOUD_ORGANIZATION: ${{ env.TF_CLOUD_ORG }}

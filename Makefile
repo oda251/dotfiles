@@ -8,17 +8,17 @@ help: ## Show this help
 # Terraform
 # =============================================
 
-tf-init: ## Initial setup: common → user fills Bitwarden values → all stacks
-	cd terraform/common && source ../.env.bw && terragrunt apply
-	@echo "\nBitwarden で各アイテムに値を設定してから Enter を押してください"
+tf-init: ## Initial setup: common → user fills Infisical values → all stacks
+	cd terraform/common && source ../.env.infisical && terragrunt apply
+	@echo "\nInfisical Web UI で各シークレットに値を設定してから Enter を押してください"
 	@read _
-	cd terraform && source .env.bw && terragrunt run-all apply
+	cd terraform && source .env.infisical && terragrunt run-all apply
 
 tf-plan: ## Run terragrunt plan on all stacks
-	cd terraform && source .env.bw && terragrunt run-all plan
+	cd terraform && source .env.infisical && terragrunt run-all plan
 
 tf-apply: ## Run terragrunt apply on all stacks
-	cd terraform && source .env.bw && terragrunt run-all apply
+	cd terraform && source .env.infisical && terragrunt run-all apply
 
 tf-fmt: ## Format all terraform files
 	terraform fmt -recursive terraform/

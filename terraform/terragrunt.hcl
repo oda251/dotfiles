@@ -12,25 +12,17 @@ generate "backend" {
   EOF
 }
 
-generate "bitwarden" {
-  path      = "provider_bitwarden.tf"
+generate "infisical" {
+  path      = "provider_infisical.tf"
   if_exists = "overwrite_terragrunt"
   contents  = <<-EOF
-    provider "bitwarden" {
-      email           = var.bw_email
-      master_password = var.bw_master_password
-      server          = "https://vault.bitwarden.com"
+    provider "infisical" {
+      host = "https://app.infisical.com"
     }
 
-    variable "bw_email" {
-      description = "Bitwarden account email"
+    variable "infisical_project_id" {
+      description = "Infisical project ID"
       type        = string
-    }
-
-    variable "bw_master_password" {
-      description = "Bitwarden master password"
-      type        = string
-      sensitive   = true
     }
   EOF
 }
