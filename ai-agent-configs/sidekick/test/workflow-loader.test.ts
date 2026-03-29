@@ -1,0 +1,300 @@
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
+import {
+  loadWorkflows,
+  lint,
+  getCallableWorkflows,
+} from "../src/workflow-loader.js";
+
+let tmpDir: string;
+
+function createWorkflow(domain: string, name: string, content: string) {
+  const dir = join(tmpDir, domain);
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(join(dir, `${name}.md`), content);
+}
+
+beforeEach(() => {
+  tmpDir = mkdtempSync(join(tmpdir(), "sidekick-test-"));
+});
+
+afterEach(() => {
+  rmSync(tmpDir, { recursive: true, force: true });
+});
+
+describe("loadWorkflows", () => {
+  it("loads a valid workflow", () => {
+    createWorkflow(
+      "dev",
+      "impl",
+      `---
+description: Implement code
+inputs:
+  what: What to implement
+  where: Target file
+requires-approval: true
+then: review
+---
+
+Write the code.`,
+    );
+
+    createWorkflow(
+      "dev",
+      "review",
+      `---
+description: Review implementation
+callable: false
+inputs:
+  changes: Changed files
+---
+
+Review the changes.`,
+    );
+
+    const { workflows, errors } = loadWorkflows(tmpDir);
+    expect(errors).toHaveLength(0);
+    expect(workflows.size).toBe(2);
+
+    const impl = workflows.get("dev/impl")!;
+    expect(impl.frontmatter.description).toBe("Implement code");
+    expect(impl.frontmatter.inputs).toEqual({
+      what: "What to implement",
+      where: "Target file",
+    });
+    expect(impl.frontmatter["requires-approval"]).toBe(true);
+    expect(impl.frontmatter.then).toBe("review");
+    expect(impl.body).toBe("Write the code.");
+  });
+
+  it("rejects workflow with missing description", () => {
+    createWorkflow(
+      "dev",
+      "bad",
+      `---
+inputs:
+  what: Something
+---
+
+Body.`,
+    );
+
+    const { workflows, errors } = loadWorkflows(tmpDir);
+    expect(workflows.size).toBe(0);
+    expect(errors).toHaveLength(1);
+    expect(errors[0].message).toContain("description");
+  });
+
+  it("rejects workflow with missing inputs", () => {
+    createWorkflow(
+      "dev",
+      "bad",
+      `---
+description: Something
+---
+
+Body.`,
+    );
+
+    const { workflows, errors } = loadWorkflows(tmpDir);
+    expect(workflows.size).toBe(0);
+    expect(errors).toHaveLength(1);
+    expect(errors[0].message).toContain("inputs");
+  });
+
+  it("reports error for unresolved then reference", () => {
+    createWorkflow(
+      "dev",
+      "impl",
+      `---
+description: Implement
+inputs:
+  what: Something
+then: nonexistent
+---
+
+Body.`,
+    );
+
+    const { errors } = loadWorkflows(tmpDir);
+    expect(errors.some((e) => e.message.includes("non-existent"))).toBe(true);
+  });
+
+  it("resolves outputs from then chain", () => {
+    createWorkflow(
+      "dev",
+      "impl",
+      `---
+description: Implement
+inputs:
+  what: What to implement
+then: review
+---
+
+Body.`,
+    );
+
+    createWorkflow(
+      "dev",
+      "review",
+      `---
+description: Review
+callable: false
+inputs:
+  changes: Changed files
+---
+
+Review.`,
+    );
+
+    const { workflows } = loadWorkflows(tmpDir);
+    const impl = workflows.get("dev/impl")!;
+    expect(impl.outputs).toEqual({ changes: "Changed files" });
+  });
+
+  it("does not include shared inputs in outputs", () => {
+    createWorkflow(
+      "dev",
+      "impl",
+      `---
+description: Implement
+inputs:
+  what: What to implement
+  spec: Specification
+then: review
+---
+
+Body.`,
+    );
+
+    createWorkflow(
+      "dev",
+      "review",
+      `---
+description: Review
+callable: false
+inputs:
+  spec: Specification
+  changes: Changed files
+---
+
+Review.`,
+    );
+
+    const { workflows } = loadWorkflows(tmpDir);
+    const impl = workflows.get("dev/impl")!;
+    // spec is shared, only changes should be in outputs
+    expect(impl.outputs).toEqual({ changes: "Changed files" });
+  });
+});
+
+describe("lint", () => {
+  it("detects circular then chains", () => {
+    createWorkflow(
+      "dev",
+      "a",
+      `---
+description: A
+inputs:
+  x: X
+then: b
+---
+A.`,
+    );
+
+    createWorkflow(
+      "dev",
+      "b",
+      `---
+description: B
+inputs:
+  x: X
+then: a
+---
+B.`,
+    );
+
+    const errors = lint(tmpDir);
+    expect(errors.some((e) => e.message.includes("Circular"))).toBe(true);
+  });
+
+  it("detects orphaned non-callable workflows", () => {
+    createWorkflow(
+      "dev",
+      "orphan",
+      `---
+description: Orphan
+callable: false
+inputs:
+  x: X
+---
+Orphan.`,
+    );
+
+    const errors = lint(tmpDir);
+    expect(errors.some((e) => e.message.includes("orphaned"))).toBe(true);
+  });
+
+  it("passes for valid workflows", () => {
+    createWorkflow(
+      "dev",
+      "impl",
+      `---
+description: Implement
+inputs:
+  what: What
+then: review
+---
+Impl.`,
+    );
+
+    createWorkflow(
+      "dev",
+      "review",
+      `---
+description: Review
+callable: false
+inputs:
+  changes: Changes
+---
+Review.`,
+    );
+
+    const errors = lint(tmpDir);
+    expect(errors).toHaveLength(0);
+  });
+});
+
+describe("getCallableWorkflows", () => {
+  it("filters out non-callable workflows", () => {
+    createWorkflow(
+      "dev",
+      "impl",
+      `---
+description: Implement
+inputs:
+  what: What
+---
+Impl.`,
+    );
+
+    createWorkflow(
+      "dev",
+      "review",
+      `---
+description: Review
+callable: false
+inputs:
+  changes: Changes
+---
+Review.`,
+    );
+
+    const { workflows } = loadWorkflows(tmpDir);
+    const callable = getCallableWorkflows(workflows);
+    expect(callable).toHaveLength(1);
+    expect(callable[0].type).toBe("dev/impl");
+  });
+});
