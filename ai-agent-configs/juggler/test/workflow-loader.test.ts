@@ -17,7 +17,7 @@ function createWorkflow(domain: string, name: string, content: string) {
 }
 
 beforeEach(() => {
-  tmpDir = mkdtempSync(join(tmpdir(), "sidekick-test-"));
+  tmpDir = mkdtempSync(join(tmpdir(), "juggler-test-"));
 });
 
 afterEach(() => {

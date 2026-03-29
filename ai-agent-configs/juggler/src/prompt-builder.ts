@@ -10,11 +10,11 @@ export function buildWorkerPrompt(
   sections.push(`## 共通フロー
 
 1. タスク内容と inputs を確認する
-2. 要件不足 → sidekick reject --reason "理由"
+2. 要件不足 → juggler reject --reason "理由"
 3. 実行する（以下のワークフローに従う）
 4. セルフレビュー
-5a. OK → sidekick done${formatOutputArgs(workflow.outputs)}
-5b. 問題あり → sidekick reject --reason "理由"
+5a. OK → juggler done${formatOutputArgs(workflow.outputs)}
+5b. 問題あり → juggler reject --reason "理由"
 
 タスクID: ${taskId}`);
 
