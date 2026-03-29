@@ -188,6 +188,68 @@ Review.`,
     // spec is shared, only changes should be in outputs
     expect(impl.outputs).toEqual({ changes: "Changed files" });
   });
+
+  it("returns empty for non-existent directory", () => {
+    const { workflows, errors } = loadWorkflows("/tmp/nonexistent-dir-xxx");
+    expect(workflows.size).toBe(0);
+    expect(errors).toHaveLength(0);
+  });
+
+  it("defaults requires-approval to false and callable to true", () => {
+    createWorkflow(
+      "dev",
+      "simple",
+      `---
+description: Simple workflow
+inputs:
+  what: Something
+---
+
+Do it.`,
+    );
+
+    const { workflows } = loadWorkflows(tmpDir);
+    const simple = workflows.get("dev/simple") ?? (() => { throw new Error("not found"); })();
+    expect(simple.frontmatter["requires-approval"]).toBe(false);
+    expect(simple.frontmatter.callable).toBe(true);
+  });
+
+  it("loads workflows from multiple domains", () => {
+    createWorkflow("dev", "impl", `---
+description: Dev impl
+inputs:
+  what: What
+---
+Body.`);
+
+    createWorkflow("research", "gather", `---
+description: Research gather
+inputs:
+  topic: Topic
+---
+Body.`);
+
+    const { workflows, errors } = loadWorkflows(tmpDir);
+    expect(errors).toHaveLength(0);
+    expect(workflows.size).toBe(2);
+    expect(workflows.has("dev/impl")).toBe(true);
+    expect(workflows.has("research/gather")).toBe(true);
+  });
+
+  it("ignores non-.md files", () => {
+    createWorkflow("dev", "impl", `---
+description: Impl
+inputs:
+  what: What
+---
+Body.`);
+
+    const dir = join(tmpDir, "dev");
+    writeFileSync(join(dir, "notes.txt"), "not a workflow");
+
+    const { workflows } = loadWorkflows(tmpDir);
+    expect(workflows.size).toBe(1);
+  });
 });
 
 describe("lint", () => {

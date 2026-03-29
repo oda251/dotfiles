@@ -28,7 +28,7 @@ describe("buildWorkerPrompt", () => {
     expect(prompt).toContain("src/auth/");
     expect(prompt).toContain("Write the code following TDD.");
     expect(prompt).toContain("changes");
-    expect(prompt).toContain("juggler done");
+    expect(prompt).toContain('juggler done \'{"changes":"..."}\'');
     expect(prompt).toContain("juggler reject");
   });
 
