@@ -17,7 +17,7 @@
         {
           "datasource": { "type": "prometheus" },
           "expr": "sum(increase(claude_code_cost_usage_total[1d]))",
-          "legendFormat": "Cost"
+          "legendFormat": "Total"
         }
       ],
       "fieldConfig": {
@@ -26,9 +26,25 @@
     },
     {
       "id": 2,
-      "title": "Daily Token Usage",
+      "title": "Cost by Model",
       "type": "timeseries",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus" },
+          "expr": "sum by (model) (increase(claude_code_cost_usage_total[1d]))",
+          "legendFormat": "{{model}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "currencyUSD" }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Daily Token Usage by Type",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
       "targets": [
         {
           "datasource": { "type": "prometheus" },
@@ -38,10 +54,50 @@
       ]
     },
     {
-      "id": 3,
-      "title": "Sessions per Day",
+      "id": 4,
+      "title": "Cache Hit Ratio",
+      "type": "gauge",
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus" },
+          "expr": "sum(increase(claude_code_token_usage_total{type=\"cacheRead\"}[1d])) / (sum(increase(claude_code_token_usage_total{type=\"input\"}[1d])) + sum(increase(claude_code_token_usage_total{type=\"cacheRead\"}[1d])))",
+          "legendFormat": "Cache Ratio"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "steps": [
+              { "color": "red", "value": 0 },
+              { "color": "yellow", "value": 0.3 },
+              { "color": "green", "value": 0.6 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Token Usage by Model",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 8 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus" },
+          "expr": "sum by (model) (increase(claude_code_token_usage_total[1d]))",
+          "legendFormat": "{{model}}"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Sessions",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 8 },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 16 },
       "targets": [
         {
           "datasource": { "type": "prometheus" },
@@ -51,10 +107,10 @@
       ]
     },
     {
-      "id": 4,
-      "title": "Lines of Code Changed",
+      "id": 7,
+      "title": "Lines Changed",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 8 },
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 16 },
       "targets": [
         {
           "datasource": { "type": "prometheus" },
@@ -64,10 +120,10 @@
       ]
     },
     {
-      "id": 5,
-      "title": "Commits Created",
+      "id": 8,
+      "title": "Commits",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 8 },
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 16 },
       "targets": [
         {
           "datasource": { "type": "prometheus" },
@@ -77,10 +133,10 @@
       ]
     },
     {
-      "id": 6,
-      "title": "PRs Created",
+      "id": 9,
+      "title": "PRs",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 8 },
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 16 },
       "targets": [
         {
           "datasource": { "type": "prometheus" },
@@ -90,15 +146,33 @@
       ]
     },
     {
-      "id": 7,
-      "title": "Active Time",
-      "type": "timeseries",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "id": 10,
+      "title": "Lines Added vs Removed",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 16 },
       "targets": [
         {
           "datasource": { "type": "prometheus" },
-          "expr": "sum(increase(claude_code_active_time_total[1d]))",
-          "legendFormat": "Active Time"
+          "expr": "sum(increase(claude_code_lines_of_code_count_total{type=\"added\"}[1d]))",
+          "legendFormat": "Added"
+        },
+        {
+          "datasource": { "type": "prometheus" },
+          "expr": "sum(increase(claude_code_lines_of_code_count_total{type=\"removed\"}[1d]))",
+          "legendFormat": "Removed"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "Active Time (User vs CLI)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 20 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus" },
+          "expr": "sum by (type) (increase(claude_code_active_time_total[1d]))",
+          "legendFormat": "{{type}}"
         }
       ],
       "fieldConfig": {
@@ -106,27 +180,87 @@
       }
     },
     {
-      "id": 8,
+      "id": 12,
       "title": "Tool Decisions",
       "type": "piechart",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 },
       "targets": [
         {
           "datasource": { "type": "prometheus" },
-          "expr": "sum by (tool) (increase(claude_code_code_edit_tool_decision_total[7d]))",
-          "legendFormat": "{{tool}}"
+          "expr": "sum by (tool_name) (increase(claude_code_code_edit_tool_decision_total[7d]))",
+          "legendFormat": "{{tool_name}}"
         }
       ]
     },
     {
-      "id": 9,
-      "title": "User Prompts (Recent)",
-      "type": "logs",
-      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 20 },
+      "id": 13,
+      "title": "Edit Decisions by Language",
+      "type": "barchart",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 28 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus" },
+          "expr": "sum by (language, decision) (increase(claude_code_code_edit_tool_decision_total[7d]))",
+          "legendFormat": "{{language}} - {{decision}}"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "title": "API Latency (p50 / p95)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 28 },
       "targets": [
         {
           "datasource": { "type": "loki" },
-          "expr": "{service_name=\"claude-code\"} |= \"user_prompt\""
+          "expr": "quantile_over_time(0.50, {service_name=\"claude-code\"} | json | event_name=\"api_request\" | unwrap duration_ms [1h]) by ()",
+          "legendFormat": "p50"
+        },
+        {
+          "datasource": { "type": "loki" },
+          "expr": "quantile_over_time(0.95, {service_name=\"claude-code\"} | json | event_name=\"api_request\" | unwrap duration_ms [1h]) by ()",
+          "legendFormat": "p95"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "ms" }
+      }
+    },
+    {
+      "id": 15,
+      "title": "API Errors",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 36 },
+      "targets": [
+        {
+          "datasource": { "type": "loki" },
+          "expr": "sum by (status_code) (count_over_time({service_name=\"claude-code\"} | json | event_name=\"api_error\" [1h]))",
+          "legendFormat": "{{status_code}}"
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "title": "Top Tools Used",
+      "type": "barchart",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 36 },
+      "targets": [
+        {
+          "datasource": { "type": "loki" },
+          "expr": "sum by (tool_name) (count_over_time({service_name=\"claude-code\"} | json | event_name=\"tool_result\" [7d]))",
+          "legendFormat": "{{tool_name}}"
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "title": "User Prompts (Recent)",
+      "type": "logs",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 44 },
+      "targets": [
+        {
+          "datasource": { "type": "loki" },
+          "expr": "{service_name=\"claude-code\"} | json | event_name=\"user_prompt\""
         }
       ]
     }
