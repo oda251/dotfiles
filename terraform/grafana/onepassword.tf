@@ -1,0 +1,32 @@
+resource "onepassword_item" "grafana_otlp" {
+  vault = var.op_vault_id
+  title = "grafana-cloud-otlp"
+
+  section {
+    label = "OTLP Configuration"
+
+    field {
+      label = "endpoint"
+      value = local.otlp_endpoint
+      type  = "CONCEALED"
+    }
+
+    field {
+      label = "basic-auth"
+      value = local.otlp_basic_auth
+      type  = "CONCEALED"
+    }
+
+    field {
+      label = "instance-id"
+      value = tostring(grafana_cloud_stack.this.id)
+      type  = "CONCEALED"
+    }
+
+    field {
+      label = "token"
+      value = local.otlp_token
+      type  = "CONCEALED"
+    }
+  }
+}
