@@ -3,9 +3,15 @@
 .chezmoistate
 .git
 README.md
+CLAUDE.md
 LICENSE
+lefthook.yml
+mise.toml
 scripts/
 docs/
+terraform/
+.github/
+ai-agent-configs/
 
 # Windows-specific configs (ignore on non-Windows systems)
 {{ if ne .chezmoi.os "windows" }}
@@ -17,6 +23,11 @@ Documents/WindowsPowerShell/
 # macOS-specific configs (ignore on non-macOS systems)
 {{ if ne .chezmoi.os "darwin" }}
 .config/ghostty/
+{{ end }}
+
+# Linux/macOS-specific configs (ignore on Windows)
+{{ if eq .chezmoi.os "windows" }}
+.config/zellij/
 {{ end }}
 
 # Ignore all PowerShell scripts on non-Windows

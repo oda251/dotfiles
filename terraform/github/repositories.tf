@@ -6,7 +6,6 @@ variable "repositories" {
     topics            = optional(list(string), [])
     is_template       = optional(bool, false)
     template          = optional(string)
-    branch_protection = optional(bool, true)       # true: 直プッシュ不可+CI必須, false: 直プッシュOK
     has_terraform = optional(bool, false) # true なら TF workflow を配置
   }))
 }
@@ -38,6 +37,21 @@ resource "github_repository" "this" {
   }
 }
 
+resource "github_repository_file" "gate_workflow" {
+  for_each = var.repositories
+
+  repository = github_repository.this[each.key].name
+  branch     = "main"
+  file       = ".github/workflows/gate.yml"
+  content    = templatefile("${path.module}/templates/gate.yml.tpl", {})
+  commit_message      = "chore: add gate workflow (managed by Terraform)"
+  overwrite_on_create = true
+
+  lifecycle {
+    ignore_changes = [content]
+  }
+}
+
 resource "github_repository_file" "terraform_workflow" {
   for_each = { for k, v in var.repositories : k => v if v.has_terraform }
 
@@ -47,24 +61,44 @@ resource "github_repository_file" "terraform_workflow" {
   content    = templatefile("${path.module}/templates/terraform.yml.tpl", {})
   commit_message      = "chore: update Terraform workflow (managed by Terraform)"
   overwrite_on_create = true
+
+  lifecycle {
+    ignore_changes = [content]
+  }
 }
 
-resource "github_branch_protection" "main" {
-  for_each = { for k, v in var.repositories : k => v if v.branch_protection }
+resource "github_repository_ruleset" "main" {
+  for_each = var.repositories
 
-  depends_on    = [github_repository_file.terraform_workflow]
-  repository_id = github_repository.this[each.key].node_id
-  pattern       = "main"
+  repository  = github_repository.this[each.key].name
+  name        = "main"
+  target      = "branch"
+  enforcement = "active"
 
-  required_pull_request_reviews {
-    required_approving_review_count = 0
-    dismiss_stale_reviews           = true
+  bypass_actors {
+    actor_id    = 5 # Repository admin
+    actor_type  = "RepositoryRole"
+    bypass_mode = "always"
   }
 
-  required_status_checks {
-    strict = true
-    contexts = each.value.has_terraform ? ["gate"] : []
+  conditions {
+    ref_name {
+      include = ["~DEFAULT_BRANCH"]
+      exclude = []
+    }
   }
 
-  enforce_admins = true
+  rules {
+    pull_request {
+      required_approving_review_count = 1
+      dismiss_stale_reviews_on_push   = true
+    }
+
+    required_status_checks {
+      required_check {
+        context = "gate"
+      }
+      strict_required_status_checks_policy = true
+    }
+  }
 }
