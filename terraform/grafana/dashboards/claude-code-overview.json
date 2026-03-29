@@ -254,9 +254,73 @@
     },
     {
       "id": 17,
+      "title": "Skill Usage Ranking",
+      "type": "barchart",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 44 },
+      "targets": [
+        {
+          "datasource": { "type": "loki" },
+          "expr": "sum by (skill_name) (count_over_time({service_name=\"claude-code\"} | json | event_name=\"tool_result\" | tool_name=\"Skill\" | json tool_parameters | skill_name != \"\" [7d]))",
+          "legendFormat": "{{skill_name}}"
+        }
+      ],
+      "options": {
+        "orientation": "horizontal",
+        "showValue": "always"
+      }
+    },
+    {
+      "id": 18,
+      "title": "File References (Read/Glob)",
+      "type": "barchart",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 44 },
+      "targets": [
+        {
+          "datasource": { "type": "loki" },
+          "expr": "sum by (tool_name) (count_over_time({service_name=\"claude-code\"} | json | event_name=\"tool_result\" | tool_name=~\"Read|Glob|Grep\" [7d]))",
+          "legendFormat": "{{tool_name}}"
+        }
+      ],
+      "options": {
+        "orientation": "horizontal",
+        "showValue": "always"
+      }
+    },
+    {
+      "id": 19,
+      "title": "Most Read Files (Top 20)",
+      "type": "table",
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 52 },
+      "targets": [
+        {
+          "datasource": { "type": "loki" },
+          "expr": "topk(20, sum by (file_path) (count_over_time({service_name=\"claude-code\"} | json | event_name=\"tool_result\" | tool_name=\"Read\" | json tool_input | file_path != \"\" [7d])))",
+          "legendFormat": "{{file_path}}"
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "title": "MCP Server Tool Usage",
+      "type": "barchart",
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 52 },
+      "targets": [
+        {
+          "datasource": { "type": "loki" },
+          "expr": "sum by (mcp_server_scope) (count_over_time({service_name=\"claude-code\"} | json | event_name=\"tool_result\" | mcp_server_scope != \"\" [7d]))",
+          "legendFormat": "{{mcp_server_scope}}"
+        }
+      ],
+      "options": {
+        "orientation": "horizontal",
+        "showValue": "always"
+      }
+    },
+    {
+      "id": 21,
       "title": "User Prompts (Recent)",
       "type": "logs",
-      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 44 },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 62 },
       "targets": [
         {
           "datasource": { "type": "loki" },
