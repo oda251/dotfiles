@@ -4,20 +4,27 @@ import { resolve } from "node:path";
 import { lint } from "./workflow-loader.js";
 import { startServer } from "./server.js";
 
-const WORKFLOWS_DIR =
-  process.env.SIDEKICK_WORKFLOWS_DIR ??
-  resolve(process.env.HOME ?? "~", ".claude", "workflows");
-
 const args = process.argv.slice(2);
 const command = args[0];
 
+function resolveWorkflowsDir(args: string[]): string {
+  const dirIndex = args.indexOf("--dir");
+  if (dirIndex !== -1 && args[dirIndex + 1]) {
+    return resolve(args[dirIndex + 1]);
+  }
+  return (
+    process.env.SIDEKICK_WORKFLOWS_DIR ??
+    resolve(process.env.HOME ?? "~", ".claude", "workflows")
+  );
+}
+
 switch (command) {
   case "serve":
-    await startServer(WORKFLOWS_DIR);
+    await startServer(resolveWorkflowsDir(args));
     break;
 
   case "lint":
-    runLint(args[1] ?? WORKFLOWS_DIR);
+    runLint(resolveWorkflowsDir(args));
     break;
 
   case "done":
@@ -103,8 +110,8 @@ function printUsage() {
   console.log(`sidekick - Agent workflow orchestrator
 
 Commands:
-  serve                         Start MCP server
-  lint [dir]                    Validate workflow definitions
+  serve [--dir path]            Start MCP server
+  lint [--dir path]             Validate workflow definitions
   done --output key=value ...   Complete current task with outputs
   reject --reason "..."         Reject current task with reason`);
 }
