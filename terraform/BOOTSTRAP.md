@@ -4,50 +4,46 @@
 
 ## 前提
 
-- 1Password アカウント作成済み
+- Bitwarden アカウント作成済み
 - Grafana Cloud アカウント作成済み
-- `op signin` 済み
+- `bw login` 済み（chezmoi が `bw` コマンドを利用）
 
 ## 手順
 
-### 1. 1Password サービスアカウント作成
+### 1. 環境変数ファイルの設定
 
-1Password の Web UI でサービスアカウントを作成し、`dotfiles` vault へのアクセスを許可。
-credential と vault-id を控える。
+`terraform/.env.bw` にBitwarden 認証情報を記入:
 
-### 2. common スタック (1Password アイテム作成)
+```
+TF_VAR_bw_email=<your-bitwarden-email>
+TF_VAR_bw_master_password=<your-master-password>
+TF_CLOUD_ORGANIZATION=<your-tf-cloud-org>
+```
+
+### 2. common スタック (Bitwarden アイテム作成)
 
 ```sh
 cd terraform/common
-op run --env-file=../.env.op -- terragrunt apply
+source ../.env.bw && terragrunt apply
 ```
 
-apply 後、1Password UI で各アイテムに値を設定:
+apply 後、Bitwarden UI で各アイテムに値を設定:
 
 | アイテム | フィールド | 値 |
 |---|---|---|
 | `github-pat` | password | GitHub PAT |
 | `terraform-cloud` | password | TF Cloud API token |
-| `terraform-cloud` | Terraform Cloud > organization | TF Cloud org 名 |
-| `grafana-cloud` | API > api-key | Grafana Cloud org-level API key |
-| `1password-sa` | Service Account > credential | SA トークン |
-| `1password-sa` | Service Account > vault-id | vault ID |
+| `terraform-cloud` | organization (カスタムフィールド) | TF Cloud org 名 |
+| `grafana-cloud` | api-key (カスタムフィールド) | Grafana Cloud org-level API key |
 
-### 3. github スタック
+### 3. 残りのスタックを一括 apply
 
 ```sh
-cd terraform/github
-op run --env-file=../.env.op -- terragrunt apply
+cd terraform
+source .env.bw && terragrunt run-all apply
 ```
 
-### 4. grafana スタック
-
-```sh
-cd terraform/grafana
-op run --env-file=../.env.op -- terragrunt apply
-```
-
-### 5. chezmoi apply
+### 4. chezmoi apply
 
 ```sh
 chezmoi apply
@@ -55,11 +51,15 @@ chezmoi apply
 
 settings.json に OTel 環境変数が注入される。
 
-### 全スタック一括
+### 全スタック一括 (2 回目以降)
 
-2 回目以降は:
+```sh
+make tf-apply
+```
+
+または:
 
 ```sh
 cd terraform
-op run --env-file=.env.op -- terragrunt run-all apply
+source .env.bw && terragrunt run-all apply
 ```

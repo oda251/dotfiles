@@ -12,23 +12,25 @@ generate "backend" {
   EOF
 }
 
-generate "onepassword" {
-  path      = "provider_onepassword.tf"
+generate "bitwarden" {
+  path      = "provider_bitwarden.tf"
   if_exists = "overwrite_terragrunt"
   contents  = <<-EOF
-    provider "onepassword" {
-      service_account_token = var.op_service_account_token
+    provider "bitwarden" {
+      email           = var.bw_email
+      master_password = var.bw_master_password
+      server          = "https://vault.bitwarden.com"
     }
 
-    variable "op_service_account_token" {
-      description = "1Password service account token"
+    variable "bw_email" {
+      description = "Bitwarden account email"
+      type        = string
+    }
+
+    variable "bw_master_password" {
+      description = "Bitwarden master password"
       type        = string
       sensitive   = true
-    }
-
-    variable "op_vault_id" {
-      description = "1Password vault ID for storing secrets"
-      type        = string
     }
   EOF
 }

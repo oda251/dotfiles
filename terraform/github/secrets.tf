@@ -1,18 +1,12 @@
-data "onepassword_item" "terraform_cloud" {
-  vault = var.op_vault_id
-  title = "terraform-cloud"
-}
-
-data "onepassword_item" "github_pat" {
-  vault = var.op_vault_id
-  title = "github-pat"
+data "bitwarden_item_login" "terraform_cloud" {
+  search = "terraform-cloud"
 }
 
 locals {
   cd_secrets = {
-    TF_API_TOKEN          = data.onepassword_item.terraform_cloud.password
-    TF_CLOUD_ORGANIZATION = one([for s in data.onepassword_item.terraform_cloud.section : one([for f in s.field : f.value if f.label == "organization"]) if s.label == "Terraform Cloud"])
-    GH_PAT                = data.onepassword_item.github_pat.password
+    TF_API_TOKEN          = data.bitwarden_item_login.terraform_cloud.password
+    TF_CLOUD_ORGANIZATION = one([for f in data.bitwarden_item_login.terraform_cloud.field : f.text if f.name == "organization"])
+    GH_PAT                = data.bitwarden_item_login.github_pat.password
   }
   repos_with_terraform = { for k, v in var.repositories : k => v if v.has_terraform }
   # Cross product: repo × secret
