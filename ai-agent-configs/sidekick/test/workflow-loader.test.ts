@@ -58,7 +58,7 @@ Review the changes.`,
     expect(errors).toHaveLength(0);
     expect(workflows.size).toBe(2);
 
-    const impl = workflows.get("dev/impl")!;
+    const impl = workflows.get("dev/impl") ?? expect.unreachable("dev/impl not found");
     expect(impl.frontmatter.description).toBe("Implement code");
     expect(impl.frontmatter.inputs).toEqual({
       what: "What to implement",
@@ -150,7 +150,7 @@ Review.`,
     );
 
     const { workflows } = loadWorkflows(tmpDir);
-    const impl = workflows.get("dev/impl")!;
+    const impl = workflows.get("dev/impl") ?? expect.unreachable("dev/impl not found");
     expect(impl.outputs).toEqual({ changes: "Changed files" });
   });
 
@@ -184,7 +184,7 @@ Review.`,
     );
 
     const { workflows } = loadWorkflows(tmpDir);
-    const impl = workflows.get("dev/impl")!;
+    const impl = workflows.get("dev/impl") ?? expect.unreachable("dev/impl not found");
     // spec is shared, only changes should be in outputs
     expect(impl.outputs).toEqual({ changes: "Changed files" });
   });

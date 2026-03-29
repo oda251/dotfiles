@@ -1,22 +1,28 @@
 #!/usr/bin/env node
 
 import { resolve } from "node:path";
+import * as v from "valibot";
 import { lint } from "./workflow-loader.js";
 import { startServer } from "./server.js";
+import { exhaustive } from "./types.js";
 
-const args = process.argv.slice(2);
-const command = args[0];
+const EnvSchema = v.object({
+  SIDEKICK_WORKFLOWS_DIR: v.optional(v.string()),
+  HOME: v.optional(v.string()),
+});
+
+const env = v.parse(EnvSchema, process.env);
 
 function resolveWorkflowsDir(args: string[]): string {
   const dirIndex = args.indexOf("--dir");
   if (dirIndex !== -1 && args[dirIndex + 1]) {
     return resolve(args[dirIndex + 1]);
   }
-  return (
-    process.env.SIDEKICK_WORKFLOWS_DIR ??
-    resolve(process.env.HOME ?? "~", ".claude", "workflows")
-  );
+  return env.SIDEKICK_WORKFLOWS_DIR ?? resolve(env.HOME ?? "~", ".claude", "workflows");
 }
+
+const args = process.argv.slice(2);
+const command = args[0] as "serve" | "lint" | "done" | "reject" | undefined;
 
 switch (command) {
   case "serve":
@@ -35,9 +41,12 @@ switch (command) {
     runReject(args.slice(1));
     break;
 
-  default:
+  case undefined:
     printUsage();
-    process.exit(command ? 1 : 0);
+    break;
+
+  default:
+    exhaustive(command);
 }
 
 function runLint(dir: string) {
@@ -48,8 +57,8 @@ function runLint(dir: string) {
     process.exit(0);
   }
 
-  for (const err of errors) {
-    console.error(`✗ ${err.file}: ${err.message}`);
+  for (const e of errors) {
+    console.error(`✗ ${e.file}: ${e.message}`);
   }
   process.exit(1);
 }
