@@ -6,9 +6,9 @@ inputs = {
   github_owner = "oda251"
   repositories = {
     dotfiles = {
-      description      = "chezmoi dotfiles"
-      visibility       = "public"
-      terraform_stacks = ["terraform/github"]
+      description   = "chezmoi dotfiles"
+      visibility    = "public"
+      has_terraform = true
     }
   }
 }
