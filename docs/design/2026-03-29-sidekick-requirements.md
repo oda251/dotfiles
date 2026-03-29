@@ -1,25 +1,25 @@
 ---
 tags:
   - design
-  - dispatch
+  - sidekick
   - agent-orchestration
   - mcp
 ---
-# dispatch — エージェントワークフローオーケストレーター
+# sidekick — エージェントワークフローオーケストレーター
 
 ## 概要
 
-dispatch は Claude Code メインエージェントとワーカーエージェントの間に立つオーケストレーター。
+sidekick は Claude Code メインエージェントとワーカーエージェントの間に立つオーケストレーター。
 MCP サーバーとしてデーモン動作し、ワークフロー定義に基づいてタスクの委譲・チェーン実行・通知を行う。
 
 ## アーキテクチャ
 
 ```
-CC メインエージェント ←MCP(ツール+Channel)→ dispatch daemon ←CLI→ ワーカーエージェント
+CC メインエージェント ←MCP(ツール+Channel)→ sidekick daemon ←CLI→ ワーカーエージェント
 ```
 
-- **メインエージェント**: ユーザーと対話し、タスクを分解して dispatch に投入する（plan）
-- **dispatch**: MCP サーバーとしてツール提供 + Channel で通知。ワーカーの起動・管理を行う
+- **メインエージェント**: ユーザーと対話し、タスクを分解して sidekick に投入する（plan）
+- **sidekick**: MCP サーバーとしてツール提供 + Channel で通知。ワーカーの起動・管理を行う
 - **ワーカー**: CC サブプロセスとして起動。ワークフロー定義に従い作業を実行する
 
 ### 設計原則
@@ -27,11 +27,11 @@ CC メインエージェント ←MCP(ツール+Channel)→ dispatch daemon ←C
 - plan と exec の境界は絶対。メインエージェントは実行しない、ワーカーは対話しない
 - メインエージェントの行動指針（hooks）はワーカーに漏洩させない（コンテキスト分離）
 - ワークフローの追加はディレクトリとファイルを足すだけ（動的バインド）
-- dispatch は CC セッションを跨いでデーモンとして動作する
+- sidekick は CC セッションを跨いでデーモンとして動作する
 
 ## MCP インターフェース
 
-### ツール（CC → dispatch）
+### ツール（CC → sidekick）
 
 | ツール | 引数 | 返り値 | 説明 |
 |---|---|---|---|
@@ -39,19 +39,19 @@ CC メインエージェント ←MCP(ツール+Channel)→ dispatch daemon ←C
 | `run` | `type`, `inputs`, `title` | taskId | ワーカーを起動してタスクを開始する |
 | `status` | `taskId?` | タスク状態一覧 | 実行中・完了・rejected のタスク一覧を返す |
 
-### Channel 通知（dispatch → CC）
+### Channel 通知（sidekick → CC）
 
 | イベント | 発火条件 | 内容 |
 |---|---|---|
 | `task.done` | then チェーンが全完了した時 | taskId, title, result |
 | `task.rejected` | ワーカーが reject した時 | taskId, title, reason |
 
-## CLI インターフェース（ワーカー → dispatch）
+## CLI インターフェース（ワーカー → sidekick）
 
 | コマンド | 引数 | 動作 |
 |---|---|---|
-| `dispatch done` | `--output key=value ...` | then があれば次ステップを起動、なければ CC に通知 |
-| `dispatch reject` | `--reason "..."` | CC に通知 |
+| `sidekick done` | `--output key=value ...` | then があれば次ステップを起動、なければ CC に通知 |
+| `sidekick reject` | `--reason "..."` | CC に通知 |
 
 ## ワークフロー定義
 
@@ -95,11 +95,11 @@ callable: bool               # workflows 一覧に出るか（デフォルト: t
 
 ### outputs の自動解決
 
-1. dispatch がエントリポイントの `then` を辿り、後続ステップの `inputs` を取得する
+1. sidekick がエントリポイントの `then` を辿り、後続ステップの `inputs` を取得する
 2. 後続ステップの `inputs` からエントリポイントの `inputs` を引いた差分を outputs とする
 3. ワーカー起動時に「完了時にこの output を返せ」と共通フローで伝える
-4. ワーカーが `dispatch done --output key=value` で完了する
-5. dispatch が前ステップの inputs + outputs を次ステップの inputs として渡す
+4. ワーカーが `sidekick done --output key=value` で完了する
+5. sidekick が前ステップの inputs + outputs を次ステップの inputs として渡す
 
 ### 例: dev/impl → dev/review
 
@@ -114,7 +114,7 @@ dev/review の inputs: { changes }
 
 ## ワーカー起動
 
-dispatch がワーカーを起動する際、以下をプロンプトとして注入する:
+sidekick がワーカーを起動する際、以下をプロンプトとして注入する:
 
 ### 1. 共通フロー
 
@@ -122,11 +122,11 @@ dispatch がワーカーを起動する際、以下をプロンプトとして�
 
 ```
 1. タスク内容と inputs を確認する
-2. 要件不足 → dispatch reject --reason "理由"
+2. 要件不足 → sidekick reject --reason "理由"
 3. 実行する（ワークフロー本文に従う）
 4. セルフレビュー
-5a. OK → dispatch done --output key=value ...
-5b. 問題あり → dispatch reject --reason "理由"
+5a. OK → sidekick done --output key=value ...
+5b. 問題あり → sidekick reject --reason "理由"
 ```
 
 ### 2. ワークフロー本文
@@ -196,7 +196,7 @@ interface Task {
 
 ### lint コマンド
 
-`dispatch lint` で workflows/ のバリデーションを実行する。
+`sidekick lint` で workflows/ のバリデーションを実行する。
 
 - フロントマター解釈ロジックはランタイムと lint で共有する
 - lint は CI でも使えるよう、exit code でエラーを返す
