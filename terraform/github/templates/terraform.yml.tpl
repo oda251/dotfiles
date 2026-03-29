@@ -110,7 +110,7 @@ jobs:
 
   gate:
     if: always() && github.event_name == 'pull_request'
-    needs: [plan]
+    needs: [${join(", ", gate_needs)}]
     runs-on: ubuntu-latest
     steps:
       - run: exit 1
