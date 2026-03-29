@@ -55,22 +55,36 @@ resource "github_repository_file" "terraform_workflow" {
   }
 }
 
-resource "github_branch_protection" "main" {
+resource "github_repository_ruleset" "main" {
   for_each = { for k, v in var.repositories : k => v if v.branch_protection }
 
-  depends_on    = [github_repository_file.terraform_workflow]
-  repository_id = github_repository.this[each.key].node_id
-  pattern       = "main"
+  depends_on  = [github_repository_file.terraform_workflow]
+  repository  = github_repository.this[each.key].name
+  name        = "main"
+  target      = "branch"
+  enforcement = "active"
 
-  required_pull_request_reviews {
-    required_approving_review_count = 0
-    dismiss_stale_reviews           = true
+  conditions {
+    ref_name {
+      include = ["~DEFAULT_BRANCH"]
+      exclude = []
+    }
   }
 
-  required_status_checks {
-    strict = true
-    contexts = each.value.has_terraform ? ["gate"] : []
-  }
+  rules {
+    pull_request {
+      required_approving_review_count = 0
+      dismiss_stale_reviews_on_push   = true
+    }
 
-  enforce_admins = true
+    dynamic "required_status_checks" {
+      for_each = each.value.has_terraform ? [1] : []
+      content {
+        required_check {
+          context = "gate"
+        }
+        strict_required_status_checks_policy = true
+      }
+    }
+  }
 }
