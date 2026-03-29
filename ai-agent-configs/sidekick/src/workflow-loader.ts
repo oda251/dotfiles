@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, existsSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join, basename, dirname } from "node:path";
 import matter from "gray-matter";
 import * as v from "valibot";
@@ -13,10 +13,15 @@ const FrontmatterSchema = v.object({
 });
 
 function discoverWorkflowFiles(workflowsDir: string): string[] {
-  if (!existsSync(workflowsDir)) return [];
+  let entries: ReturnType<typeof readdirSync>;
+  try {
+    entries = readdirSync(workflowsDir, { withFileTypes: true });
+  } catch {
+    return [];
+  }
 
   const files: string[] = [];
-  for (const domain of readdirSync(workflowsDir, { withFileTypes: true })) {
+  for (const domain of entries) {
     if (!domain.isDirectory()) continue;
     const domainDir = join(workflowsDir, domain.name);
     for (const file of readdirSync(domainDir, { withFileTypes: true })) {
