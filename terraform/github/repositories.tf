@@ -49,6 +49,10 @@ resource "github_repository_file" "terraform_workflow" {
   })
   commit_message      = "chore: update Terraform workflow (managed by Terraform)"
   overwrite_on_create = true
+
+  lifecycle {
+    ignore_changes = [content]
+  }
 }
 
 resource "github_branch_protection" "main" {
