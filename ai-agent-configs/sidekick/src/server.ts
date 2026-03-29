@@ -4,17 +4,28 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
+import * as v from "valibot";
 import { loadWorkflows, getCallableWorkflows } from "./workflow-loader.js";
 import { TaskStore } from "./task-store.js";
 import { buildWorkerPrompt } from "./prompt-builder.js";
 import type { Workflow } from "./types.js";
 
+const RunArgsSchema = v.object({
+  type: v.pipe(v.string(), v.minLength(1)),
+  title: v.pipe(v.string(), v.minLength(1)),
+  inputs: v.record(v.string(), v.string()),
+});
+
+const StatusArgsSchema = v.object({
+  taskId: v.optional(v.string()),
+});
+
 export function createServer(workflowsDir: string) {
   const { workflows, errors } = loadWorkflows(workflowsDir);
 
   if (errors.length > 0) {
-    for (const err of errors) {
-      console.error(`[sidekick] workflow error: ${err.file}: ${err.message}`);
+    for (const e of errors) {
+      console.error(`[sidekick] workflow error: ${e.file}: ${e.message}`);
     }
   }
 
@@ -80,15 +91,14 @@ export function createServer(workflowsDir: string) {
       case "workflows":
         return handleWorkflows(workflows);
       case "run":
-        return handleRun(
-          workflows,
-          store,
-          args as { type: string; title: string; inputs: Record<string, string> },
-        );
+        return handleRun(workflows, store, args);
       case "status":
-        return handleStatus(store, args as { taskId?: string });
+        return handleStatus(store, args);
       default:
-        return { content: [{ type: "text", text: `Unknown tool: ${name}` }], isError: true };
+        return {
+          content: [{ type: "text" as const, text: `Unknown tool: ${name}` }],
+          isError: true,
+        };
     }
   });
 
@@ -105,19 +115,37 @@ function handleWorkflows(workflows: Map<string, Workflow>) {
   }));
 
   return {
-    content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
+    content: [
+      { type: "text" as const, text: JSON.stringify(result, null, 2) },
+    ],
   };
 }
 
 function handleRun(
   workflows: Map<string, Workflow>,
   store: TaskStore,
-  args: { type: string; title: string; inputs: Record<string, string> },
+  args: unknown,
 ) {
-  const workflow = workflows.get(args.type);
+  const parsed = v.safeParse(RunArgsSchema, args);
+  if (!parsed.success) {
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text: `Invalid arguments: ${parsed.issues.map((i) => i.message).join("; ")}`,
+        },
+      ],
+      isError: true,
+    };
+  }
+
+  const { type, title, inputs } = parsed.output;
+  const workflow = workflows.get(type);
   if (!workflow) {
     return {
-      content: [{ type: "text" as const, text: `Unknown workflow type: ${args.type}` }],
+      content: [
+        { type: "text" as const, text: `Unknown workflow type: ${type}` },
+      ],
       isError: true,
     };
   }
@@ -127,17 +155,16 @@ function handleRun(
       content: [
         {
           type: "text" as const,
-          text: `Workflow ${args.type} is not callable (internal chain step)`,
+          text: `Workflow ${type} is not callable (internal chain step)`,
         },
       ],
       isError: true,
     };
   }
 
-  // Validate inputs
   const missingInputs: string[] = [];
   for (const key of Object.keys(workflow.frontmatter.inputs)) {
-    if (!(key in args.inputs) || !args.inputs[key]) {
+    if (!(key in inputs) || !inputs[key]) {
       missingInputs.push(key);
     }
   }
@@ -155,49 +182,61 @@ function handleRun(
   }
 
   const task = store.create({
-    type: args.type,
-    title: args.title,
-    inputs: args.inputs,
+    type,
+    title,
+    inputs,
     then: workflow.frontmatter.then,
   });
 
-  const prompt = buildWorkerPrompt(workflow, args.inputs, task.id);
+  const prompt = buildWorkerPrompt(workflow, inputs, task.id);
 
   return {
     content: [
       {
         type: "text" as const,
-        text: JSON.stringify(
-          {
-            taskId: task.id,
-            status: "running",
-            prompt,
-          },
-          null,
-          2,
-        ),
+        text: JSON.stringify({ taskId: task.id, status: "running", prompt }, null, 2),
       },
     ],
   };
 }
 
-function handleStatus(store: TaskStore, args: { taskId?: string }) {
-  if (args.taskId) {
-    const task = store.get(args.taskId);
+function handleStatus(store: TaskStore, args: unknown) {
+  const parsed = v.safeParse(StatusArgsSchema, args);
+  if (!parsed.success) {
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text: `Invalid arguments: ${parsed.issues.map((i) => i.message).join("; ")}`,
+        },
+      ],
+      isError: true,
+    };
+  }
+
+  const { taskId } = parsed.output;
+  if (taskId) {
+    const task = store.get(taskId);
     if (!task) {
       return {
-        content: [{ type: "text" as const, text: `Task not found: ${args.taskId}` }],
+        content: [
+          { type: "text" as const, text: `Task not found: ${taskId}` },
+        ],
         isError: true,
       };
     }
     return {
-      content: [{ type: "text" as const, text: JSON.stringify(task, null, 2) }],
+      content: [
+        { type: "text" as const, text: JSON.stringify(task, null, 2) },
+      ],
     };
   }
 
   const tasks = store.list();
   return {
-    content: [{ type: "text" as const, text: JSON.stringify(tasks, null, 2) }],
+    content: [
+      { type: "text" as const, text: JSON.stringify(tasks, null, 2) },
+    ],
   };
 }
 

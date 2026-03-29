@@ -33,3 +33,7 @@ export interface LintError {
   file: string;
   message: string;
 }
+
+export function exhaustive(_value: never): never {
+  throw new Error(`Unhandled value: ${String(_value)}`);
+}

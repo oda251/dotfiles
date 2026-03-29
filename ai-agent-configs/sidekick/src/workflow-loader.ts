@@ -1,30 +1,16 @@
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join, basename, dirname } from "node:path";
 import matter from "gray-matter";
-import type { Workflow, WorkflowFrontmatter, LintError } from "./types.js";
+import * as v from "valibot";
+import type { Workflow, LintError } from "./types.js";
 
-function parseFrontmatter(
-  raw: Record<string, unknown>,
-): WorkflowFrontmatter | null {
-  if (typeof raw.description !== "string" || !raw.description) return null;
-  if (typeof raw.inputs !== "object" || raw.inputs === null) return null;
-
-  const inputs = raw.inputs as Record<string, unknown>;
-  for (const [, v] of Object.entries(inputs)) {
-    if (typeof v !== "string") return null;
-  }
-
-  return {
-    description: raw.description,
-    inputs: inputs as Record<string, string>,
-    "requires-approval":
-      typeof raw["requires-approval"] === "boolean"
-        ? raw["requires-approval"]
-        : false,
-    then: typeof raw.then === "string" ? raw.then : undefined,
-    callable: typeof raw.callable === "boolean" ? raw.callable : true,
-  };
-}
+const FrontmatterSchema = v.object({
+  description: v.pipe(v.string(), v.minLength(1)),
+  inputs: v.record(v.string(), v.string()),
+  "requires-approval": v.optional(v.boolean(), false),
+  then: v.optional(v.string()),
+  callable: v.optional(v.boolean(), true),
+});
 
 function discoverWorkflowFiles(workflowsDir: string): string[] {
   if (!existsSync(workflowsDir)) return [];
@@ -64,13 +50,13 @@ export function loadWorkflows(workflowsDir: string): {
     }
 
     const { data, content } = matter(raw);
-    const frontmatter = parseFrontmatter(data);
+    const result = v.safeParse(FrontmatterSchema, data);
 
-    if (!frontmatter) {
+    if (!result.success) {
+      const issues = result.issues.map((i) => i.message).join("; ");
       errors.push({
         file: type,
-        message:
-          "Invalid frontmatter: description (string) and inputs (object) are required",
+        message: `Invalid frontmatter: ${issues}`,
       });
       continue;
     }
@@ -79,7 +65,7 @@ export function loadWorkflows(workflowsDir: string): {
       type,
       domain,
       name,
-      frontmatter,
+      frontmatter: result.output,
       body: content.trim(),
       outputs: {},
     });
@@ -101,7 +87,6 @@ export function loadWorkflows(workflowsDir: string): {
       continue;
     }
 
-    // Resolve outputs: then-target's inputs minus current inputs
     const currentInputKeys = new Set(
       Object.keys(workflow.frontmatter.inputs),
     );
@@ -118,7 +103,7 @@ export function loadWorkflows(workflowsDir: string): {
 export function lint(workflowsDir: string): LintError[] {
   const { workflows, errors } = loadWorkflows(workflowsDir);
 
-  // Check for circular then chains
+  // Circular then chains
   for (const [type, workflow] of workflows) {
     if (!workflow.frontmatter.then) continue;
 
@@ -140,7 +125,7 @@ export function lint(workflowsDir: string): LintError[] {
     }
   }
 
-  // Check for orphaned non-callable workflows
+  // Orphaned non-callable workflows
   const referencedByThen = new Set<string>();
   for (const [, workflow] of workflows) {
     if (workflow.frontmatter.then) {

@@ -24,9 +24,11 @@ describe("TaskStore", () => {
       inputs: { what: "test" },
     });
 
-    const completed = store.complete(task.id, {
+    const result = store.complete(task.id, {
       changes: "src/auth/middleware.ts",
     });
+    expect(result.isOk()).toBe(true);
+    const completed = result._unsafeUnwrap();
     expect(completed.status).toBe("done");
     expect(completed.output).toEqual({ changes: "src/auth/middleware.ts" });
   });
@@ -39,12 +41,14 @@ describe("TaskStore", () => {
       inputs: { what: "test" },
     });
 
-    const rejected = store.reject(task.id, "Missing spec");
+    const result = store.reject(task.id, "Missing spec");
+    expect(result.isOk()).toBe(true);
+    const rejected = result._unsafeUnwrap();
     expect(rejected.status).toBe("rejected");
     expect(rejected.reason).toBe("Missing spec");
   });
 
-  it("throws on completing non-running task", () => {
+  it("returns error on completing non-running task", () => {
     const store = new TaskStore();
     const task = store.create({
       type: "dev/impl",
@@ -53,12 +57,16 @@ describe("TaskStore", () => {
     });
     store.complete(task.id, {});
 
-    expect(() => store.complete(task.id, {})).toThrow("not running");
+    const result = store.complete(task.id, {});
+    expect(result.isErr()).toBe(true);
+    expect(result._unsafeUnwrapErr()).toContain("not running");
   });
 
-  it("throws on unknown task id", () => {
+  it("returns error on unknown task id", () => {
     const store = new TaskStore();
-    expect(() => store.complete("nonexistent", {})).toThrow("not found");
+    const result = store.complete("nonexistent", {});
+    expect(result.isErr()).toBe(true);
+    expect(result._unsafeUnwrapErr()).toContain("not found");
   });
 
   it("lists tasks", () => {

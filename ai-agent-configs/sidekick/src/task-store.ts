@@ -1,4 +1,5 @@
 import { nanoid } from "nanoid";
+import { ok, err, type Result } from "neverthrow";
 import type { Task } from "./types.js";
 
 export class TaskStore {
@@ -28,24 +29,24 @@ export class TaskStore {
     return this.tasks.get(id);
   }
 
-  complete(id: string, output: Record<string, string>): Task {
+  complete(id: string, output: Record<string, string>): Result<Task, string> {
     const task = this.tasks.get(id);
-    if (!task) throw new Error(`Task not found: ${id}`);
+    if (!task) return err(`Task not found: ${id}`);
     if (task.status !== "running")
-      throw new Error(`Task ${id} is not running (status: ${task.status})`);
+      return err(`Task ${id} is not running (status: ${task.status})`);
     task.status = "done";
     task.output = output;
-    return task;
+    return ok(task);
   }
 
-  reject(id: string, reason: string): Task {
+  reject(id: string, reason: string): Result<Task, string> {
     const task = this.tasks.get(id);
-    if (!task) throw new Error(`Task not found: ${id}`);
+    if (!task) return err(`Task not found: ${id}`);
     if (task.status !== "running")
-      throw new Error(`Task ${id} is not running (status: ${task.status})`);
+      return err(`Task ${id} is not running (status: ${task.status})`);
     task.status = "rejected";
     task.reason = reason;
-    return task;
+    return ok(task);
   }
 
   list(): Task[] {
