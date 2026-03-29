@@ -43,9 +43,7 @@ resource "github_repository_file" "terraform_workflow" {
   repository = github_repository.this[each.key].name
   branch     = "main"
   file       = ".github/workflows/terraform.yml"
-  content    = templatefile("${path.module}/templates/terraform.yml.tpl", {
-    gate_needs = ["plan"]
-  })
+  content    = templatefile("${path.module}/templates/terraform.yml.tpl", {})
   commit_message      = "chore: update Terraform workflow (managed by Terraform)"
   overwrite_on_create = true
 
@@ -57,7 +55,6 @@ resource "github_repository_file" "terraform_workflow" {
 resource "github_repository_ruleset" "main" {
   for_each = var.repositories
 
-  depends_on  = [github_repository_file.terraform_workflow]
   repository  = github_repository.this[each.key].name
   name        = "main"
   target      = "branch"
