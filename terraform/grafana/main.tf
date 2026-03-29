@@ -21,6 +21,17 @@ provider "onepassword" {
   service_account_token = var.op_service_account_token
 }
 
+variable "op_service_account_token" {
+  description = "1Password service account token"
+  type        = string
+  sensitive   = true
+}
+
+variable "op_vault_id" {
+  description = "1Password vault ID for storing secrets"
+  type        = string
+}
+
 variable "grafana_cloud_api_key" {
   description = "Grafana Cloud API key (org-level)"
   type        = string
@@ -36,15 +47,4 @@ variable "grafana_stack_region" {
   description = "Grafana Cloud stack region"
   type        = string
   default     = "ap-northeast-0"
-}
-
-variable "op_service_account_token" {
-  description = "1Password service account token"
-  type        = string
-  sensitive   = true
-}
-
-variable "op_vault_id" {
-  description = "1Password vault ID for storing secrets"
-  type        = string
 }
