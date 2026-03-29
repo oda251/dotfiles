@@ -91,14 +91,27 @@ function runDone(args: string[]) {
 }
 
 function runReject(args: string[]) {
-  const reason = args.join(" ").trim();
-
-  if (!reason) {
-    console.error("Usage: juggler reject <reason>");
+  const json = args[0];
+  if (!json) {
+    console.error('Usage: juggler reject \'{"reason": "..."}\'');
     process.exit(1);
   }
 
-  console.log(JSON.stringify({ action: "reject", reason }));
+  let data: unknown;
+  try {
+    data = JSON.parse(json);
+  } catch {
+    console.error(`Invalid JSON: ${json}`);
+    process.exit(1);
+  }
+
+  const parsed = v.safeParse(v.object({ reason: v.pipe(v.string(), v.minLength(1)) }), data);
+  if (!parsed.success) {
+    console.error('JSON must have a non-empty "reason" field');
+    process.exit(1);
+  }
+
+  console.log(JSON.stringify({ action: "reject", reason: parsed.output.reason }));
 }
 
 function printUsage() {
@@ -108,5 +121,5 @@ Commands:
   serve [--dir path]            Start MCP server
   lint [--dir path]             Validate workflow definitions
   done '<json>'                 Complete current task with JSON outputs
-  reject <reason...>            Reject current task with reason`);
+  reject '<json>'               Reject current task (requires "reason" field)`);
 }
