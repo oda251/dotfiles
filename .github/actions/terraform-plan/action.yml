@@ -5,12 +5,6 @@ inputs:
   working_directory:
     description: "Terraform working directory"
     required: true
-  tf_api_token:
-    description: "Terraform Cloud API token"
-    required: true
-  tf_cloud_organization:
-    description: "Terraform Cloud organization"
-    required: true
 
 outputs:
   plan_text_path:
@@ -33,8 +27,6 @@ runs:
       uses: oda251/dotfiles/.github/actions/terraform-setup@main
       with:
         working_directory: ${{ inputs.working_directory }}
-        tf_api_token: ${{ inputs.tf_api_token }}
-        tf_cloud_organization: ${{ inputs.tf_cloud_organization }}
 
     - name: Plan
       id: plan
@@ -67,5 +59,5 @@ runs:
         HASH=$(grep -v '^\s*Warning:' "$PLAN_FILE" | grep -v '^\s*│' | sha256sum | cut -d' ' -f1)
         echo "plan_hash=$HASH" >> "$GITHUB_OUTPUT"
       env:
-        TF_TOKEN_app_terraform_io: ${{ inputs.tf_api_token }}
-        TF_CLOUD_ORGANIZATION: ${{ inputs.tf_cloud_organization }}
+        TF_TOKEN_app_terraform_io: ${{ env.TF_API_TOKEN }}
+        TF_CLOUD_ORGANIZATION: ${{ env.TF_CLOUD_ORG }}

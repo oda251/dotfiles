@@ -12,9 +12,6 @@ permissions:
   contents: read
   pull-requests: write
 
-env:
-  GITHUB_TOKEN: $${{ secrets.GH_PAT }}
-
 jobs:
   plan:
     if: github.event_name == 'pull_request'
@@ -22,13 +19,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Fetch Infisical Secrets
+        uses: Infisical/secrets-action@v1.0.12
+        with:
+          method: "universal"
+          client-id: $${{ secrets.INFISICAL_CLIENT_ID }}
+          client-secret: $${{ secrets.INFISICAL_CLIENT_SECRET }}
+          env-slug: "prod"
+          project-slug: $${{ vars.INFISICAL_PROJECT_ID }}
+          secret-path: "/terraform"
+
       - name: Plan
         id: plan
         uses: oda251/dotfiles/.github/actions/terraform-plan@main
         with:
           working_directory: terraform
-          tf_api_token: $${{ secrets.TF_API_TOKEN }}
-          tf_cloud_organization: $${{ secrets.TF_CLOUD_ORGANIZATION }}
 
       - name: Comment
         if: always() && steps.plan.outputs.plan_text_path
@@ -48,8 +53,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Fetch Infisical Secrets
+        uses: Infisical/secrets-action@v1.0.12
+        with:
+          method: "universal"
+          client-id: $${{ secrets.INFISICAL_CLIENT_ID }}
+          client-secret: $${{ secrets.INFISICAL_CLIENT_SECRET }}
+          env-slug: "prod"
+          project-slug: $${{ vars.INFISICAL_PROJECT_ID }}
+          secret-path: "/terraform"
+
       - uses: oda251/dotfiles/.github/actions/terraform-apply@main
         with:
           working_directory: terraform
-          tf_api_token: $${{ secrets.TF_API_TOKEN }}
-          tf_cloud_organization: $${{ secrets.TF_CLOUD_ORGANIZATION }}

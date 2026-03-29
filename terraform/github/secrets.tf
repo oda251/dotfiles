@@ -1,29 +1,27 @@
-variable "tf_api_token" {
-  description = "Terraform Cloud API token"
+# Distribute Infisical credentials to repos for CI/CD.
+# GH Actions uses Universal Auth to fetch secrets from Infisical at runtime.
+# No static secrets stored in GitHub — only the Infisical client_id/secret.
+
+variable "infisical_client_id" {
+  description = "Infisical Universal Auth client ID for GitHub Actions"
   type        = string
-  sensitive   = true
 }
 
-variable "tf_cloud_organization" {
-  description = "Terraform Cloud organization name"
-  type        = string
-  sensitive   = true
-}
-
-variable "gh_pat" {
-  description = "GitHub PAT for repository management"
+variable "infisical_client_secret" {
+  description = "Infisical Universal Auth client secret for GitHub Actions"
   type        = string
   sensitive   = true
 }
 
 locals {
-  cd_secrets = {
-    TF_API_TOKEN          = var.tf_api_token
-    TF_CLOUD_ORGANIZATION = var.tf_cloud_organization
-    GH_PAT                = var.gh_pat
-  }
   repos_with_terraform = { for k, v in var.repositories : k => v if v.has_terraform }
-  # Cross product: repo × secret
+
+  # Secrets: Infisical auth credentials
+  cd_secrets = {
+    INFISICAL_CLIENT_ID     = var.infisical_client_id
+    INFISICAL_CLIENT_SECRET = var.infisical_client_secret
+  }
+
   repo_secrets = { for pair in flatten([
     for repo_key, repo in local.repos_with_terraform : [
       for secret_key, secret_value in local.cd_secrets : {
@@ -42,4 +40,12 @@ resource "github_actions_secret" "this" {
   repository      = github_repository.this[each.value.repo].name
   secret_name     = each.value.name
   plaintext_value = each.value.value
+}
+
+resource "github_actions_variable" "infisical_project_id" {
+  for_each = local.repos_with_terraform
+
+  repository    = github_repository.this[each.key].name
+  variable_name = "INFISICAL_PROJECT_ID"
+  value         = var.infisical_project_id
 }
