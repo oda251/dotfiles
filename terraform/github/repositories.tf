@@ -63,7 +63,7 @@ resource "github_branch_protection" "main" {
 
   required_status_checks {
     strict = true
-    contexts = each.value.has_terraform ? ["plan"] : []
+    contexts = each.value.has_terraform ? ["gate"] : []
   }
 
   enforce_admins = true

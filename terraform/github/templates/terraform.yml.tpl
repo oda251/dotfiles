@@ -107,3 +107,11 @@ jobs:
           command: apply
           output_path: $${{ steps.apply.outputs.apply_text_path }}
           format: diff
+
+  gate:
+    if: always() && github.event_name == 'pull_request'
+    needs: [plan]
+    runs-on: ubuntu-latest
+    steps:
+      - run: exit 1
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
