@@ -18,6 +18,7 @@ dot_zsh/local.zsh
 # Terragrunt
 .terragrunt-cache/
 backend.tf
+provider_onepassword.tf
 
 # Environment
 .env
