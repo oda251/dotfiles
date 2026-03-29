@@ -7,17 +7,11 @@ export interface WorkflowFrontmatter {
 }
 
 export interface Workflow {
-  /** e.g. "dev/impl" */
   type: string;
-  /** e.g. "dev" */
   domain: string;
-  /** e.g. "impl" */
   name: string;
-  /** Parsed frontmatter */
   frontmatter: WorkflowFrontmatter;
-  /** Markdown body (after frontmatter) */
   body: string;
-  /** Resolved outputs (derived from then-target's inputs) */
   outputs: Record<string, string>;
 }
 

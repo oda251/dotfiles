@@ -158,9 +158,6 @@ export function lint(workflowsDir: string): LintError[] {
     }
   }
 
-  // Check for duplicate input keys (technically impossible with object, but check yaml parse weirdness)
-  // This is handled by the object nature of inputs, so we skip it.
-
   return errors;
 }
 

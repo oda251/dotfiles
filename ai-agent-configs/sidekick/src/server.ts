@@ -83,7 +83,6 @@ export function createServer(workflowsDir: string) {
         return handleRun(
           workflows,
           store,
-          server,
           args as { type: string; title: string; inputs: Record<string, string> },
         );
       case "status":
@@ -113,7 +112,6 @@ function handleWorkflows(workflows: Map<string, Workflow>) {
 function handleRun(
   workflows: Map<string, Workflow>,
   store: TaskStore,
-  _server: Server,
   args: { type: string; title: string; inputs: Record<string, string> },
 ) {
   const workflow = workflows.get(args.type);

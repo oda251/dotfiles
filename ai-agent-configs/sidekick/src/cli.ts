@@ -28,11 +28,11 @@ switch (command) {
     break;
 
   case "done":
-    await runDone(args.slice(1));
+    runDone(args.slice(1));
     break;
 
   case "reject":
-    await runReject(args.slice(1));
+    runReject(args.slice(1));
     break;
 
   default:
@@ -54,41 +54,26 @@ function runLint(dir: string) {
   process.exit(1);
 }
 
-async function runDone(args: string[]) {
+function runDone(args: string[]) {
   const output: Record<string, string> = {};
 
-  for (const arg of args) {
-    if (arg.startsWith("--output")) continue;
-    const eqIndex = arg.indexOf("=");
-    if (eqIndex === -1) {
-      console.error(`Invalid output format: ${arg} (expected key=value)`);
-      process.exit(1);
-    }
-    output[arg.slice(0, eqIndex)] = arg.slice(eqIndex + 1);
-  }
-
-  // Parse --output key=value pairs
   for (let i = 0; i < args.length; i++) {
     if (args[i] === "--output" && args[i + 1]) {
       const pair = args[i + 1];
-      const eqIndex = pair.indexOf("=");
-      if (eqIndex === -1) {
-        console.error(
-          `Invalid output format: ${pair} (expected key=value)`,
-        );
+      const eq = pair.indexOf("=");
+      if (eq === -1) {
+        console.error(`Invalid output format: ${pair} (expected key=value)`);
         process.exit(1);
       }
-      output[pair.slice(0, eqIndex)] = pair.slice(eqIndex + 1);
+      output[pair.slice(0, eq)] = pair.slice(eq + 1);
       i++;
     }
   }
 
-  // In daemon mode, this would communicate with the running server.
-  // For now, write to stdout for the server to capture.
   console.log(JSON.stringify({ action: "done", output }));
 }
 
-async function runReject(args: string[]) {
+function runReject(args: string[]) {
   let reason = "";
 
   for (let i = 0; i < args.length; i++) {
