@@ -6,7 +6,6 @@ variable "repositories" {
     topics            = optional(list(string), [])
     is_template       = optional(bool, false)
     template          = optional(string)
-    branch_protection = optional(bool, true)       # true: 直プッシュ不可+CI必須, false: 直プッシュOK
     has_terraform = optional(bool, false) # true なら TF workflow を配置
   }))
 }
@@ -56,7 +55,7 @@ resource "github_repository_file" "terraform_workflow" {
 }
 
 resource "github_repository_ruleset" "main" {
-  for_each = { for k, v in var.repositories : k => v if v.branch_protection }
+  for_each = var.repositories
 
   depends_on  = [github_repository_file.terraform_workflow]
   repository  = github_repository.this[each.key].name
