@@ -37,14 +37,14 @@ export function createServer(workflowsDir: string) {
 
   if (errors.length > 0) {
     for (const e of errors) {
-      console.error(`[sidekick] workflow error: ${e.file}: ${e.message}`);
+      console.error(`[juggler] workflow error: ${e.file}: ${e.message}`);
     }
   }
 
   const store = new TaskStore();
 
   const server = new Server(
-    { name: "sidekick", version: "0.1.0" },
+    { name: "juggler", version: "0.1.0" },
     {
       capabilities: {
         tools: {},

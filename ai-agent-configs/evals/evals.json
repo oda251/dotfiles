@@ -6,10 +6,10 @@
       "id": 1,
       "category": "delegation",
       "prompt": "認証機能をJWTベースに移行したい。今はセッションベースで、express-sessionとconnect-redisを使ってる。移行中も既存ユーザーのセッションを切りたくないんだけど",
-      "expected_output": "要件を対話で詰めてから、research/gather や dev/impl に分解して sidekick に投入する",
+      "expected_output": "要件を対話で詰めてから、research/gather や dev/impl に分解して juggler に投入する",
       "assertions": [
         {"type": "behavior", "text": "ユーザーに質問して要件を引き出す（いきなり実装に入らない）"},
-        {"type": "behavior", "text": "sidekick tasktypes を参照してタスクタイプを選択する"}
+        {"type": "behavior", "text": "juggler tasktypes を参照してタスクタイプを選択する"}
       ]
     },
     {
@@ -39,7 +39,7 @@
       "expected_output": "dev/impl は requires-approval: true なのでユーザー確認を提示する",
       "assertions": [
         {"type": "behavior", "text": "承認待ちタスクとしてユーザーに提示する"},
-        {"type": "behavior", "text": "承認後に sidekick に投入する"}
+        {"type": "behavior", "text": "承認後に juggler に投入する"}
       ]
     },
     {
@@ -48,7 +48,7 @@
       "prompt": "src/utils/format.ts の42行目、'recieve' を 'receive' に直して",
       "expected_output": "軽微な変更なので直接対応する",
       "assertions": [
-        {"type": "behavior", "text": "sidekick を通さず直接 Edit で対応する"}
+        {"type": "behavior", "text": "juggler を通さず直接 Edit で対応する"}
       ]
     },
     {
@@ -57,7 +57,7 @@
       "prompt": "git log の最新5件見せて",
       "expected_output": "直接対応する",
       "assertions": [
-        {"type": "behavior", "text": "sidekick を通さず直接 Bash で対応する"}
+        {"type": "behavior", "text": "juggler を通さず直接 Bash で対応する"}
       ]
     },
     {

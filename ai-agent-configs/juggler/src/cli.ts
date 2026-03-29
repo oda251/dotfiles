@@ -7,7 +7,7 @@ import { startServer } from "./server.js";
 import { exhaustive } from "./types.js";
 
 const EnvSchema = v.object({
-  SIDEKICK_WORKFLOWS_DIR: v.optional(v.string()),
+  JUGGLER_WORKFLOWS_DIR: v.optional(v.string()),
   HOME: v.optional(v.string()),
 });
 
@@ -18,7 +18,7 @@ function resolveWorkflowsDir(args: string[]): string {
   if (dirIndex !== -1 && args[dirIndex + 1]) {
     return resolve(args[dirIndex + 1]);
   }
-  return env.SIDEKICK_WORKFLOWS_DIR ?? resolve(env.HOME ?? "~", ".claude", "workflows");
+  return env.JUGGLER_WORKFLOWS_DIR ?? resolve(env.HOME ?? "~", ".claude", "workflows");
 }
 
 const COMMANDS = ["serve", "lint", "done", "reject"] as const;
@@ -104,7 +104,7 @@ function runReject(args: string[]) {
 }
 
 function printUsage() {
-  console.log(`sidekick - Agent workflow orchestrator
+  console.log(`juggler - Agent workflow orchestrator
 
 Commands:
   serve [--dir path]            Start MCP server

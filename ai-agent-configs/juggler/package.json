@@ -4,7 +4,7 @@
   "description": "Declarative workflow orchestrator for AI agents — MCP server + CLI",
   "type": "module",
   "bin": {
-    "sidekick": "./src/cli.ts"
+    "juggler": "./src/cli.ts"
   },
   "scripts": {
     "test": "bun test",
