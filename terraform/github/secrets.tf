@@ -1,26 +1,18 @@
-variable "tf_api_token" {
-  description = "Terraform Cloud API token"
-  type        = string
-  sensitive   = true
+data "onepassword_item" "terraform_cloud" {
+  vault = var.op_vault_id
+  title = "terraform-cloud"
 }
 
-variable "tf_cloud_organization" {
-  description = "Terraform Cloud organization name"
-  type        = string
-  sensitive   = true
-}
-
-variable "gh_pat" {
-  description = "GitHub PAT for repository management"
-  type        = string
-  sensitive   = true
+data "onepassword_item" "github_pat" {
+  vault = var.op_vault_id
+  title = "github-pat"
 }
 
 locals {
   cd_secrets = {
-    TF_API_TOKEN          = var.tf_api_token
-    TF_CLOUD_ORGANIZATION = var.tf_cloud_organization
-    GH_PAT                = var.gh_pat
+    TF_API_TOKEN          = data.onepassword_item.terraform_cloud.password
+    TF_CLOUD_ORGANIZATION = one([for s in data.onepassword_item.terraform_cloud.section : one([for f in s.field : f.value if f.label == "organization"]) if s.label == "Terraform Cloud"])
+    GH_PAT                = data.onepassword_item.github_pat.password
   }
   repos_with_terraform = { for k, v in var.repositories : k => v if v.has_terraform }
   # Cross product: repo × secret
