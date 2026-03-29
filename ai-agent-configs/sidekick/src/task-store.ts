@@ -30,23 +30,19 @@ export class TaskStore {
   }
 
   complete(id: string, output: Record<string, string>): Result<Task, string> {
-    const task = this.tasks.get(id);
-    if (!task) return err(`Task not found: ${id}`);
-    if (task.status !== "running")
-      return err(`Task ${id} is not running (status: ${task.status})`);
-    task.status = "done";
-    task.output = output;
-    return ok(task);
+    return this.ensureRunning(id).map((task) => {
+      task.status = "done";
+      task.output = output;
+      return task;
+    });
   }
 
   reject(id: string, reason: string): Result<Task, string> {
-    const task = this.tasks.get(id);
-    if (!task) return err(`Task not found: ${id}`);
-    if (task.status !== "running")
-      return err(`Task ${id} is not running (status: ${task.status})`);
-    task.status = "rejected";
-    task.reason = reason;
-    return ok(task);
+    return this.ensureRunning(id).map((task) => {
+      task.status = "rejected";
+      task.reason = reason;
+      return task;
+    });
   }
 
   list(): Task[] {
@@ -55,5 +51,13 @@ export class TaskStore {
 
   getRunning(): Task[] {
     return this.list().filter((t) => t.status === "running");
+  }
+
+  private ensureRunning(id: string): Result<Task, string> {
+    const task = this.tasks.get(id);
+    if (!task) return err(`Task not found: ${id}`);
+    if (task.status !== "running")
+      return err(`Task ${id} is not running (status: ${task.status})`);
+    return ok(task);
   }
 }

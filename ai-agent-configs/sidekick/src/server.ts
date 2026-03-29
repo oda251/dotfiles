@@ -20,6 +20,18 @@ const StatusArgsSchema = v.object({
   taskId: v.optional(v.string()),
 });
 
+function textResponse(text: string) {
+  return { content: [{ type: "text" as const, text }] };
+}
+
+function errorResponse(text: string) {
+  return { content: [{ type: "text" as const, text }], isError: true as const };
+}
+
+function jsonResponse(data: unknown) {
+  return textResponse(JSON.stringify(data, null, 2));
+}
+
 export function createServer(workflowsDir: string) {
   const { workflows, errors } = loadWorkflows(workflowsDir);
 
@@ -95,14 +107,15 @@ export function createServer(workflowsDir: string) {
       case "status":
         return handleStatus(store, args);
       default:
-        return {
-          content: [{ type: "text" as const, text: `Unknown tool: ${name}` }],
-          isError: true,
-        };
+        return errorResponse(`Unknown tool: ${name}`);
     }
   });
 
   return { server, store, workflows };
+}
+
+function validationError(issues: v.BaseIssue<unknown>[]) {
+  return errorResponse(`Invalid arguments: ${issues.map((i) => i.message).join("; ")}`);
 }
 
 function handleWorkflows(workflows: Map<string, Workflow>) {
@@ -114,11 +127,7 @@ function handleWorkflows(workflows: Map<string, Workflow>) {
     "requires-approval": w.frontmatter["requires-approval"] ?? false,
   }));
 
-  return {
-    content: [
-      { type: "text" as const, text: JSON.stringify(result, null, 2) },
-    ],
-  };
+  return jsonResponse(result);
 }
 
 function handleRun(
@@ -127,39 +136,14 @@ function handleRun(
   args: unknown,
 ) {
   const parsed = v.safeParse(RunArgsSchema, args);
-  if (!parsed.success) {
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: `Invalid arguments: ${parsed.issues.map((i) => i.message).join("; ")}`,
-        },
-      ],
-      isError: true,
-    };
-  }
+  if (!parsed.success) return validationError(parsed.issues);
 
   const { type, title, inputs } = parsed.output;
   const workflow = workflows.get(type);
-  if (!workflow) {
-    return {
-      content: [
-        { type: "text" as const, text: `Unknown workflow type: ${type}` },
-      ],
-      isError: true,
-    };
-  }
+  if (!workflow) return errorResponse(`Unknown workflow type: ${type}`);
 
   if (workflow.frontmatter.callable === false) {
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: `Workflow ${type} is not callable (internal chain step)`,
-        },
-      ],
-      isError: true,
-    };
+    return errorResponse(`Workflow ${type} is not callable (internal chain step)`);
   }
 
   const missingInputs: string[] = [];
@@ -170,15 +154,7 @@ function handleRun(
   }
 
   if (missingInputs.length > 0) {
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: `Missing required inputs: ${missingInputs.join(", ")}`,
-        },
-      ],
-      isError: true,
-    };
+    return errorResponse(`Missing required inputs: ${missingInputs.join(", ")}`);
   }
 
   const task = store.create({
@@ -190,54 +166,21 @@ function handleRun(
 
   const prompt = buildWorkerPrompt(workflow, inputs, task.id);
 
-  return {
-    content: [
-      {
-        type: "text" as const,
-        text: JSON.stringify({ taskId: task.id, status: "running", prompt }, null, 2),
-      },
-    ],
-  };
+  return jsonResponse({ taskId: task.id, status: "running", prompt });
 }
 
 function handleStatus(store: TaskStore, args: unknown) {
   const parsed = v.safeParse(StatusArgsSchema, args);
-  if (!parsed.success) {
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: `Invalid arguments: ${parsed.issues.map((i) => i.message).join("; ")}`,
-        },
-      ],
-      isError: true,
-    };
-  }
+  if (!parsed.success) return validationError(parsed.issues);
 
   const { taskId } = parsed.output;
   if (taskId) {
     const task = store.get(taskId);
-    if (!task) {
-      return {
-        content: [
-          { type: "text" as const, text: `Task not found: ${taskId}` },
-        ],
-        isError: true,
-      };
-    }
-    return {
-      content: [
-        { type: "text" as const, text: JSON.stringify(task, null, 2) },
-      ],
-    };
+    if (!task) return errorResponse(`Task not found: ${taskId}`);
+    return jsonResponse(task);
   }
 
-  const tasks = store.list();
-  return {
-    content: [
-      { type: "text" as const, text: JSON.stringify(tasks, null, 2) },
-    ],
-  };
+  return jsonResponse(store.list());
 }
 
 export async function startServer(workflowsDir: string) {

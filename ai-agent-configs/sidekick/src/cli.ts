@@ -21,32 +21,35 @@ function resolveWorkflowsDir(args: string[]): string {
   return env.SIDEKICK_WORKFLOWS_DIR ?? resolve(env.HOME ?? "~", ".claude", "workflows");
 }
 
+const COMMANDS = ["serve", "lint", "done", "reject"] as const;
+type Command = (typeof COMMANDS)[number];
+
 const args = process.argv.slice(2);
-const command = args[0] as "serve" | "lint" | "done" | "reject" | undefined;
+const command = args[0];
 
-switch (command) {
-  case "serve":
-    await startServer(resolveWorkflowsDir(args));
-    break;
-
-  case "lint":
-    runLint(resolveWorkflowsDir(args));
-    break;
-
-  case "done":
-    runDone(args.slice(1));
-    break;
-
-  case "reject":
-    runReject(args.slice(1));
-    break;
-
-  case undefined:
-    printUsage();
-    break;
-
-  default:
-    exhaustive(command);
+if (!command) {
+  printUsage();
+} else if (!COMMANDS.includes(command as Command)) {
+  console.error(`Unknown command: ${command}`);
+  process.exit(1);
+} else {
+  const cmd = command as Command;
+  switch (cmd) {
+    case "serve":
+      await startServer(resolveWorkflowsDir(args));
+      break;
+    case "lint":
+      runLint(resolveWorkflowsDir(args));
+      break;
+    case "done":
+      runDone(args.slice(1));
+      break;
+    case "reject":
+      runReject(args.slice(1));
+      break;
+    default:
+      exhaustive(cmd);
+  }
 }
 
 function runLint(dir: string) {

@@ -7,7 +7,6 @@ export function buildWorkerPrompt(
 ): string {
   const sections: string[] = [];
 
-  // Common flow
   sections.push(`## 共通フロー
 
 1. タスク内容と inputs を確認する
@@ -19,13 +18,11 @@ export function buildWorkerPrompt(
 
 タスクID: ${taskId}`);
 
-  // Inputs
   sections.push(`## Inputs\n`);
   for (const [key, value] of Object.entries(inputs)) {
     sections.push(`- **${key}**: ${value}`);
   }
 
-  // Outputs (if then chain exists)
   if (Object.keys(workflow.outputs).length > 0) {
     sections.push(`\n## 完了時に返す Outputs\n`);
     for (const [key, desc] of Object.entries(workflow.outputs)) {
@@ -33,7 +30,6 @@ export function buildWorkerPrompt(
     }
   }
 
-  // Workflow body
   sections.push(`\n## ワークフロー\n\n${workflow.body}`);
 
   return sections.join("\n");
