@@ -53,12 +53,3 @@ jobs:
           working_directory: terraform
           tf_api_token: $${{ secrets.TF_API_TOKEN }}
           tf_cloud_organization: $${{ secrets.TF_CLOUD_ORGANIZATION }}
-
-
-  gate:
-    if: always() && github.event_name == 'pull_request'
-    needs: [plan]
-    runs-on: ubuntu-latest
-    steps:
-      - run: exit 1
-        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')

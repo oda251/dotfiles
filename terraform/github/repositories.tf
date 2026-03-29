@@ -37,6 +37,21 @@ resource "github_repository" "this" {
   }
 }
 
+resource "github_repository_file" "gate_workflow" {
+  for_each = var.repositories
+
+  repository = github_repository.this[each.key].name
+  branch     = "main"
+  file       = ".github/workflows/gate.yml"
+  content    = templatefile("${path.module}/templates/gate.yml.tpl", {})
+  commit_message      = "chore: add gate workflow (managed by Terraform)"
+  overwrite_on_create = true
+
+  lifecycle {
+    ignore_changes = [content]
+  }
+}
+
 resource "github_repository_file" "terraform_workflow" {
   for_each = { for k, v in var.repositories : k => v if v.has_terraform }
 
@@ -79,14 +94,11 @@ resource "github_repository_ruleset" "main" {
       dismiss_stale_reviews_on_push   = true
     }
 
-    dynamic "required_status_checks" {
-      for_each = each.value.has_terraform ? [1] : []
-      content {
-        required_check {
-          context = "gate"
-        }
-        strict_required_status_checks_policy = true
+    required_status_checks {
+      required_check {
+        context = "gate"
       }
+      strict_required_status_checks_policy = true
     }
   }
 }
