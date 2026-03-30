@@ -1,6 +1,6 @@
 ---
 description: 収集結果を元に調査ドキュメントを作成する
-callable: false
+chain-only: true
 inputs:
   sources: 収集結果ディレクトリパス
   theme: 調査テーマ

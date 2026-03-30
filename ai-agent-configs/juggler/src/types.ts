@@ -3,7 +3,7 @@ export interface WorkflowFrontmatter {
   inputs: Record<string, string>;
   "confirm-before-run"?: boolean;
   then?: string;
-  callable?: boolean;
+  "chain-only"?: boolean;
 }
 
 export interface Workflow {

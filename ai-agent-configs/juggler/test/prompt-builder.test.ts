@@ -40,7 +40,7 @@ describe("buildWorkerPrompt", () => {
       frontmatter: {
         description: "Review code",
         inputs: { changes: "Changed files" },
-        callable: false,
+        "chain-only": true,
       },
       body: "Review the changes.",
       outputs: {},

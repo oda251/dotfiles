@@ -1,7 +1,7 @@
 import { ok, err, type Result } from "neverthrow";
 import type { Workflow, Task } from "./types.js";
 import type { TaskStore } from "./task-store.js";
-import { getCallableWorkflows } from "./workflow-loader.js";
+import { getRunnableWorkflows } from "./workflow-loader.js";
 import { buildWorkerPrompt } from "./prompt-builder.js";
 
 export interface WorkflowSummary {
@@ -32,7 +32,7 @@ export interface RejectResult {
 export function listWorkflows(
   workflows: Map<string, Workflow>,
 ): WorkflowSummary[] {
-  return getCallableWorkflows(workflows).map((w) => ({
+  return getRunnableWorkflows(workflows).map((w) => ({
     type: w.type,
     description: w.frontmatter.description,
     inputs: w.frontmatter.inputs,
@@ -48,8 +48,8 @@ export function runWorkflow(
   const workflow = workflows.get(params.type);
   if (!workflow) return err(`Unknown workflow type: ${params.type}`);
 
-  if (workflow.frontmatter.callable === false) {
-    return err(`Workflow ${params.type} is not callable (internal chain step)`);
+  if (workflow.frontmatter["chain-only"]) {
+    return err(`Workflow ${params.type} is chain-only (not directly runnable)`);
   }
 
   const missingInputs: string[] = [];

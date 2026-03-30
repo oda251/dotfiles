@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import {
   loadWorkflows,
   lint,
-  getCallableWorkflows,
+  getRunnableWorkflows,
 } from "../src/workflow-loader.js";
 
 let tmpDir: string;
@@ -46,7 +46,7 @@ Write the code.`,
       "review",
       `---
 description: Review implementation
-callable: false
+chain-only: true
 inputs:
   changes: Changed files
 ---
@@ -141,7 +141,7 @@ Body.`,
       "review",
       `---
 description: Review
-callable: false
+chain-only: true
 inputs:
   changes: Changed files
 ---
@@ -174,7 +174,7 @@ Body.`,
       "review",
       `---
 description: Review
-callable: false
+chain-only: true
 inputs:
   spec: Specification
   changes: Changed files
@@ -195,7 +195,7 @@ Review.`,
     expect(errors).toHaveLength(0);
   });
 
-  it("defaults confirm-before-run to false and callable to true", () => {
+  it("defaults confirm-before-run to false and chain-only to false", () => {
     createWorkflow(
       "dev",
       "simple",
@@ -211,7 +211,7 @@ Do it.`,
     const { workflows } = loadWorkflows(tmpDir);
     const simple = workflows.get("dev/simple") ?? (() => { throw new Error("not found"); })();
     expect(simple.frontmatter["confirm-before-run"]).toBe(false);
-    expect(simple.frontmatter.callable).toBe(true);
+    expect(simple.frontmatter["chain-only"]).toBe(false);
   });
 
   it("loads workflows from multiple domains", () => {
@@ -282,13 +282,13 @@ B.`,
     expect(errors.some((e) => e.message.includes("Circular"))).toBe(true);
   });
 
-  it("detects orphaned non-callable workflows", () => {
+  it("detects orphaned chain-only workflows", () => {
     createWorkflow(
       "dev",
       "orphan",
       `---
 description: Orphan
-callable: false
+chain-only: true
 inputs:
   x: X
 ---
@@ -317,7 +317,7 @@ Impl.`,
       "review",
       `---
 description: Review
-callable: false
+chain-only: true
 inputs:
   changes: Changes
 ---
@@ -329,8 +329,8 @@ Review.`,
   });
 });
 
-describe("getCallableWorkflows", () => {
-  it("filters out non-callable workflows", () => {
+describe("getRunnableWorkflows", () => {
+  it("filters out chain-only workflows", () => {
     createWorkflow(
       "dev",
       "impl",
@@ -347,7 +347,7 @@ Impl.`,
       "review",
       `---
 description: Review
-callable: false
+chain-only: true
 inputs:
   changes: Changes
 ---
@@ -355,8 +355,8 @@ Review.`,
     );
 
     const { workflows } = loadWorkflows(tmpDir);
-    const callable = getCallableWorkflows(workflows);
-    expect(callable).toHaveLength(1);
-    expect(callable[0].type).toBe("dev/impl");
+    const runnable = getRunnableWorkflows(workflows);
+    expect(runnable).toHaveLength(1);
+    expect(runnable[0].type).toBe("dev/impl");
   });
 });
