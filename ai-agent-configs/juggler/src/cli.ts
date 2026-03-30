@@ -8,10 +8,26 @@ import { exhaustive } from "./types.js";
 
 const EnvSchema = v.object({
   JUGGLER_WORKFLOWS_DIR: v.optional(v.string()),
+  JUGGLER_PORT: v.optional(v.string()),
   HOME: v.optional(v.string()),
 });
 
 const env = v.parse(EnvSchema, process.env);
+
+const DEFAULT_PORT = 4312;
+
+function resolvePort(args: string[]): number {
+  const portIndex = args.indexOf("--port");
+  if (portIndex !== -1 && args[portIndex + 1]) {
+    const port = Number(args[portIndex + 1]);
+    if (Number.isNaN(port) || port < 1 || port > 65535) {
+      console.error(`Invalid port: ${args[portIndex + 1]}`);
+      process.exit(1);
+    }
+    return port;
+  }
+  return env.JUGGLER_PORT ? Number(env.JUGGLER_PORT) : DEFAULT_PORT;
+}
 
 function resolveWorkflowsDir(args: string[]): string {
   const dirIndex = args.indexOf("--dir");
@@ -35,9 +51,11 @@ if (!command) {
 } else {
   const cmd = command as Command;
   switch (cmd) {
-    case "serve":
-      await startServer(resolveWorkflowsDir(args));
+    case "serve": {
+      const stop = await startServer(resolveWorkflowsDir(args), resolvePort(args));
+      process.on("SIGINT", () => { stop(); process.exit(0); });
       break;
+    }
     case "lint":
       runLint(resolveWorkflowsDir(args));
       break;
@@ -64,6 +82,6 @@ function printUsage() {
   console.log(`juggler - Agent workflow orchestrator
 
 Commands:
-  serve [--dir path]            Start MCP server
-  lint [--dir path]             Validate workflow definitions`);
+  serve [--dir path] [--port N]   Start HTTP MCP server (default: 4312)
+  lint [--dir path]               Validate workflow definitions`);
 }

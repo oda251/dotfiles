@@ -2,7 +2,9 @@ import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { createServer } from "../src/server.js";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { createServer, startServer } from "../src/server.js";
 
 let tmpDir: string;
 
@@ -316,5 +318,95 @@ describe("tools list", () => {
     expect(names).toContain("done");
     expect(names).toContain("reject");
     expect(names).toContain("status");
+  });
+});
+
+describe("HTTP server", () => {
+  let stopServer: (() => void) | undefined;
+
+  afterEach(() => {
+    stopServer?.();
+    stopServer = undefined;
+  });
+
+  it("accepts MCP client connections via HTTP", async () => {
+    setupWorkflows();
+    const port = 44312 + Math.floor(Math.random() * 1000);
+    const stop = await startServer(tmpDir, port);
+    stopServer = stop;
+
+    const client = new Client({ name: "test-client", version: "1.0.0" });
+    const transport = new StreamableHTTPClientTransport(
+      new URL(`http://127.0.0.1:${port}/mcp`),
+    );
+    await client.connect(transport);
+
+    const tools = await client.listTools();
+    expect(tools.tools).toHaveLength(5);
+
+    const result = await client.callTool({
+      name: "workflows",
+      arguments: {},
+    });
+    const data = JSON.parse((result.content as Array<{ text: string }>)[0].text);
+    expect(data).toHaveLength(1);
+    expect(data[0].type).toBe("dev/impl");
+
+    await client.close();
+  });
+
+  it("supports multiple concurrent clients sharing state", async () => {
+    setupWorkflows();
+    const port = 44312 + Math.floor(Math.random() * 1000);
+    const stop = await startServer(tmpDir, port);
+    stopServer = stop;
+
+    const client1 = new Client({ name: "client-1", version: "1.0.0" });
+    const transport1 = new StreamableHTTPClientTransport(
+      new URL(`http://127.0.0.1:${port}/mcp`),
+    );
+    await client1.connect(transport1);
+
+    const client2 = new Client({ name: "client-2", version: "1.0.0" });
+    const transport2 = new StreamableHTTPClientTransport(
+      new URL(`http://127.0.0.1:${port}/mcp`),
+    );
+    await client2.connect(transport2);
+
+    // Client 1 creates a task
+    const runResult = await client1.callTool({
+      name: "run",
+      arguments: {
+        type: "dev/impl",
+        title: "Shared task",
+        inputs: { what: "feature", where: "src/" },
+      },
+    });
+    const { taskId } = JSON.parse(
+      (runResult.content as Array<{ text: string }>)[0].text,
+    );
+
+    // Client 2 can see and complete the task
+    const doneResult = await client2.callTool({
+      name: "done",
+      arguments: { taskId, output: { changes: "done by client 2" } },
+    });
+    const doneData = JSON.parse(
+      (doneResult.content as Array<{ text: string }>)[0].text,
+    );
+    expect(doneData.status).toBe("done");
+
+    // Client 1 can verify the status
+    const statusResult = await client1.callTool({
+      name: "status",
+      arguments: { taskId },
+    });
+    const statusData = JSON.parse(
+      (statusResult.content as Array<{ text: string }>)[0].text,
+    );
+    expect(statusData.status).toBe("done");
+
+    await client1.close();
+    await client2.close();
   });
 });

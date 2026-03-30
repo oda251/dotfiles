@@ -1,8 +1,9 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  isInitializeRequest,
 } from "@modelcontextprotocol/sdk/types.js";
 import * as v from "valibot";
 import { loadWorkflows, getCallableWorkflows } from "./workflow-loader.js";
@@ -46,95 +47,69 @@ function validationError(issues: v.BaseIssue<unknown>[]) {
   return errorResponse(`Invalid arguments: ${issues.map((i) => i.message).join("; ")}`);
 }
 
-export function createServer(workflowsDir: string) {
-  const { workflows, errors } = loadWorkflows(workflowsDir);
-
-  if (errors.length > 0) {
-    for (const e of errors) {
-      console.error(`[juggler] workflow error: ${e.file}: ${e.message}`);
-    }
-  }
-
-  const store = new TaskStore();
-
-  const server = new Server(
-    { name: "juggler", version: "0.1.0" },
-    {
-      capabilities: {
-        tools: {},
-        experimental: { "claude/channel": {} },
+const TOOL_DEFINITIONS = [
+  {
+    name: "workflows",
+    description:
+      "List available workflow types with their descriptions and required inputs",
+    inputSchema: { type: "object" as const, properties: {} },
+  },
+  {
+    name: "run",
+    description: "Start a task with a specific workflow type",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        type: { type: "string", description: "Workflow type (e.g. dev/impl)" },
+        title: { type: "string", description: "Task title" },
+        inputs: { type: "object", description: "Input parameters for the workflow" },
+      },
+      required: ["type", "title", "inputs"],
+    },
+  },
+  {
+    name: "done",
+    description: "Complete a running task with output values",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        taskId: { type: "string", description: "Task ID to complete" },
+        output: { type: "object", description: "Output key-value pairs" },
+      },
+      required: ["taskId", "output"],
+    },
+  },
+  {
+    name: "reject",
+    description: "Reject a running task with a reason",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        taskId: { type: "string", description: "Task ID to reject" },
+        reason: { type: "string", description: "Rejection reason" },
+      },
+      required: ["taskId", "reason"],
+    },
+  },
+  {
+    name: "status",
+    description: "Get status of tasks",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        taskId: { type: "string", description: "Optional task ID to filter by" },
       },
     },
-  );
+  },
+];
 
+function configureMcpServer(
+  server: Server,
+  workflows: Map<string, Workflow>,
+  store: TaskStore,
+) {
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
-    tools: [
-      {
-        name: "workflows",
-        description:
-          "List available workflow types with their descriptions and required inputs",
-        inputSchema: { type: "object" as const, properties: {} },
-      },
-      {
-        name: "run",
-        description: "Start a task with a specific workflow type",
-        inputSchema: {
-          type: "object" as const,
-          properties: {
-            type: {
-              type: "string",
-              description: "Workflow type (e.g. dev/impl)",
-            },
-            title: { type: "string", description: "Task title" },
-            inputs: {
-              type: "object",
-              description: "Input parameters for the workflow",
-            },
-          },
-          required: ["type", "title", "inputs"],
-        },
-      },
-      {
-        name: "done",
-        description: "Complete a running task with output values",
-        inputSchema: {
-          type: "object" as const,
-          properties: {
-            taskId: { type: "string", description: "Task ID to complete" },
-            output: {
-              type: "object",
-              description: "Output key-value pairs",
-            },
-          },
-          required: ["taskId", "output"],
-        },
-      },
-      {
-        name: "reject",
-        description: "Reject a running task with a reason",
-        inputSchema: {
-          type: "object" as const,
-          properties: {
-            taskId: { type: "string", description: "Task ID to reject" },
-            reason: { type: "string", description: "Rejection reason" },
-          },
-          required: ["taskId", "reason"],
-        },
-      },
-      {
-        name: "status",
-        description: "Get status of tasks",
-        inputSchema: {
-          type: "object" as const,
-          properties: {
-            taskId: {
-              type: "string",
-              description: "Optional task ID to filter by",
-            },
-          },
-        },
-      },
-    ],
+    tools: TOOL_DEFINITIONS,
   }));
 
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
@@ -155,6 +130,27 @@ export function createServer(workflowsDir: string) {
         return errorResponse(`Unknown tool: ${name}`);
     }
   });
+}
+
+function newMcpServer() {
+  return new Server(
+    { name: "juggler", version: "0.1.0" },
+    { capabilities: { tools: {} } },
+  );
+}
+
+export function createServer(workflowsDir: string) {
+  const { workflows, errors } = loadWorkflows(workflowsDir);
+
+  if (errors.length > 0) {
+    for (const e of errors) {
+      console.error(`[juggler] workflow error: ${e.file}: ${e.message}`);
+    }
+  }
+
+  const store = new TaskStore();
+  const server = newMcpServer();
+  configureMcpServer(server, workflows, store);
 
   return { server, store, workflows };
 }
@@ -248,8 +244,71 @@ function handleStatus(store: TaskStore, args: unknown) {
   return jsonResponse(store.list());
 }
 
-export async function startServer(workflowsDir: string) {
-  const { server } = createServer(workflowsDir);
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
+export async function startServer(workflowsDir: string, port: number) {
+  const { workflows, errors } = loadWorkflows(workflowsDir);
+
+  if (errors.length > 0) {
+    for (const e of errors) {
+      console.error(`[juggler] workflow error: ${e.file}: ${e.message}`);
+    }
+  }
+
+  const store = new TaskStore();
+  const sessions = new Map<string, WebStandardStreamableHTTPServerTransport>();
+
+  function createSession(): WebStandardStreamableHTTPServerTransport {
+    const transport = new WebStandardStreamableHTTPServerTransport({
+      sessionIdGenerator: () => crypto.randomUUID(),
+      onsessioninitialized: (sessionId) => {
+        sessions.set(sessionId, transport);
+      },
+    });
+
+    transport.onclose = () => {
+      if (transport.sessionId) sessions.delete(transport.sessionId);
+    };
+
+    const server = newMcpServer();
+    configureMcpServer(server, workflows, store);
+    server.connect(transport);
+
+    return transport;
+  }
+
+  const httpServer = Bun.serve({
+    port,
+    hostname: "127.0.0.1",
+    async fetch(req) {
+      const url = new URL(req.url);
+      if (url.pathname !== "/mcp") {
+        return new Response("Not Found", { status: 404 });
+      }
+
+      const sessionId = req.headers.get("mcp-session-id");
+
+      const existing = sessionId ? sessions.get(sessionId) : undefined;
+      if (existing) {
+        return existing.handleRequest(req);
+      }
+
+      if (req.method === "POST") {
+        const body = await req.json();
+        if (isInitializeRequest(body)) {
+          const transport = createSession();
+          return transport.handleRequest(req, { parsedBody: body });
+        }
+      }
+
+      return new Response("Bad Request", { status: 400 });
+    },
+  });
+
+  console.log(`[juggler] listening on http://127.0.0.1:${httpServer.port}/mcp`);
+
+  return function stop() {
+    for (const transport of sessions.values()) {
+      transport.close();
+    }
+    httpServer.stop();
+  };
 }
