@@ -6,10 +6,18 @@ import {
   isInitializeRequest,
 } from "@modelcontextprotocol/sdk/types.js";
 import * as v from "valibot";
-import { loadWorkflows, getCallableWorkflows } from "./workflow-loader.js";
+import { loadWorkflows } from "./workflow-loader.js";
 import { TaskStore } from "./task-store.js";
-import { buildWorkerPrompt } from "./prompt-builder.js";
+import {
+  listWorkflows,
+  runWorkflow,
+  completeTask,
+  rejectTask,
+  getStatus,
+} from "./handlers.js";
 import type { Workflow } from "./types.js";
+
+// --- Valibot schemas (input validation) ---
 
 const RunArgsSchema = v.object({
   type: v.pipe(v.string(), v.minLength(1)),
@@ -31,6 +39,8 @@ const RejectArgsSchema = v.object({
   reason: v.pipe(v.string(), v.minLength(1)),
 });
 
+// --- MCP response helpers ---
+
 function textResponse(text: string) {
   return { content: [{ type: "text" as const, text }] };
 }
@@ -46,6 +56,8 @@ function jsonResponse(data: unknown) {
 function validationError(issues: v.BaseIssue<unknown>[]) {
   return errorResponse(`Invalid arguments: ${issues.map((i) => i.message).join("; ")}`);
 }
+
+// --- MCP tool definitions ---
 
 const TOOL_DEFINITIONS = [
   {
@@ -103,6 +115,8 @@ const TOOL_DEFINITIONS = [
   },
 ];
 
+// --- MCP server wiring ---
+
 function configureMcpServer(
   server: Server,
   workflows: Map<string, Workflow>,
@@ -117,15 +131,44 @@ function configureMcpServer(
 
     switch (name) {
       case "workflows":
-        return handleWorkflows(workflows);
-      case "run":
-        return handleRun(workflows, store, args);
-      case "done":
-        return handleDone(store, args);
-      case "reject":
-        return handleReject(store, args);
-      case "status":
-        return handleStatus(store, args);
+        return jsonResponse(listWorkflows(workflows));
+
+      case "run": {
+        const parsed = v.safeParse(RunArgsSchema, args);
+        if (!parsed.success) return validationError(parsed.issues);
+        return runWorkflow(workflows, store, parsed.output).match(
+          (data) => jsonResponse(data),
+          (e) => errorResponse(e),
+        );
+      }
+
+      case "done": {
+        const parsed = v.safeParse(DoneArgsSchema, args);
+        if (!parsed.success) return validationError(parsed.issues);
+        return completeTask(store, parsed.output).match(
+          (data) => jsonResponse(data),
+          (e) => errorResponse(e),
+        );
+      }
+
+      case "reject": {
+        const parsed = v.safeParse(RejectArgsSchema, args);
+        if (!parsed.success) return validationError(parsed.issues);
+        return rejectTask(store, parsed.output).match(
+          (data) => jsonResponse(data),
+          (e) => errorResponse(e),
+        );
+      }
+
+      case "status": {
+        const parsed = v.safeParse(StatusArgsSchema, args);
+        if (!parsed.success) return validationError(parsed.issues);
+        return getStatus(store, parsed.output.taskId).match(
+          (data) => jsonResponse(data),
+          (e) => errorResponse(e),
+        );
+      }
+
       default:
         return errorResponse(`Unknown tool: ${name}`);
     }
@@ -138,6 +181,8 @@ function newMcpServer() {
     { capabilities: { tools: {} } },
   );
 }
+
+// --- Exports ---
 
 export function createServer(workflowsDir: string) {
   const { workflows, errors } = loadWorkflows(workflowsDir);
@@ -153,95 +198,6 @@ export function createServer(workflowsDir: string) {
   configureMcpServer(server, workflows, store);
 
   return { server, store, workflows };
-}
-
-function handleWorkflows(workflows: Map<string, Workflow>) {
-  const callable = getCallableWorkflows(workflows);
-  const result = callable.map((w) => ({
-    type: w.type,
-    description: w.frontmatter.description,
-    inputs: w.frontmatter.inputs,
-    "requires-approval": w.frontmatter["requires-approval"] ?? false,
-  }));
-
-  return jsonResponse(result);
-}
-
-function handleRun(
-  workflows: Map<string, Workflow>,
-  store: TaskStore,
-  args: unknown,
-) {
-  const parsed = v.safeParse(RunArgsSchema, args);
-  if (!parsed.success) return validationError(parsed.issues);
-
-  const { type, title, inputs } = parsed.output;
-  const workflow = workflows.get(type);
-  if (!workflow) return errorResponse(`Unknown workflow type: ${type}`);
-
-  if (workflow.frontmatter.callable === false) {
-    return errorResponse(`Workflow ${type} is not callable (internal chain step)`);
-  }
-
-  const missingInputs: string[] = [];
-  for (const key of Object.keys(workflow.frontmatter.inputs)) {
-    if (!(key in inputs) || !inputs[key]) {
-      missingInputs.push(key);
-    }
-  }
-
-  if (missingInputs.length > 0) {
-    return errorResponse(`Missing required inputs: ${missingInputs.join(", ")}`);
-  }
-
-  const task = store.create({
-    type,
-    title,
-    inputs,
-    then: workflow.frontmatter.then,
-  });
-
-  const prompt = buildWorkerPrompt(workflow, inputs, task.id);
-
-  return jsonResponse({ taskId: task.id, status: "running", prompt });
-}
-
-function handleDone(store: TaskStore, args: unknown) {
-  const parsed = v.safeParse(DoneArgsSchema, args);
-  if (!parsed.success) return validationError(parsed.issues);
-
-  const { taskId, output } = parsed.output;
-  const result = store.complete(taskId, output);
-
-  if (result.isErr()) return errorResponse(result.error);
-
-  return jsonResponse({ taskId, status: "done", output });
-}
-
-function handleReject(store: TaskStore, args: unknown) {
-  const parsed = v.safeParse(RejectArgsSchema, args);
-  if (!parsed.success) return validationError(parsed.issues);
-
-  const { taskId, reason } = parsed.output;
-  const result = store.reject(taskId, reason);
-
-  if (result.isErr()) return errorResponse(result.error);
-
-  return jsonResponse({ taskId, status: "rejected", reason });
-}
-
-function handleStatus(store: TaskStore, args: unknown) {
-  const parsed = v.safeParse(StatusArgsSchema, args);
-  if (!parsed.success) return validationError(parsed.issues);
-
-  const { taskId } = parsed.output;
-  if (taskId) {
-    const task = store.get(taskId);
-    if (!task) return errorResponse(`Task not found: ${taskId}`);
-    return jsonResponse(task);
-  }
-
-  return jsonResponse(store.list());
 }
 
 export async function startServer(workflowsDir: string, port: number) {
