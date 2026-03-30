@@ -55,4 +55,70 @@ describe("buildWorkerPrompt", () => {
     expect(prompt).not.toContain("完了時に返す Outputs");
     expect(prompt).toContain("src/auth/middleware.ts");
   });
+
+  it("embeds taskId in done and reject instructions", () => {
+    const workflow: Workflow = {
+      type: "dev/impl",
+      domain: "dev",
+      name: "impl",
+      frontmatter: {
+        description: "Impl",
+        inputs: { what: "What" },
+      },
+      body: "Do it.",
+      outputs: {},
+    };
+
+    const prompt = buildWorkerPrompt(workflow, { what: "x" }, "abc-999");
+
+    // taskId appears in both done and reject instructions
+    const doneMatch = prompt.match(/done ツール.*abc-999/);
+    const rejectMatch = prompt.match(/reject ツール.*abc-999/);
+    expect(doneMatch).not.toBeNull();
+    expect(rejectMatch).not.toBeNull();
+  });
+
+  it("formats multiple output keys in done hint", () => {
+    const workflow: Workflow = {
+      type: "dev/impl",
+      domain: "dev",
+      name: "impl",
+      frontmatter: {
+        description: "Impl",
+        inputs: { what: "What" },
+        then: "review",
+      },
+      body: "Do it.",
+      outputs: { changes: "Changed files", summary: "Summary of changes" },
+    };
+
+    const prompt = buildWorkerPrompt(workflow, { what: "x" }, "task-1");
+
+    expect(prompt).toContain("changes");
+    expect(prompt).toContain("summary");
+    expect(prompt).toContain("完了時に返す Outputs");
+  });
+
+  it("omits output hint in done instruction when no outputs", () => {
+    const workflow: Workflow = {
+      type: "dev/review",
+      domain: "dev",
+      name: "review",
+      frontmatter: {
+        description: "Review",
+        inputs: { changes: "Changes" },
+      },
+      body: "Review.",
+      outputs: {},
+    };
+
+    const prompt = buildWorkerPrompt(
+      workflow,
+      { changes: "file.ts" },
+      "task-2",
+    );
+
+    // done instruction should not contain "output:" hint
+    expect(prompt).not.toContain("output:");
+  });
 });

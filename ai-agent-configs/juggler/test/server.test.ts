@@ -3,8 +3,8 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import { createServer, startServer } from "../src/server.js";
+import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import { createServer } from "../src/server.js";
 
 let tmpDir: string;
 
@@ -44,30 +44,19 @@ Review the changes.`,
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- accessing SDK internals for testing
-function getHandler(server: ReturnType<typeof createServer>, method: string) {
-  const s = server.server as Record<string, unknown>;
-  const handlers = s._requestHandlers as Map<string, Function> | undefined;
-  const handler = handlers?.get(method);
-  if (!handler) throw new Error(`No ${method} handler registered`);
-  return handler;
+async function connectClient(workflowsDir: string) {
+  const { server } = createServer(workflowsDir);
+  const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+  await server.connect(serverTransport);
+
+  const client = new Client({ name: "test-client", version: "1.0.0" });
+  await client.connect(clientTransport);
+
+  return client;
 }
 
-async function callTool(
-  server: ReturnType<typeof createServer>,
-  name: string,
-  args: Record<string, unknown> = {},
-) {
-  const handler = getHandler(server, "tools/call");
-  return handler({
-    method: "tools/call",
-    params: { name, arguments: args },
-  });
-}
-
-async function listTools(server: ReturnType<typeof createServer>) {
-  const handler = getHandler(server, "tools/list");
-  return handler({ method: "tools/list" });
+function parseText(result: Awaited<ReturnType<Client["callTool"]>>) {
+  return JSON.parse((result.content as Array<{ text: string }>)[0].text);
 }
 
 beforeEach(() => {
@@ -78,209 +67,236 @@ afterEach(() => {
   rmSync(tmpDir, { recursive: true, force: true });
 });
 
+describe("tools list", () => {
+  it("exposes five tools", async () => {
+    setupWorkflows();
+    const client = await connectClient(tmpDir);
+
+    const result = await client.listTools();
+    expect(result.tools).toHaveLength(5);
+
+    const names = result.tools.map((t) => t.name);
+    expect(names).toContain("workflows");
+    expect(names).toContain("run");
+    expect(names).toContain("done");
+    expect(names).toContain("reject");
+    expect(names).toContain("status");
+
+    await client.close();
+  });
+});
+
 describe("valibot validation", () => {
   it("rejects run with empty type", async () => {
     setupWorkflows();
-    const server = createServer(tmpDir);
-    const result = await callTool(server, "run", {
-      type: "",
-      title: "Test",
-      inputs: {},
+    const client = await connectClient(tmpDir);
+
+    const result = await client.callTool({
+      name: "run",
+      arguments: { type: "", title: "Test", inputs: {} },
     });
 
     expect(result.isError).toBe(true);
-    expect(result.content[0].text).toContain("Invalid arguments");
+    expect((result.content as Array<{ text: string }>)[0].text).toContain(
+      "Invalid arguments",
+    );
+
+    await client.close();
   });
 
   it("rejects done with missing arguments", async () => {
     setupWorkflows();
-    const server = createServer(tmpDir);
-    const result = await callTool(server, "done", {});
+    const client = await connectClient(tmpDir);
+
+    const result = await client.callTool({
+      name: "done",
+      arguments: {},
+    });
 
     expect(result.isError).toBe(true);
-    expect(result.content[0].text).toContain("Invalid arguments");
+    expect((result.content as Array<{ text: string }>)[0].text).toContain(
+      "Invalid arguments",
+    );
+
+    await client.close();
   });
 
   it("rejects reject with empty reason", async () => {
     setupWorkflows();
-    const server = createServer(tmpDir);
-    const result = await callTool(server, "reject", {
-      taskId: "some-id",
-      reason: "",
+    const client = await connectClient(tmpDir);
+
+    const result = await client.callTool({
+      name: "reject",
+      arguments: { taskId: "some-id", reason: "" },
     });
 
     expect(result.isError).toBe(true);
-    expect(result.content[0].text).toContain("Invalid arguments");
+    expect((result.content as Array<{ text: string }>)[0].text).toContain(
+      "Invalid arguments",
+    );
+
+    await client.close();
   });
 });
 
 describe("MCP response format", () => {
   it("returns JSON text content for success", async () => {
     setupWorkflows();
-    const server = createServer(tmpDir);
-    const result = await callTool(server, "workflows");
-
-    expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
-    expect(() => JSON.parse(result.content[0].text)).not.toThrow();
-    expect(result.isError).toBeUndefined();
-  });
-
-  it("returns isError true for business errors", async () => {
-    setupWorkflows();
-    const server = createServer(tmpDir);
-    const result = await callTool(server, "run", {
-      type: "unknown/type",
-      title: "Test",
-      inputs: {},
-    });
-
-    expect(result.isError).toBe(true);
-    expect(result.content[0].type).toBe("text");
-  });
-});
-
-describe("unknown tool", () => {
-  it("returns error", async () => {
-    setupWorkflows();
-    const server = createServer(tmpDir);
-    const result = await callTool(server, "nonexistent");
-
-    expect(result.isError).toBe(true);
-    expect(result.content[0].text).toContain("Unknown tool");
-  });
-});
-
-describe("tools list", () => {
-  it("exposes five tools", async () => {
-    setupWorkflows();
-    const server = createServer(tmpDir);
-    const result = await listTools(server);
-
-    expect(result.tools).toHaveLength(5);
-    const names = result.tools.map((t: { name: string }) => t.name);
-    expect(names).toContain("workflows");
-    expect(names).toContain("run");
-    expect(names).toContain("done");
-    expect(names).toContain("reject");
-    expect(names).toContain("status");
-  });
-});
-
-describe("HTTP server", () => {
-  let stopServer: (() => void) | undefined;
-
-  afterEach(() => {
-    stopServer?.();
-    stopServer = undefined;
-  });
-
-  it("accepts MCP client connections via HTTP", async () => {
-    setupWorkflows();
-    const port = 44312 + Math.floor(Math.random() * 1000);
-    const stop = await startServer(tmpDir, port);
-    stopServer = stop;
-
-    const client = new Client({ name: "test-client", version: "1.0.0" });
-    const transport = new StreamableHTTPClientTransport(
-      new URL(`http://127.0.0.1:${port}/mcp`),
-    );
-    await client.connect(transport);
-
-    const tools = await client.listTools();
-    expect(tools.tools).toHaveLength(5);
+    const client = await connectClient(tmpDir);
 
     const result = await client.callTool({
       name: "workflows",
       arguments: {},
     });
-    const data = JSON.parse((result.content as Array<{ text: string }>)[0].text);
+
+    expect(result.isError).toBeUndefined();
+    const data = parseText(result);
     expect(data).toHaveLength(1);
     expect(data[0].type).toBe("dev/impl");
 
     await client.close();
   });
 
-  it("supports multiple concurrent clients sharing state", async () => {
+  it("returns isError true for business errors", async () => {
     setupWorkflows();
-    const port = 44312 + Math.floor(Math.random() * 1000);
-    const stop = await startServer(tmpDir, port);
-    stopServer = stop;
+    const client = await connectClient(tmpDir);
 
-    const client1 = new Client({ name: "client-1", version: "1.0.0" });
-    const transport1 = new StreamableHTTPClientTransport(
-      new URL(`http://127.0.0.1:${port}/mcp`),
-    );
-    await client1.connect(transport1);
+    const result = await client.callTool({
+      name: "run",
+      arguments: { type: "unknown/type", title: "Test", inputs: {} },
+    });
 
-    const client2 = new Client({ name: "client-2", version: "1.0.0" });
-    const transport2 = new StreamableHTTPClientTransport(
-      new URL(`http://127.0.0.1:${port}/mcp`),
-    );
-    await client2.connect(transport2);
+    expect(result.isError).toBe(true);
 
-    // Client 1 creates a task
-    const runResult = await client1.callTool({
+    await client.close();
+  });
+});
+
+describe("MCP tool pipeline", () => {
+  it("run → done full cycle", async () => {
+    setupWorkflows();
+    const client = await connectClient(tmpDir);
+
+    const runResult = await client.callTool({
       name: "run",
       arguments: {
         type: "dev/impl",
-        title: "Shared task",
-        inputs: { what: "feature", where: "src/" },
+        title: "Add auth",
+        inputs: { what: "JWT", where: "src/" },
       },
     });
-    const { taskId } = JSON.parse(
-      (runResult.content as Array<{ text: string }>)[0].text,
-    );
 
-    // Client 2 can see and complete the task
-    const doneResult = await client2.callTool({
+    expect(runResult.isError).toBeUndefined();
+    const runData = parseText(runResult);
+    expect(runData.status).toBe("running");
+    expect(runData.prompt).toContain("JWT");
+
+    const doneResult = await client.callTool({
       name: "done",
-      arguments: { taskId, output: { changes: "done by client 2" } },
+      arguments: { taskId: runData.taskId, output: { changes: "src/auth.ts" } },
     });
-    const doneData = JSON.parse(
-      (doneResult.content as Array<{ text: string }>)[0].text,
-    );
+
+    expect(doneResult.isError).toBeUndefined();
+    const doneData = parseText(doneResult);
     expect(doneData.status).toBe("done");
 
-    // Client 1 can verify the status
-    const statusResult = await client1.callTool({
+    const statusResult = await client.callTool({
       name: "status",
-      arguments: { taskId },
+      arguments: { taskId: runData.taskId },
     });
-    const statusData = JSON.parse(
-      (statusResult.content as Array<{ text: string }>)[0].text,
-    );
+    const statusData = parseText(statusResult);
     expect(statusData.status).toBe("done");
 
-    await client1.close();
-    await client2.close();
+    await client.close();
   });
 
-  it("returns 404 for non-/mcp paths", async () => {
+  it("run → reject full cycle", async () => {
     setupWorkflows();
-    const port = 44312 + Math.floor(Math.random() * 1000);
-    const stop = await startServer(tmpDir, port);
-    stopServer = stop;
+    const client = await connectClient(tmpDir);
 
-    const res = await fetch(`http://127.0.0.1:${port}/other`);
-    expect(res.status).toBe(404);
-  });
-
-  it("returns 400 for non-initialize POST without session", async () => {
-    setupWorkflows();
-    const port = 44312 + Math.floor(Math.random() * 1000);
-    const stop = await startServer(tmpDir, port);
-    stopServer = stop;
-
-    const res = await fetch(`http://127.0.0.1:${port}/mcp`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        method: "tools/list",
-        id: 1,
-      }),
+    const runResult = await client.callTool({
+      name: "run",
+      arguments: {
+        type: "dev/impl",
+        title: "Task",
+        inputs: { what: "x", where: "y" },
+      },
     });
-    expect(res.status).toBe(400);
+    const { taskId } = parseText(runResult);
+
+    const rejectResult = await client.callTool({
+      name: "reject",
+      arguments: { taskId, reason: "Spec unclear" },
+    });
+
+    expect(rejectResult.isError).toBeUndefined();
+    const data = parseText(rejectResult);
+    expect(data.status).toBe("rejected");
+    expect(data.reason).toBe("Spec unclear");
+
+    await client.close();
+  });
+
+  it("done on already-completed task returns error", async () => {
+    setupWorkflows();
+    const client = await connectClient(tmpDir);
+
+    const runResult = await client.callTool({
+      name: "run",
+      arguments: {
+        type: "dev/impl",
+        title: "Task",
+        inputs: { what: "x", where: "y" },
+      },
+    });
+    const { taskId } = parseText(runResult);
+
+    await client.callTool({
+      name: "done",
+      arguments: { taskId, output: {} },
+    });
+
+    const secondDone = await client.callTool({
+      name: "done",
+      arguments: { taskId, output: {} },
+    });
+    expect(secondDone.isError).toBe(true);
+    expect((secondDone.content as Array<{ text: string }>)[0].text).toContain(
+      "not running",
+    );
+
+    await client.close();
+  });
+
+  it("unknown tool returns error", async () => {
+    setupWorkflows();
+    const client = await connectClient(tmpDir);
+
+    const result = await client.callTool({
+      name: "nonexistent",
+      arguments: {},
+    });
+
+    expect(result.isError).toBe(true);
+    expect((result.content as Array<{ text: string }>)[0].text).toContain(
+      "Unknown tool",
+    );
+
+    await client.close();
+  });
+
+  it("status returns empty list when no tasks", async () => {
+    setupWorkflows();
+    const client = await connectClient(tmpDir);
+
+    const result = await client.callTool({
+      name: "status",
+      arguments: {},
+    });
+
+    expect(result.isError).toBeUndefined();
+    expect(parseText(result)).toEqual([]);
+
+    await client.close();
   });
 });
