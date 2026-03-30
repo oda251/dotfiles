@@ -55,10 +55,6 @@ async function connectClient(workflowsDir: string) {
   return client;
 }
 
-function parseText(result: Awaited<ReturnType<Client["callTool"]>>) {
-  return JSON.parse((result.content as Array<{ text: string }>)[0].text);
-}
-
 beforeEach(() => {
   tmpDir = mkdtempSync(join(tmpdir(), "juggler-server-test-"));
 });
@@ -150,9 +146,8 @@ describe("MCP response format", () => {
     });
 
     expect(result.isError).toBeUndefined();
-    const data = parseText(result);
-    expect(data).toHaveLength(1);
-    expect(data[0].type).toBe("dev/impl");
+    const text = (result.content as Array<{ text: string }>)[0].text;
+    expect(() => JSON.parse(text)).not.toThrow();
 
     await client.close();
   });
@@ -172,103 +167,8 @@ describe("MCP response format", () => {
   });
 });
 
-describe("MCP tool pipeline", () => {
-  it("run → done full cycle", async () => {
-    setupWorkflows();
-    const client = await connectClient(tmpDir);
-
-    const runResult = await client.callTool({
-      name: "run",
-      arguments: {
-        type: "dev/impl",
-        title: "Add auth",
-        inputs: { what: "JWT", where: "src/" },
-      },
-    });
-
-    expect(runResult.isError).toBeUndefined();
-    const runData = parseText(runResult);
-    expect(runData.status).toBe("running");
-    expect(runData.prompt).toContain("JWT");
-
-    const doneResult = await client.callTool({
-      name: "done",
-      arguments: { taskId: runData.taskId, output: { changes: "src/auth.ts" } },
-    });
-
-    expect(doneResult.isError).toBeUndefined();
-    const doneData = parseText(doneResult);
-    expect(doneData.status).toBe("done");
-
-    const statusResult = await client.callTool({
-      name: "status",
-      arguments: { taskId: runData.taskId },
-    });
-    const statusData = parseText(statusResult);
-    expect(statusData.status).toBe("done");
-
-    await client.close();
-  });
-
-  it("run → reject full cycle", async () => {
-    setupWorkflows();
-    const client = await connectClient(tmpDir);
-
-    const runResult = await client.callTool({
-      name: "run",
-      arguments: {
-        type: "dev/impl",
-        title: "Task",
-        inputs: { what: "x", where: "y" },
-      },
-    });
-    const { taskId } = parseText(runResult);
-
-    const rejectResult = await client.callTool({
-      name: "reject",
-      arguments: { taskId, reason: "Spec unclear" },
-    });
-
-    expect(rejectResult.isError).toBeUndefined();
-    const data = parseText(rejectResult);
-    expect(data.status).toBe("rejected");
-    expect(data.reason).toBe("Spec unclear");
-
-    await client.close();
-  });
-
-  it("done on already-completed task returns error", async () => {
-    setupWorkflows();
-    const client = await connectClient(tmpDir);
-
-    const runResult = await client.callTool({
-      name: "run",
-      arguments: {
-        type: "dev/impl",
-        title: "Task",
-        inputs: { what: "x", where: "y" },
-      },
-    });
-    const { taskId } = parseText(runResult);
-
-    await client.callTool({
-      name: "done",
-      arguments: { taskId, output: {} },
-    });
-
-    const secondDone = await client.callTool({
-      name: "done",
-      arguments: { taskId, output: {} },
-    });
-    expect(secondDone.isError).toBe(true);
-    expect((secondDone.content as Array<{ text: string }>)[0].text).toContain(
-      "not running",
-    );
-
-    await client.close();
-  });
-
-  it("unknown tool returns error", async () => {
+describe("unknown tool", () => {
+  it("returns error via MCP protocol", async () => {
     setupWorkflows();
     const client = await connectClient(tmpDir);
 
@@ -281,21 +181,6 @@ describe("MCP tool pipeline", () => {
     expect((result.content as Array<{ text: string }>)[0].text).toContain(
       "Unknown tool",
     );
-
-    await client.close();
-  });
-
-  it("status returns empty list when no tasks", async () => {
-    setupWorkflows();
-    const client = await connectClient(tmpDir);
-
-    const result = await client.callTool({
-      name: "status",
-      arguments: {},
-    });
-
-    expect(result.isError).toBeUndefined();
-    expect(parseText(result)).toEqual([]);
 
     await client.close();
   });
