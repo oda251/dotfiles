@@ -36,7 +36,7 @@
       "id": 4,
       "category": "approval",
       "prompt": "Userモデルにemailフィールドを追加して。型定義はsrc/types/user.ts、スキーマはsrc/schema/user.ts、バリデーションはzodで。既存のnameフィールドと同じパターンで",
-      "expected_output": "dev/impl は requires-approval: true なのでユーザー確認を提示する",
+      "expected_output": "dev/impl は confirm-before-run: true なのでユーザー確認を提示する",
       "assertions": [
         {"type": "behavior", "text": "承認待ちタスクとしてユーザーに提示する"},
         {"type": "behavior", "text": "承認後に juggler に投入する"}

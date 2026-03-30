@@ -8,7 +8,7 @@ export interface WorkflowSummary {
   type: string;
   description: string;
   inputs: Record<string, string>;
-  "requires-approval": boolean;
+  "confirm-before-run": boolean;
 }
 
 export interface RunResult {
@@ -36,7 +36,7 @@ export function listWorkflows(
     type: w.type,
     description: w.frontmatter.description,
     inputs: w.frontmatter.inputs,
-    "requires-approval": w.frontmatter["requires-approval"] ?? false,
+    "confirm-before-run": w.frontmatter["confirm-before-run"] ?? false,
   }));
 }
 

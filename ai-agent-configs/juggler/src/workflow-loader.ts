@@ -7,7 +7,7 @@ import type { Workflow, LintError } from "./types.js";
 const FrontmatterSchema = v.object({
   description: v.pipe(v.string(), v.minLength(1)),
   inputs: v.record(v.string(), v.string()),
-  "requires-approval": v.optional(v.boolean(), false),
+  "confirm-before-run": v.optional(v.boolean(), false),
   then: v.optional(v.string()),
   callable: v.optional(v.boolean(), true),
 });

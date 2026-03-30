@@ -4,7 +4,7 @@ inputs:
   what: 何を実装するか
   where: どのファイル/モジュールに
   spec: 準拠する仕様やインターフェース
-requires-approval: true
+confirm-before-run: true
 then: review
 ---
 
