@@ -31,7 +31,7 @@ function makeWorkflows(): Map<string, Workflow> {
     frontmatter: {
       description: "Review implementation",
       inputs: { changes: "Changed files" },
-      callable: false,
+      "chain-only": true,
     },
     body: "Review the changes.",
     outputs: {},
@@ -40,7 +40,7 @@ function makeWorkflows(): Map<string, Workflow> {
 }
 
 describe("listWorkflows", () => {
-  it("returns only callable workflows with summary", () => {
+  it("returns only runnable workflows with summary", () => {
     const result = listWorkflows(makeWorkflows());
     expect(result).toHaveLength(1);
     expect(result[0].type).toBe("dev/impl");
@@ -82,7 +82,7 @@ describe("runWorkflow", () => {
     expect(result._unsafeUnwrapErr()).toContain("Unknown workflow type");
   });
 
-  it("errors on non-callable workflow", () => {
+  it("errors on chain-only workflow", () => {
     const store = new TaskStore();
     const result = runWorkflow(makeWorkflows(), store, {
       type: "dev/review",
@@ -91,7 +91,7 @@ describe("runWorkflow", () => {
     });
 
     expect(result.isErr()).toBe(true);
-    expect(result._unsafeUnwrapErr()).toContain("not callable");
+    expect(result._unsafeUnwrapErr()).toContain("chain-only");
   });
 
   it("errors on missing required inputs", () => {

@@ -9,7 +9,7 @@ const FrontmatterSchema = v.object({
   inputs: v.record(v.string(), v.string()),
   "confirm-before-run": v.optional(v.boolean(), false),
   then: v.optional(v.string()),
-  callable: v.optional(v.boolean(), true),
+  "chain-only": v.optional(v.boolean(), false),
 });
 
 function discoverWorkflowFiles(workflowsDir: string): string[] {
@@ -130,7 +130,7 @@ export function lint(workflowsDir: string): LintError[] {
     }
   }
 
-  // Orphaned non-callable workflows
+  // Orphaned chain-only workflows
   const referencedByThen = new Set<string>();
   for (const [, workflow] of workflows) {
     if (workflow.frontmatter.then) {
@@ -139,11 +139,11 @@ export function lint(workflowsDir: string): LintError[] {
   }
 
   for (const [type, workflow] of workflows) {
-    if (workflow.frontmatter.callable === false && !referencedByThen.has(type)) {
+    if (workflow.frontmatter["chain-only"] && !referencedByThen.has(type)) {
       errors.push({
         file: type,
         message:
-          "Workflow is callable: false but not referenced by any then chain (orphaned)",
+          "Workflow is chain-only but not referenced by any then chain (orphaned)",
       });
     }
   }
@@ -151,10 +151,10 @@ export function lint(workflowsDir: string): LintError[] {
   return errors;
 }
 
-export function getCallableWorkflows(
+export function getRunnableWorkflows(
   workflows: Map<string, Workflow>,
 ): Workflow[] {
   return [...workflows.values()].filter(
-    (w) => w.frontmatter.callable !== false,
+    (w) => !w.frontmatter["chain-only"],
   );
 }

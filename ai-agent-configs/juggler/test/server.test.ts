@@ -35,7 +35,7 @@ Write the code.`,
     "review",
     `---
 description: Review implementation
-callable: false
+chain-only: true
 inputs:
   changes: Changed files
 ---

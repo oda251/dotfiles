@@ -35,7 +35,7 @@ CC メインエージェント ←MCP(ツール+Channel)→ juggler daemon ←CL
 
 | ツール | 引数 | 返り値 | 説明 |
 |---|---|---|---|
-| `workflows` | なし | ワークフロー一覧 | callable なエントリポイントの description と inputs を返す |
+| `workflows` | なし | ワークフロー一覧 | 直接実行可能なワークフローの description と inputs を返す |
 | `run` | `type`, `inputs`, `title` | taskId | ワーカーを起動してタスクを開始する |
 | `status` | `taskId?` | タスク状態一覧 | 実行中・完了・rejected のタスク一覧を返す |
 
@@ -60,11 +60,11 @@ CC メインエージェント ←MCP(ツール+Channel)→ juggler daemon ←CL
 ```
 workflows/
   dev/
-    impl.md       # callable, then: review
-    review.md     # callable: false
+    impl.md       # then: review
+    review.md     # chain-only: true
   research/
-    gather.md     # callable, then: write
-    write.md      # callable: false
+    gather.md     # then: write
+    write.md      # chain-only: true
 ```
 
 ### フロントマター仕様
@@ -77,7 +77,7 @@ inputs:                      # 入力パラメータ（key: 説明）
   key2: 説明2
 confirm-before-run: bool      # ユーザー承認が必要か（デフォルト: false）
 then: string                 # 後続ステップのファイル名（拡張子なし）
-callable: bool               # workflows 一覧に出るか（デフォルト: true）
+chain-only: bool             # then チェーン専用か（デフォルト: false）
 ---
 ```
 
@@ -89,7 +89,7 @@ callable: bool               # workflows 一覧に出るか（デフォルト: t
 | `inputs` | （必須） | 呼び出しに必要な入力。全て埋まらないと呼び出せない |
 | `confirm-before-run` | `false` | `true` の場合、メインエージェントがユーザーに承認を求める |
 | `then` | なし | 後続ステップ。同一ドメインディレクトリ内のファイル名 |
-| `callable` | `true` | `false` のステップは `workflows` ツールの一覧に含まれない |
+| `chain-only` | `false` | `true` のステップは then チェーン専用。直接実行不可 |
 
 ## then チェーンの動作
 
@@ -204,7 +204,7 @@ interface Task {
   - フロントマター必須フィールドの欠落
   - then 先の未解決参照
   - then チェーンの循環検出
-  - callable: false なのに then から参照されていないステップ（孤立）
+  - chain-only: true なのに then から参照されていないステップ（孤立）
   - inputs の key 名重複
 
 ## 技術スタック
