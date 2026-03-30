@@ -5,7 +5,7 @@ inputs:
   where: どのファイル/モジュールに
   spec: 準拠する仕様やインターフェース
 confirm-before-run: true
-then: review
+next: review
 ---
 
 - 対象言語のガイドライン

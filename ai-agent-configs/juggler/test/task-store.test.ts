@@ -96,11 +96,11 @@ describe("TaskStore", () => {
       type: "dev/impl",
       title: "Test",
       inputs: {},
-      then: "review",
+      next: "review",
       chainParent: "parent-123",
     });
 
-    expect(task.then).toBe("review");
+    expect(task.next).toBe("review");
     expect(task.chainParent).toBe("parent-123");
   });
 

@@ -35,7 +35,7 @@ inputs:
   what: What to implement
   where: Target file
 confirm-before-run: true
-then: review
+next: review
 ---
 
 Write the code.`,
@@ -46,7 +46,7 @@ Write the code.`,
       "review",
       `---
 description: Review implementation
-chain-only: true
+internal: true
 inputs:
   changes: Changed files
 ---
@@ -65,7 +65,7 @@ Review the changes.`,
       where: "Target file",
     });
     expect(impl.frontmatter["confirm-before-run"]).toBe(true);
-    expect(impl.frontmatter.then).toBe("review");
+    expect(impl.frontmatter.next).toBe("review");
     expect(impl.body).toBe("Write the code.");
   });
 
@@ -104,7 +104,7 @@ Body.`,
     expect(errors[0].message).toContain("inputs");
   });
 
-  it("reports error for unresolved then reference", () => {
+  it("reports error for unresolved next reference", () => {
     createWorkflow(
       "dev",
       "impl",
@@ -112,7 +112,7 @@ Body.`,
 description: Implement
 inputs:
   what: Something
-then: nonexistent
+next: nonexistent
 ---
 
 Body.`,
@@ -122,7 +122,7 @@ Body.`,
     expect(errors.some((e) => e.message.includes("non-existent"))).toBe(true);
   });
 
-  it("resolves outputs from then chain", () => {
+  it("resolves outputs from next chain", () => {
     createWorkflow(
       "dev",
       "impl",
@@ -130,7 +130,7 @@ Body.`,
 description: Implement
 inputs:
   what: What to implement
-then: review
+next: review
 ---
 
 Body.`,
@@ -141,7 +141,7 @@ Body.`,
       "review",
       `---
 description: Review
-chain-only: true
+internal: true
 inputs:
   changes: Changed files
 ---
@@ -163,7 +163,7 @@ description: Implement
 inputs:
   what: What to implement
   spec: Specification
-then: review
+next: review
 ---
 
 Body.`,
@@ -174,7 +174,7 @@ Body.`,
       "review",
       `---
 description: Review
-chain-only: true
+internal: true
 inputs:
   spec: Specification
   changes: Changed files
@@ -195,7 +195,7 @@ Review.`,
     expect(errors).toHaveLength(0);
   });
 
-  it("defaults confirm-before-run to false and chain-only to false", () => {
+  it("defaults confirm-before-run to false and internal to false", () => {
     createWorkflow(
       "dev",
       "simple",
@@ -211,7 +211,7 @@ Do it.`,
     const { workflows } = loadWorkflows(tmpDir);
     const simple = workflows.get("dev/simple") ?? (() => { throw new Error("not found"); })();
     expect(simple.frontmatter["confirm-before-run"]).toBe(false);
-    expect(simple.frontmatter["chain-only"]).toBe(false);
+    expect(simple.frontmatter.internal).toBe(false);
   });
 
   it("loads workflows from multiple domains", () => {
@@ -253,7 +253,7 @@ Body.`);
 });
 
 describe("lint", () => {
-  it("detects circular then chains", () => {
+  it("detects circular next chains", () => {
     createWorkflow(
       "dev",
       "a",
@@ -261,7 +261,7 @@ describe("lint", () => {
 description: A
 inputs:
   x: X
-then: b
+next: b
 ---
 A.`,
     );
@@ -273,7 +273,7 @@ A.`,
 description: B
 inputs:
   x: X
-then: a
+next: a
 ---
 B.`,
     );
@@ -282,13 +282,13 @@ B.`,
     expect(errors.some((e) => e.message.includes("Circular"))).toBe(true);
   });
 
-  it("detects orphaned chain-only workflows", () => {
+  it("detects orphaned internal workflows", () => {
     createWorkflow(
       "dev",
       "orphan",
       `---
 description: Orphan
-chain-only: true
+internal: true
 inputs:
   x: X
 ---
@@ -307,7 +307,7 @@ Orphan.`,
 description: Implement
 inputs:
   what: What
-then: review
+next: review
 ---
 Impl.`,
     );
@@ -317,7 +317,7 @@ Impl.`,
       "review",
       `---
 description: Review
-chain-only: true
+internal: true
 inputs:
   changes: Changes
 ---
@@ -330,7 +330,7 @@ Review.`,
 });
 
 describe("getRunnableWorkflows", () => {
-  it("filters out chain-only workflows", () => {
+  it("filters out internal workflows", () => {
     createWorkflow(
       "dev",
       "impl",
@@ -347,7 +347,7 @@ Impl.`,
       "review",
       `---
 description: Review
-chain-only: true
+internal: true
 inputs:
   changes: Changes
 ---

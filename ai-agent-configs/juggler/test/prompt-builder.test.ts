@@ -11,7 +11,7 @@ describe("buildWorkerPrompt", () => {
       frontmatter: {
         description: "Implement code",
         inputs: { what: "What to implement", where: "Target file" },
-        then: "review",
+        next: "review",
       },
       body: "Write the code following TDD.",
       outputs: { changes: "Changed files" },
@@ -40,7 +40,7 @@ describe("buildWorkerPrompt", () => {
       frontmatter: {
         description: "Review code",
         inputs: { changes: "Changed files" },
-        "chain-only": true,
+        internal: true,
       },
       body: "Review the changes.",
       outputs: {},
@@ -86,7 +86,7 @@ describe("buildWorkerPrompt", () => {
       frontmatter: {
         description: "Impl",
         inputs: { what: "What" },
-        then: "review",
+        next: "review",
       },
       body: "Do it.",
       outputs: { changes: "Changed files", summary: "Summary of changes" },

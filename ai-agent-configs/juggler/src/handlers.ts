@@ -48,8 +48,8 @@ export function runWorkflow(
   const workflow = workflows.get(params.type);
   if (!workflow) return err(`Unknown workflow type: ${params.type}`);
 
-  if (workflow.frontmatter["chain-only"]) {
-    return err(`Workflow ${params.type} is chain-only (not directly runnable)`);
+  if (workflow.frontmatter.internal) {
+    return err(`Workflow ${params.type} is internal (not directly runnable)`);
   }
 
   const missingInputs: string[] = [];
@@ -67,7 +67,7 @@ export function runWorkflow(
     type: params.type,
     title: params.title,
     inputs: params.inputs,
-    then: workflow.frontmatter.then,
+    next: workflow.frontmatter.next,
   });
 
   const prompt = buildWorkerPrompt(workflow, params.inputs, task.id);

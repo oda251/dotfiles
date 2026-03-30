@@ -8,8 +8,8 @@ const FrontmatterSchema = v.object({
   description: v.pipe(v.string(), v.minLength(1)),
   inputs: v.record(v.string(), v.string()),
   "confirm-before-run": v.optional(v.boolean(), false),
-  then: v.optional(v.string()),
-  "chain-only": v.optional(v.boolean(), false),
+  next: v.optional(v.string()),
+  internal: v.optional(v.boolean(), false),
 });
 
 function discoverWorkflowFiles(workflowsDir: string): string[] {
@@ -76,18 +76,18 @@ export function loadWorkflows(workflowsDir: string): {
     });
   }
 
-  // Resolve then references and outputs
+  // Resolve next references and outputs
   for (const [type, workflow] of workflows) {
-    const { then: thenName } = workflow.frontmatter;
-    if (!thenName) continue;
+    const { next: nextName } = workflow.frontmatter;
+    if (!nextName) continue;
 
-    const thenType = `${workflow.domain}/${thenName}`;
-    const thenWorkflow = workflows.get(thenType);
+    const nextType = `${workflow.domain}/${nextName}`;
+    const nextWorkflow = workflows.get(nextType);
 
-    if (!thenWorkflow) {
+    if (!nextWorkflow) {
       errors.push({
         file: type,
-        message: `then "${thenName}" references non-existent workflow "${thenType}"`,
+        message: `next "${nextName}" references non-existent workflow "${nextType}"`,
       });
       continue;
     }
@@ -95,7 +95,7 @@ export function loadWorkflows(workflowsDir: string): {
     const currentInputKeys = new Set(
       Object.keys(workflow.frontmatter.inputs),
     );
-    for (const [key, desc] of Object.entries(thenWorkflow.frontmatter.inputs)) {
+    for (const [key, desc] of Object.entries(nextWorkflow.frontmatter.inputs)) {
       if (!currentInputKeys.has(key)) {
         workflow.outputs[key] = desc;
       }
@@ -108,9 +108,9 @@ export function loadWorkflows(workflowsDir: string): {
 export function lint(workflowsDir: string): LintError[] {
   const { workflows, errors } = loadWorkflows(workflowsDir);
 
-  // Circular then chains
+  // Circular chains
   for (const [type, workflow] of workflows) {
-    if (!workflow.frontmatter.then) continue;
+    if (!workflow.frontmatter.next) continue;
 
     const visited = new Set<string>();
     let current: string | undefined = type;
@@ -119,31 +119,31 @@ export function lint(workflowsDir: string): LintError[] {
       if (visited.has(current)) {
         errors.push({
           file: type,
-          message: `Circular then chain detected: ${[...visited, current].join(" → ")}`,
+          message: `Circular chain detected: ${[...visited, current].join(" → ")}`,
         });
         break;
       }
       visited.add(current);
       const w = workflows.get(current);
-      if (!w?.frontmatter.then) break;
-      current = `${w.domain}/${w.frontmatter.then}`;
+      if (!w?.frontmatter.next) break;
+      current = `${w.domain}/${w.frontmatter.next}`;
     }
   }
 
-  // Orphaned chain-only workflows
-  const referencedByThen = new Set<string>();
+  // Orphaned internal workflows
+  const referencedByNext = new Set<string>();
   for (const [, workflow] of workflows) {
-    if (workflow.frontmatter.then) {
-      referencedByThen.add(`${workflow.domain}/${workflow.frontmatter.then}`);
+    if (workflow.frontmatter.next) {
+      referencedByNext.add(`${workflow.domain}/${workflow.frontmatter.next}`);
     }
   }
 
   for (const [type, workflow] of workflows) {
-    if (workflow.frontmatter["chain-only"] && !referencedByThen.has(type)) {
+    if (workflow.frontmatter.internal && !referencedByNext.has(type)) {
       errors.push({
         file: type,
         message:
-          "Workflow is chain-only but not referenced by any then chain (orphaned)",
+          "Workflow is internal but not referenced by any next chain (orphaned)",
       });
     }
   }
@@ -155,6 +155,6 @@ export function getRunnableWorkflows(
   workflows: Map<string, Workflow>,
 ): Workflow[] {
   return [...workflows.values()].filter(
-    (w) => !w.frontmatter["chain-only"],
+    (w) => !w.frontmatter.internal,
   );
 }

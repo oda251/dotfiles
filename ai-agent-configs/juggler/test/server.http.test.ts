@@ -24,7 +24,7 @@ description: Implement code
 inputs:
   what: What to implement
   where: Target file
-then: review
+next: review
 ---
 
 Write the code.`,
@@ -35,7 +35,7 @@ Write the code.`,
     "review",
     `---
 description: Review implementation
-chain-only: true
+internal: true
 inputs:
   changes: Changed files
 ---

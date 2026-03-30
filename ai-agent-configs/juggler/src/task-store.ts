@@ -9,7 +9,7 @@ export class TaskStore {
     type: string;
     title: string;
     inputs: Record<string, string>;
-    then?: string;
+    next?: string;
     chainParent?: string;
   }): Task {
     const task: Task = {
@@ -18,7 +18,7 @@ export class TaskStore {
       title: params.title,
       inputs: params.inputs,
       status: "running",
-      then: params.then,
+      next: params.next,
       chainParent: params.chainParent,
     };
     this.tasks.set(task.id, task);

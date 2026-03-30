@@ -47,10 +47,10 @@ plan と exec の境界は絶対。混在させない。
 
 ```
 workflows/
-  dev/          # then: impl → review
+  dev/          # next: impl → review
     impl.md
     review.md
-  research/     # then: gather → write
+  research/     # next: gather → write
     gather.md
     write.md
 ```
