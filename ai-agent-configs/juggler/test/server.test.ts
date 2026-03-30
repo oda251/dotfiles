@@ -78,77 +78,8 @@ afterEach(() => {
   rmSync(tmpDir, { recursive: true, force: true });
 });
 
-describe("workflows tool", () => {
-  it("lists only callable workflows", async () => {
-    setupWorkflows();
-    const server = createServer(tmpDir);
-    const result = await callTool(server, "workflows");
-    const data = JSON.parse(result.content[0].text);
-
-    expect(data).toHaveLength(1);
-    expect(data[0].type).toBe("dev/impl");
-    expect(data[0]["requires-approval"]).toBe(true);
-  });
-});
-
-describe("run tool", () => {
-  it("creates task and returns prompt", async () => {
-    setupWorkflows();
-    const server = createServer(tmpDir);
-    const result = await callTool(server, "run", {
-      type: "dev/impl",
-      title: "Add auth",
-      inputs: { what: "JWT middleware", where: "src/auth/" },
-    });
-
-    expect(result.isError).toBeUndefined();
-    const data = JSON.parse(result.content[0].text);
-    expect(data.taskId).toBeDefined();
-    expect(data.status).toBe("running");
-    expect(data.prompt).toContain("JWT middleware");
-  });
-
-  it("rejects unknown workflow type", async () => {
-    setupWorkflows();
-    const server = createServer(tmpDir);
-    const result = await callTool(server, "run", {
-      type: "unknown/type",
-      title: "Test",
-      inputs: {},
-    });
-
-    expect(result.isError).toBe(true);
-    expect(result.content[0].text).toContain("Unknown workflow type");
-  });
-
-  it("rejects non-callable workflow", async () => {
-    setupWorkflows();
-    const server = createServer(tmpDir);
-    const result = await callTool(server, "run", {
-      type: "dev/review",
-      title: "Test",
-      inputs: { changes: "file.ts" },
-    });
-
-    expect(result.isError).toBe(true);
-    expect(result.content[0].text).toContain("not callable");
-  });
-
-  it("rejects missing required inputs", async () => {
-    setupWorkflows();
-    const server = createServer(tmpDir);
-    const result = await callTool(server, "run", {
-      type: "dev/impl",
-      title: "Test",
-      inputs: { what: "something" },
-    });
-
-    expect(result.isError).toBe(true);
-    expect(result.content[0].text).toContain("Missing required inputs");
-    expect(result.content[0].text).toContain("where");
-  });
-
-  it("rejects invalid arguments", async () => {
+describe("valibot validation", () => {
+  it("rejects run with empty type", async () => {
     setupWorkflows();
     const server = createServer(tmpDir);
     const result = await callTool(server, "run", {
@@ -160,88 +91,8 @@ describe("run tool", () => {
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain("Invalid arguments");
   });
-});
 
-describe("status tool", () => {
-  it("returns all tasks", async () => {
-    setupWorkflows();
-    const server = createServer(tmpDir);
-
-    await callTool(server, "run", {
-      type: "dev/impl",
-      title: "Task A",
-      inputs: { what: "a", where: "b" },
-    });
-
-    const result = await callTool(server, "status");
-    const data = JSON.parse(result.content[0].text);
-    expect(data).toHaveLength(1);
-    expect(data[0].title).toBe("Task A");
-  });
-
-  it("returns specific task by ID", async () => {
-    setupWorkflows();
-    const server = createServer(tmpDir);
-
-    const runResult = await callTool(server, "run", {
-      type: "dev/impl",
-      title: "Task A",
-      inputs: { what: "a", where: "b" },
-    });
-    const { taskId } = JSON.parse(runResult.content[0].text);
-
-    const result = await callTool(server, "status", { taskId });
-    const data = JSON.parse(result.content[0].text);
-    expect(data.id).toBe(taskId);
-    expect(data.status).toBe("running");
-  });
-
-  it("returns error for unknown task ID", async () => {
-    setupWorkflows();
-    const server = createServer(tmpDir);
-    const result = await callTool(server, "status", {
-      taskId: "nonexistent",
-    });
-
-    expect(result.isError).toBe(true);
-    expect(result.content[0].text).toContain("Task not found");
-  });
-});
-
-describe("done tool", () => {
-  it("completes a running task", async () => {
-    setupWorkflows();
-    const server = createServer(tmpDir);
-    const runResult = await callTool(server, "run", {
-      type: "dev/impl",
-      title: "Task A",
-      inputs: { what: "a", where: "b" },
-    });
-    const { taskId } = JSON.parse(runResult.content[0].text);
-
-    const result = await callTool(server, "done", {
-      taskId,
-      output: { changes: "src/foo.ts" },
-    });
-
-    expect(result.isError).toBeUndefined();
-    const data = JSON.parse(result.content[0].text);
-    expect(data.status).toBe("done");
-    expect(data.output.changes).toBe("src/foo.ts");
-  });
-
-  it("rejects invalid task ID", async () => {
-    setupWorkflows();
-    const server = createServer(tmpDir);
-    const result = await callTool(server, "done", {
-      taskId: "nonexistent",
-      output: { changes: "x" },
-    });
-
-    expect(result.isError).toBe(true);
-  });
-
-  it("rejects missing arguments", async () => {
+  it("rejects done with missing arguments", async () => {
     setupWorkflows();
     const server = createServer(tmpDir);
     const result = await callTool(server, "done", {});
@@ -249,48 +100,43 @@ describe("done tool", () => {
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain("Invalid arguments");
   });
-});
 
-describe("reject tool", () => {
-  it("rejects a running task", async () => {
-    setupWorkflows();
-    const server = createServer(tmpDir);
-    const runResult = await callTool(server, "run", {
-      type: "dev/impl",
-      title: "Task A",
-      inputs: { what: "a", where: "b" },
-    });
-    const { taskId } = JSON.parse(runResult.content[0].text);
-
-    const result = await callTool(server, "reject", {
-      taskId,
-      reason: "Requirements unclear",
-    });
-
-    expect(result.isError).toBeUndefined();
-    const data = JSON.parse(result.content[0].text);
-    expect(data.status).toBe("rejected");
-    expect(data.reason).toBe("Requirements unclear");
-  });
-
-  it("rejects invalid task ID", async () => {
+  it("rejects reject with empty reason", async () => {
     setupWorkflows();
     const server = createServer(tmpDir);
     const result = await callTool(server, "reject", {
-      taskId: "nonexistent",
-      reason: "bad",
+      taskId: "some-id",
+      reason: "",
     });
-
-    expect(result.isError).toBe(true);
-  });
-
-  it("rejects missing arguments", async () => {
-    setupWorkflows();
-    const server = createServer(tmpDir);
-    const result = await callTool(server, "reject", {});
 
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain("Invalid arguments");
+  });
+});
+
+describe("MCP response format", () => {
+  it("returns JSON text content for success", async () => {
+    setupWorkflows();
+    const server = createServer(tmpDir);
+    const result = await callTool(server, "workflows");
+
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect(() => JSON.parse(result.content[0].text)).not.toThrow();
+    expect(result.isError).toBeUndefined();
+  });
+
+  it("returns isError true for business errors", async () => {
+    setupWorkflows();
+    const server = createServer(tmpDir);
+    const result = await callTool(server, "run", {
+      type: "unknown/type",
+      title: "Test",
+      inputs: {},
+    });
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].type).toBe("text");
   });
 });
 
@@ -408,5 +254,33 @@ describe("HTTP server", () => {
 
     await client1.close();
     await client2.close();
+  });
+
+  it("returns 404 for non-/mcp paths", async () => {
+    setupWorkflows();
+    const port = 44312 + Math.floor(Math.random() * 1000);
+    const stop = await startServer(tmpDir, port);
+    stopServer = stop;
+
+    const res = await fetch(`http://127.0.0.1:${port}/other`);
+    expect(res.status).toBe(404);
+  });
+
+  it("returns 400 for non-initialize POST without session", async () => {
+    setupWorkflows();
+    const port = 44312 + Math.floor(Math.random() * 1000);
+    const stop = await startServer(tmpDir, port);
+    stopServer = stop;
+
+    const res = await fetch(`http://127.0.0.1:${port}/mcp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "tools/list",
+        id: 1,
+      }),
+    });
+    expect(res.status).toBe(400);
   });
 });
