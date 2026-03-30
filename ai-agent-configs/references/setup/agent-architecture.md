@@ -35,7 +35,7 @@ AI エージェントシステムの責務分離の原則。ツール・フレ�
 plan と exec の境界は絶対。混在させない。
 
 - plan はメインエージェントの振る舞いとして hooks で注入する
-- exec はワークフロー定義として `workflows/` に置き、
+- exec はワークフロー定義として `skills/` に置き、
   juggler がワーカーに注入する
 - plan の行動指針はワーカーに漏洩させない（コンテキスト分離）
 
@@ -46,7 +46,7 @@ plan と exec の境界は絶対。混在させない。
 チェーン制御は juggler（オーケストレーター）の責務。
 
 ```
-workflows/
+skills/
   dev/          # next: impl → review
     impl.md
     review.md

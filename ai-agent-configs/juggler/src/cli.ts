@@ -7,7 +7,7 @@ import { startServer } from "./server.js";
 import { exhaustive } from "./types.js";
 
 const EnvSchema = v.object({
-  JUGGLER_WORKFLOWS_DIR: v.optional(v.string()),
+  JUGGLER_SKILLS_DIR: v.optional(v.string()),
   JUGGLER_PORT: v.optional(v.string()),
   HOME: v.optional(v.string()),
 });
@@ -34,7 +34,7 @@ function resolveWorkflowsDir(args: string[]): string {
   if (dirIndex !== -1 && args[dirIndex + 1]) {
     return resolve(args[dirIndex + 1]);
   }
-  return env.JUGGLER_WORKFLOWS_DIR ?? resolve(env.HOME ?? "~", ".claude", "workflows");
+  return env.JUGGLER_SKILLS_DIR ?? resolve(env.HOME ?? "~", ".claude", "skills");
 }
 
 const COMMANDS = ["serve", "lint"] as const;
@@ -68,7 +68,7 @@ function runLint(dir: string) {
   const errors = lint(dir);
 
   if (errors.length === 0) {
-    console.log("✓ All workflows valid");
+    console.log("✓ All skills valid");
     process.exit(0);
   }
 
