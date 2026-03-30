@@ -2,8 +2,8 @@ export interface WorkflowFrontmatter {
   description: string;
   inputs: Record<string, string>;
   "confirm-before-run"?: boolean;
-  then?: string;
-  "chain-only"?: boolean;
+  next?: string;
+  internal?: boolean;
 }
 
 export interface Workflow {
@@ -25,7 +25,7 @@ export interface Task {
   status: TaskStatus;
   output?: Record<string, string>;
   reason?: string;
-  then?: string;
+  next?: string;
   chainParent?: string;
 }
 

@@ -19,7 +19,7 @@ function makeWorkflows(): Map<string, Workflow> {
       description: "Implement code",
       inputs: { what: "What to implement", where: "Target file" },
       "confirm-before-run": true,
-      then: "review",
+      next: "review",
     },
     body: "Write the code.",
     outputs: { changes: "Changed files" },
@@ -31,7 +31,7 @@ function makeWorkflows(): Map<string, Workflow> {
     frontmatter: {
       description: "Review implementation",
       inputs: { changes: "Changed files" },
-      "chain-only": true,
+      internal: true,
     },
     body: "Review the changes.",
     outputs: {},
@@ -82,7 +82,7 @@ describe("runWorkflow", () => {
     expect(result._unsafeUnwrapErr()).toContain("Unknown workflow type");
   });
 
-  it("errors on chain-only workflow", () => {
+  it("errors on internal workflow", () => {
     const store = new TaskStore();
     const result = runWorkflow(makeWorkflows(), store, {
       type: "dev/review",
@@ -91,7 +91,7 @@ describe("runWorkflow", () => {
     });
 
     expect(result.isErr()).toBe(true);
-    expect(result._unsafeUnwrapErr()).toContain("chain-only");
+    expect(result._unsafeUnwrapErr()).toContain("internal");
   });
 
   it("errors on missing required inputs", () => {

@@ -43,14 +43,14 @@ CC メインエージェント ←MCP(ツール+Channel)→ juggler daemon ←CL
 
 | イベント | 発火条件 | 内容 |
 |---|---|---|
-| `task.done` | then チェーンが全完了した時 | taskId, title, result |
+| `task.done` | next チェーンが全完了した時 | taskId, title, result |
 | `task.rejected` | ワーカーが reject した時 | taskId, title, reason |
 
 ## CLI インターフェース（ワーカー → juggler）
 
 | コマンド | 引数 | 動作 |
 |---|---|---|
-| `juggler done` | `--output key=value ...` | then があれば次ステップを起動、なければ CC に通知 |
+| `juggler done` | `--output key=value ...` | next があれば次ステップを起動、なければ CC に通知 |
 | `juggler reject` | `--reason "..."` | CC に通知 |
 
 ## ワークフロー定義
@@ -60,11 +60,11 @@ CC メインエージェント ←MCP(ツール+Channel)→ juggler daemon ←CL
 ```
 workflows/
   dev/
-    impl.md       # then: review
-    review.md     # chain-only: true
+    impl.md       # next: review
+    review.md     # internal: true
   research/
-    gather.md     # then: write
-    write.md      # chain-only: true
+    gather.md     # next: write
+    write.md      # internal: true
 ```
 
 ### フロントマター仕様
@@ -76,8 +76,8 @@ inputs:                      # 入力パラメータ（key: 説明）
   key1: 説明1
   key2: 説明2
 confirm-before-run: bool      # ユーザー承認が必要か（デフォルト: false）
-then: string                 # 後続ステップのファイル名（拡張子なし）
-chain-only: bool             # then チェーン専用か（デフォルト: false）
+next: string                 # 後続ステップのファイル名（拡張子なし）
+internal: bool               # next チェーン専用か（デフォルト: false）
 ---
 ```
 
@@ -88,14 +88,14 @@ chain-only: bool             # then チェーン専用か（デフォルト: fal
 | `description` | （必須） | ワークフローの目的。メインエージェントが委譲先を判断する材料 |
 | `inputs` | （必須） | 呼び出しに必要な入力。全て埋まらないと呼び出せない |
 | `confirm-before-run` | `false` | `true` の場合、メインエージェントがユーザーに承認を求める |
-| `then` | なし | 後続ステップ。同一ドメインディレクトリ内のファイル名 |
-| `chain-only` | `false` | `true` のステップは then チェーン専用。直接実行不可 |
+| `next` | なし | 後続ステップ。同一ドメインディレクトリ内のファイル名 |
+| `internal` | `false` | `true` のステップは next チェーン専用。直接実行不可 |
 
-## then チェーンの動作
+## next チェーンの動作
 
 ### outputs の自動解決
 
-1. juggler がエントリポイントの `then` を辿り、後続ステップの `inputs` を取得する
+1. juggler がエントリポイントの `next` を辿り、後続ステップの `inputs` を取得する
 2. 後続ステップの `inputs` からエントリポイントの `inputs` を引いた差分を outputs とする
 3. ワーカー起動時に「完了時にこの output を返せ」と共通フローで伝える
 4. ワーカーが `juggler done --output key=value` で完了する
@@ -154,7 +154,7 @@ interface Task {
   status: "running" | "done" | "rejected"
   output?: Record<string, string>
   reason?: string        // reject 時
-  then?: string          // "review"
+  next?: string          // "review"
   chainParent?: string   // チェーン元の taskId
 }
 ```
@@ -182,7 +182,7 @@ interface Task {
 ### IO バリデーション
 
 - `run` 時に inputs が不足していればエラーを返す
-- `done` 時に outputs が不足していればエラーを返す（then がある場合）
+- `done` 時に outputs が不足していればエラーを返す（next がある場合）
 - `reject` 時に reason が空ならエラーを返す
 - 型違反は即座にエラーとし、暗黙の補完はしない
 
@@ -190,8 +190,8 @@ interface Task {
 
 - フロントマターが不完全なワークフローは読み込まない（無視する）
 - 必須フィールド: `description`, `inputs`
-- `then` が指す先のファイルが存在しなければエラー
-- `then` チェーンに循環があればエラー
+- `next` が指す先のファイルが存在しなければエラー
+- `next` チェーンに循環があればエラー
 - バリデーション違反時はエラー内容を明示する
 
 ### lint コマンド
@@ -202,9 +202,9 @@ interface Task {
 - lint は CI でも使えるよう、exit code でエラーを返す
 - 検出項目:
   - フロントマター必須フィールドの欠落
-  - then 先の未解決参照
-  - then チェーンの循環検出
-  - chain-only: true なのに then から参照されていないステップ（孤立）
+  - next 先の未解決参照
+  - next チェーンの循環検出
+  - internal: true なのに next から参照されていないステップ（孤立）
   - inputs の key 名重複
 
 ## 技術スタック

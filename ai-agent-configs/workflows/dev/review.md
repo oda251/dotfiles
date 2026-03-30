@@ -1,6 +1,6 @@
 ---
 description: 実装内容をレビューし、品質を検証する
-chain-only: true
+internal: true
 inputs:
   changes: レビュー対象の変更内容
   criteria: レビュー観点
