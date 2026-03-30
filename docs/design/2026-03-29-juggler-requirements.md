@@ -58,7 +58,7 @@ CC メインエージェント ←MCP(ツール+Channel)→ juggler daemon ←CL
 ### ディレクトリ構造
 
 ```
-workflows/
+skills/
   dev/
     impl.md       # next: review
     review.md     # internal: true
@@ -196,7 +196,7 @@ interface Task {
 
 ### lint コマンド
 
-`juggler lint` で workflows/ のバリデーションを実行する。
+`juggler lint` で skills/ のバリデーションを実行する。
 
 - フロントマター解釈ロジックはランタイムと lint で共有する
 - lint は CI でも使えるよう、exit code でエラーを返す
@@ -216,7 +216,7 @@ interface Task {
 
 ## 拡張ポイント
 
-- **新ドメイン追加**: `workflows/` にディレクトリとファイルを足すだけ
+- **新ドメイン追加**: `skills/` にディレクトリとファイルを足すだけ
 - **スケジュール実行**: `schedule` ツールを追加し、cron で `run` を呼ぶ
 - **外部承認**: Channel の permission capability で Slack 等に承認を飛ばす
 - **タスク永続化**: ファイルベースの状態保存で CC セッション跨ぎ
