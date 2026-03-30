@@ -75,7 +75,7 @@ description: string          # ワークフローの目的（workflows ツール
 inputs:                      # 入力パラメータ（key: 説明）
   key1: 説明1
   key2: 説明2
-requires-approval: bool      # ユーザー承認が必要か（デフォルト: false）
+confirm-before-run: bool      # ユーザー承認が必要か（デフォルト: false）
 then: string                 # 後続ステップのファイル名（拡張子なし）
 callable: bool               # workflows 一覧に出るか（デフォルト: true）
 ---
@@ -87,7 +87,7 @@ callable: bool               # workflows 一覧に出るか（デフォルト: t
 |---|---|---|
 | `description` | （必須） | ワークフローの目的。メインエージェントが委譲先を判断する材料 |
 | `inputs` | （必須） | 呼び出しに必要な入力。全て埋まらないと呼び出せない |
-| `requires-approval` | `false` | `true` の場合、メインエージェントがユーザーに承認を求める |
+| `confirm-before-run` | `false` | `true` の場合、メインエージェントがユーザーに承認を求める |
 | `then` | なし | 後続ステップ。同一ドメインディレクトリ内のファイル名 |
 | `callable` | `true` | `false` のステップは `workflows` ツールの一覧に含まれない |
 
@@ -161,7 +161,7 @@ interface Task {
 
 ## 承認制御
 
-メインエージェントは `requires-approval: true` のタスクを投入する前に、
+メインエージェントは `confirm-before-run: true` のタスクを投入する前に、
 ユーザーに一括で提示して承認を得る。
 
 ```
@@ -175,7 +175,7 @@ interface Task {
 承認 / 修正 / 却下
 ```
 
-`requires-approval: false` のタスクは確認なしで即実行する。
+`confirm-before-run: false` のタスクは確認なしで即実行する。
 
 ## 非機能要件
 

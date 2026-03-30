@@ -23,7 +23,7 @@ description: Implement code
 inputs:
   what: What to implement
   where: Target file
-requires-approval: true
+confirm-before-run: true
 then: review
 ---
 

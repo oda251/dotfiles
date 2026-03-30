@@ -1,7 +1,7 @@
 export interface WorkflowFrontmatter {
   description: string;
   inputs: Record<string, string>;
-  "requires-approval"?: boolean;
+  "confirm-before-run"?: boolean;
   then?: string;
   callable?: boolean;
 }

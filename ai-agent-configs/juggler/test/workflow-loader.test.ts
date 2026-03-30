@@ -34,7 +34,7 @@ description: Implement code
 inputs:
   what: What to implement
   where: Target file
-requires-approval: true
+confirm-before-run: true
 then: review
 ---
 
@@ -64,7 +64,7 @@ Review the changes.`,
       what: "What to implement",
       where: "Target file",
     });
-    expect(impl.frontmatter["requires-approval"]).toBe(true);
+    expect(impl.frontmatter["confirm-before-run"]).toBe(true);
     expect(impl.frontmatter.then).toBe("review");
     expect(impl.body).toBe("Write the code.");
   });
@@ -195,7 +195,7 @@ Review.`,
     expect(errors).toHaveLength(0);
   });
 
-  it("defaults requires-approval to false and callable to true", () => {
+  it("defaults confirm-before-run to false and callable to true", () => {
     createWorkflow(
       "dev",
       "simple",
@@ -210,7 +210,7 @@ Do it.`,
 
     const { workflows } = loadWorkflows(tmpDir);
     const simple = workflows.get("dev/simple") ?? (() => { throw new Error("not found"); })();
-    expect(simple.frontmatter["requires-approval"]).toBe(false);
+    expect(simple.frontmatter["confirm-before-run"]).toBe(false);
     expect(simple.frontmatter.callable).toBe(true);
   });
 

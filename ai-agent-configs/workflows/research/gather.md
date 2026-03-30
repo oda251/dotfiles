@@ -4,7 +4,7 @@ inputs:
   topic: 調査テーマ
   purpose: 調査の目的（技術選定、現状把握など）
   depth: 必要な粒度（概要 or 実装詳細）
-requires-approval: false
+confirm-before-run: false
 then: write
 ---
 

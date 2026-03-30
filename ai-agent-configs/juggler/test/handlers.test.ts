@@ -18,7 +18,7 @@ function makeWorkflows(): Map<string, Workflow> {
     frontmatter: {
       description: "Implement code",
       inputs: { what: "What to implement", where: "Target file" },
-      "requires-approval": true,
+      "confirm-before-run": true,
       then: "review",
     },
     body: "Write the code.",
@@ -45,7 +45,7 @@ describe("listWorkflows", () => {
     expect(result).toHaveLength(1);
     expect(result[0].type).toBe("dev/impl");
     expect(result[0].description).toBe("Implement code");
-    expect(result[0]["requires-approval"]).toBe(true);
+    expect(result[0]["confirm-before-run"]).toBe(true);
   });
 
   it("returns empty array when no workflows", () => {
