@@ -17,9 +17,10 @@ read -p "Project ID: " project_id
 read -p "Client ID: " client_id
 read -sp "Client Secret: " client_secret
 echo ""
+read -p "Terraform Cloud Organization: " tf_cloud_org
 
-printf 'export INFISICAL_UNIVERSAL_AUTH_CLIENT_ID=%s\nexport INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET=%s\nexport INFISICAL_ORG_ID=%s\nexport TF_VAR_infisical_project_id=%s\n' \
-  "$client_id" "$client_secret" "$org_id" "$project_id" > "$ENV_FILE"
+printf 'export INFISICAL_UNIVERSAL_AUTH_CLIENT_ID=%s\nexport INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET=%s\nexport INFISICAL_ORG_ID=%s\nexport TF_VAR_infisical_project_id=%s\nexport TF_CLOUD_ORGANIZATION=%s\n' \
+  "$client_id" "$client_secret" "$org_id" "$project_id" "$tf_cloud_org" > "$ENV_FILE"
 echo ""
 echo "${ENV_FILE} を書き込みました。"
 
