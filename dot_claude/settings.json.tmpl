@@ -6,7 +6,7 @@
     "OTEL_METRICS_EXPORTER": "otlp",
     "OTEL_LOGS_EXPORTER": "otlp",
     "OTEL_EXPORTER_OTLP_ENDPOINT": "https://otlp.nr-data.net",
-    "OTEL_EXPORTER_OTLP_HEADERS": "{{ if lookPath "infisical" }}Api-Key={{ output "infisical" "secrets" "get" "NEWRELIC_LICENSE_KEY" "--plain" "--silent" "--env" "prod" "--path" "/generated" | trim }}{{ end }}",
+    "OTEL_EXPORTER_OTLP_HEADERS": "{{ with (output "bash" "-c" "infisical secrets get NEWRELIC_LICENSE_KEY --plain --silent --env prod --path /generated 2>/dev/null || true" | trim) }}Api-Key={{ . }}{{ end }}",
     "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE": "delta",
     "OTEL_LOG_USER_PROMPTS": "1",
     "OTEL_LOG_TOOL_DETAILS": "1",
