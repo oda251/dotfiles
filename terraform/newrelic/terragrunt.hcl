@@ -8,6 +8,5 @@ dependency "common" {
 }
 
 inputs = {
-  grafana_stack_slug   = "oda251"
-  grafana_stack_region = "ap-northeast-0"
+  newrelic_region = "US"
 }

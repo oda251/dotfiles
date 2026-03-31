@@ -3,8 +3,6 @@ pre-commit:
     distribute-ai-agent-configs:
       run: scripts/distribute_ai_agent_configs.sh
       stage_fixed: true
-    check-user:
-      run: scripts/check_user.sh
     terraform-fmt:
       glob: "terraform/**/*.tf"
       run: terraform fmt -recursive terraform/
