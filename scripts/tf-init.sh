@@ -2,13 +2,17 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-ENV_FILE="${REPO_ROOT}/terraform/.env.infisical"
+TF_DIR="${REPO_ROOT}/terraform"
+ENV_FILE="${TF_DIR}/.env.infisical"
+
+cd "$TF_DIR"
+eval "$(mise hook-env 2>/dev/null)" || true
 
 echo "=== Infisical Bootstrap ==="
 echo ""
 
 command -v infisical >/dev/null 2>&1 || { echo "ERROR: infisical CLI が見つかりません。mise install を実行してください。"; exit 1; }
-command -v terragrunt >/dev/null 2>&1 || { echo "ERROR: terragrunt が見つかりません。"; exit 1; }
+command -v terragrunt >/dev/null 2>&1 || { echo "ERROR: terragrunt が見つかりません。cd terraform && mise install を実行してください。"; exit 1; }
 
 echo "1) https://app.infisical.com でアカウント・プロジェクトを作成"
 echo "2) Settings > Machine Identities で Universal Auth の Identity を作成"
@@ -28,7 +32,7 @@ echo "${ENV_FILE} を書き込みました。"
 
 echo ""
 echo "=== common スタック apply (シークレット枠を作成) ==="
-(cd "${REPO_ROOT}/terraform/common" && source "../.env.infisical" && terragrunt apply)
+(cd "${TF_DIR}/common" && source "../.env.infisical" && terragrunt apply)
 
 echo ""
 echo "=== Infisical Web UI で /terraform フォルダ内のシークレットに値を設定してください ==="
@@ -42,7 +46,7 @@ read -p "設定完了したら Enter を押してください..."
 
 echo ""
 echo "=== 全スタック apply ==="
-(cd "${REPO_ROOT}/terraform" && source ".env.infisical" && terragrunt run-all apply)
+(cd "${TF_DIR}" && source ".env.infisical" && terragrunt run-all apply)
 
 echo ""
 echo "=== Bootstrap 完了 ==="
