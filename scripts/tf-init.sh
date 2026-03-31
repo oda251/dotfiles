@@ -5,14 +5,7 @@ REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 TF_DIR="${REPO_ROOT}/terraform"
 ENV_FILE="${TF_DIR}/.env.infisical"
 
-cd "$TF_DIR"
-eval "$(mise hook-env 2>/dev/null)" || true
-
 echo "=== Infisical Bootstrap ==="
-echo ""
-
-command -v infisical >/dev/null 2>&1 || { echo "ERROR: infisical CLI が見つかりません。mise install を実行してください。"; exit 1; }
-command -v terragrunt >/dev/null 2>&1 || { echo "ERROR: terragrunt が見つかりません。cd terraform && mise install を実行してください。"; exit 1; }
 
 echo "1) https://app.infisical.com でアカウント・プロジェクトを作成"
 echo "2) Settings > Machine Identities で Universal Auth の Identity を作成"
