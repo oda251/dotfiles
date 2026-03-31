@@ -25,6 +25,12 @@ echo ""
 echo "${ENV_FILE} を書き込みました。"
 
 echo ""
+if ! terraform providers lock >/dev/null 2>&1; then
+  echo "=== Terraform Cloud ログインが必要です ==="
+  terraform login
+fi
+
+echo ""
 echo "=== common スタック apply (シークレット枠を作成) ==="
 (cd "${TF_DIR}/common" && source "../.env.infisical" && terragrunt apply)
 
