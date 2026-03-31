@@ -22,6 +22,3 @@ sync|ai-agent-configs/references|dot_claude/references
 sync|ai-agent-configs/skills|dot_claude/skills
 sync|ai-agent-configs/skills|dot_codex/skills
 sync|ai-agent-configs/skills|dot_cursor/skills
-
-# Workflows (dispatch reads these, not loaded as skills)
-sync|ai-agent-configs/workflows|dot_claude/workflows

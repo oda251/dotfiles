@@ -8,9 +8,11 @@ if [[ -z "$user_value" ]]; then
   exit 1
 fi
 
-if git grep -q -F "$user_value" ":(exclude)scripts/$SCRIPT_NAME"; then
+repo_root="$(git rev-parse --show-toplevel)"
+matches="$(grep -rn --include='*' -F "$user_value" "$repo_root" --exclude="scripts/$SCRIPT_NAME" --exclude-dir='.git' || true)"
+if [[ -n "$matches" ]]; then
   echo "エラー: USER の値 ($user_value) が含まれています"
-  git grep -n -F "$user_value" ":(exclude)scripts/$SCRIPT_NAME"
+  echo "$matches"
   exit 1
 fi
 
