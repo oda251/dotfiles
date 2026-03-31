@@ -5,11 +5,11 @@ output "github_actions_identity_id" {
 
 output "github_actions_client_id" {
   description = "Universal Auth client ID for GitHub Actions"
-  value       = infisical_identity_universal_auth.github_actions.client_id
+  value       = infisical_identity_universal_auth_client_secret.github_actions.client_id
 }
 
 output "github_actions_client_secret" {
   description = "Universal Auth client secret for GitHub Actions (set as GH secret)"
-  value       = infisical_identity_universal_auth.github_actions.client_secret
+  value       = infisical_identity_universal_auth_client_secret.github_actions.client_secret
   sensitive   = true
 }

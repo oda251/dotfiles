@@ -17,21 +17,21 @@ locals {
 resource "infisical_secret_folder" "this" {
   for_each = local.secret_folders
 
-  name         = each.value
-  env_slug     = var.env_slug
-  workspace_id = var.infisical_project_id
-  folder_path  = "/"
+  name             = each.value
+  environment_slug = var.environment_slug
+  project_id       = var.infisical_project_id
+  folder_path      = "/"
 }
 
 resource "infisical_secret" "user_managed" {
   for_each = local.user_secrets
 
-  name         = each.key
-  value        = ""
-  comment      = each.value.comment
-  env_slug     = var.env_slug
-  workspace_id = var.infisical_project_id
-  folder_path  = each.value.folder
+  name             = each.key
+  value            = ""
+  comment          = each.value.comment
+  environment_slug = var.environment_slug
+  project_id       = var.infisical_project_id
+  folder_path      = each.value.folder
 
   depends_on = [infisical_secret_folder.this["terraform"]]
 
@@ -55,5 +55,9 @@ resource "infisical_identity" "github_actions" {
 }
 
 resource "infisical_identity_universal_auth" "github_actions" {
+  identity_id = infisical_identity.github_actions.id
+}
+
+resource "infisical_identity_universal_auth_client_secret" "github_actions" {
   identity_id = infisical_identity.github_actions.id
 }

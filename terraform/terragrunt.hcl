@@ -25,13 +25,13 @@ generate "infisical" {
       type        = string
     }
 
-    variable "env_slug" {
+    variable "environment_slug" {
       description = "Infisical environment slug"
       type        = string
     }
 
     data "infisical_secrets" "terraform" {
-      env_slug     = var.env_slug
+      env_slug     = var.environment_slug
       workspace_id = var.infisical_project_id
       folder_path  = "/terraform"
     }
@@ -41,5 +41,5 @@ generate "infisical" {
 inputs = {
   infisical_project_id = get_env("TF_VAR_infisical_project_id", "")
   infisical_org_id     = get_env("INFISICAL_ORG_ID", "")
-  env_slug             = "prod"
+  environment_slug     = "prod"
 }
