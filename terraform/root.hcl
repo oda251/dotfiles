@@ -4,7 +4,6 @@ generate "backend" {
   contents  = <<-EOF
     terraform {
       cloud {
-        organization = "oda251"
         workspaces {
           name = "${basename(get_terragrunt_dir())}"
         }
