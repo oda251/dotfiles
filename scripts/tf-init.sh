@@ -17,11 +17,11 @@ if [[ ! -f "$ENV_FILE" ]]; then
   echo ""
   read -p "Terraform Cloud Organization: " tf_cloud_org
   echo ""
-  echo "CI/CD 用 Machine Identity を Infisical UI で作成済みであれば Identity ID を入力"
-  read -p "Pipeline Identity ID (未作成なら空 Enter): " pipeline_identity_id
+  echo "GitHub Actions 用 Machine Identity を Infisical UI で作成済みであれば Identity ID を入力"
+  read -p "GitHub Actions Identity ID (未作成なら空 Enter): " gha_identity_id
 
-  printf 'export INFISICAL_UNIVERSAL_AUTH_CLIENT_ID=%s\nexport INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET=%s\nexport INFISICAL_ORG_ID=%s\nexport TF_VAR_infisical_project_id=%s\nexport TF_CLOUD_ORGANIZATION=%s\nexport TF_VAR_infisical_pipeline_identity_id=%s\n' \
-    "$client_id" "$client_secret" "$org_id" "$project_id" "$tf_cloud_org" "$pipeline_identity_id" > "$ENV_FILE"
+  printf 'export INFISICAL_UNIVERSAL_AUTH_CLIENT_ID=%s\nexport INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET=%s\nexport INFISICAL_ORG_ID=%s\nexport TF_VAR_infisical_project_id=%s\nexport TF_CLOUD_ORGANIZATION=%s\nexport TF_VAR_infisical_gha_identity_id=%s\n' \
+    "$client_id" "$client_secret" "$org_id" "$project_id" "$tf_cloud_org" "$gha_identity_id" > "$ENV_FILE"
   echo ""
   echo "${ENV_FILE} を書き込みました。"
   source "$ENV_FILE"
@@ -72,8 +72,8 @@ echo "  - TF_API_TOKEN               : Terraform Cloud API token"
 echo "  - TF_CLOUD_ORG               : Terraform Cloud organization 名"
 echo "  - NEW_RELIC_API_KEY           : New Relic User API key"
 echo "  - NEW_RELIC_ACCOUNT_ID        : New Relic account ID"
-echo "  - INFISICAL_CI_CLIENT_ID      : Infisical CI/CD 用 client ID"
-echo "  - INFISICAL_CI_CLIENT_SECRET  : Infisical CI/CD 用 client secret"
+echo "  - INFISICAL_CI_CLIENT_ID      : Infisical GitHub Actions 用 client ID"
+echo "  - INFISICAL_CI_CLIENT_SECRET  : Infisical GitHub Actions 用 client secret"
 echo ""
 read -p "設定完了したら Enter を押してください..."
 

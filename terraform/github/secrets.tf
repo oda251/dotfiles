@@ -2,8 +2,8 @@ locals {
   repos_with_terraform = { for k, v in var.repositories : k => v if v.has_terraform }
 
   cd_secrets = {
-    INFISICAL_CLIENT_ID     = data.infisical_secrets.terraform.secrets["INFISICAL_PIPELINE_CLIENT_ID"].value
-    INFISICAL_CLIENT_SECRET = data.infisical_secrets.terraform.secrets["INFISICAL_PIPELINE_CLIENT_SECRET"].value
+    INFISICAL_CLIENT_ID     = data.infisical_secrets.terraform.secrets["INFISICAL_GHA_CLIENT_ID"].value
+    INFISICAL_CLIENT_SECRET = data.infisical_secrets.terraform.secrets["INFISICAL_GHA_CLIENT_SECRET"].value
   }
 
   repo_secrets = { for pair in flatten([
