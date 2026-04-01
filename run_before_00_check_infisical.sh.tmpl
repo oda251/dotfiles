@@ -1,10 +1,17 @@
 #!/bin/bash
 {{- if lookPath "infisical" }}
-if ! infisical secrets get NEWRELIC_LICENSE_KEY --plain --silent --env prod --path /generated >/dev/null 2>&1; then
+CHEZMOI_SOURCE="{{ .chezmoi.sourceDir }}"
+
+if [[ ! -f "${CHEZMOI_SOURCE}/.infisical.json" ]]; then
+  echo ""
+  echo "⚠ Infisical プロジェクトが未設定です。"
+  echo "  → cd ${CHEZMOI_SOURCE} && infisical login && infisical init"
+  echo ""
+elif ! (cd "${CHEZMOI_SOURCE}" && infisical secrets get NEWRELIC_LICENSE_KEY --plain --silent --env prod --path /generated) >/dev/null 2>&1; then
   echo ""
   echo "⚠ Infisical にログインしていません。"
   echo "  一部の設定（OTEL等）が反映されません。"
-  echo "  → infisical login && infisical init を実行してください。"
+  echo "  → infisical login"
   echo ""
 fi
 {{ end -}}
