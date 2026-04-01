@@ -15,6 +15,13 @@
     {{-     $header = index $lines 1 }}
     {{-   end }}
     {{- end }}
+    {{- if and (eq $endpoint "") (lookPath "infisical") }}
+    {{-   $endpoint = output "bash" "-c" "infisical secrets get NEWRELIC_OTLP_ENDPOINT --plain --silent --env prod --path /generated 2>/dev/null || true" | trim }}
+    {{-   $key := output "bash" "-c" "infisical secrets get NEWRELIC_LICENSE_KEY --plain --silent --env prod --path /generated 2>/dev/null || true" | trim }}
+    {{-   if ne $key "" }}
+    {{-     $header = printf "Api-Key=%s" $key }}
+    {{-   end }}
+    {{- end }}
     "OTEL_EXPORTER_OTLP_ENDPOINT": "{{ $endpoint }}",
     "OTEL_EXPORTER_OTLP_HEADERS": "{{ $header }}",
     "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE": "delta",
