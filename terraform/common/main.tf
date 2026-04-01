@@ -6,10 +6,6 @@ terraform {
       source  = "infisical/infisical"
       version = "~> 0.16"
     }
-    tfe = {
-      source  = "hashicorp/tfe"
-      version = "~> 0.64"
-    }
   }
 }
 

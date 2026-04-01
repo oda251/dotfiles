@@ -36,22 +36,27 @@ if ! terraform providers lock >/dev/null 2>&1; then
   terraform login
 fi
 
-# HCP Terraform workspace の実行モードを local に設定
+# workspace を作成（init で自動作成）し、execution mode を local に設定
 echo ""
-echo "=== Workspace execution mode → local ==="
+echo "=== Workspace 初期化 & execution mode → local ==="
 TFE_TOKEN=$(jq -r '.credentials["app.terraform.io"].token' ~/.terraform.d/credentials.tfrc.json 2>/dev/null || true)
-if [[ -n "$TFE_TOKEN" ]]; then
-  for ws in common github newrelic; do
+
+set_local_mode() {
+  local ws="$1"
+  if [[ -n "$TFE_TOKEN" ]]; then
     curl -sf \
       -H "Authorization: Bearer ${TFE_TOKEN}" \
       -H "Content-Type: application/vnd.api+json" \
       -X PATCH \
       "https://app.terraform.io/api/v2/organizations/${TF_CLOUD_ORGANIZATION}/workspaces/${ws}" \
-      -d '{"data":{"type":"workspaces","attributes":{"execution-mode":"local"}}}' > /dev/null && echo "  ${ws}: ok" || echo "  ${ws}: skipped (workspace may not exist yet)"
-  done
-else
-  echo "  WARNING: TFE token not found, skipping"
-fi
+      -d '{"data":{"type":"workspaces","attributes":{"execution-mode":"local"}}}' > /dev/null && echo "  ${ws}: local" || echo "  ${ws}: skipped"
+  fi
+}
+
+for stack in common github newrelic; do
+  (cd "${TF_DIR}/${stack}" && terragrunt init --terragrunt-non-interactive 2>/dev/null) || true
+  set_local_mode "$stack"
+done
 
 echo ""
 echo "=== common スタック apply (シークレット枠を作成) ==="
