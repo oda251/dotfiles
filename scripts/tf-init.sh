@@ -36,7 +36,22 @@ if ! terraform providers lock >/dev/null 2>&1; then
   terraform login
 fi
 
-export TF_CLOUD_FORCE_LOCAL=1
+# HCP Terraform workspace の実行モードを local に設定
+echo ""
+echo "=== Workspace execution mode → local ==="
+TFE_TOKEN=$(jq -r '.credentials["app.terraform.io"].token' ~/.terraform.d/credentials.tfrc.json 2>/dev/null || true)
+if [[ -n "$TFE_TOKEN" ]]; then
+  for ws in common github newrelic; do
+    curl -sf \
+      -H "Authorization: Bearer ${TFE_TOKEN}" \
+      -H "Content-Type: application/vnd.api+json" \
+      -X PATCH \
+      "https://app.terraform.io/api/v2/organizations/${TF_CLOUD_ORGANIZATION}/workspaces/${ws}" \
+      -d '{"data":{"type":"workspaces","attributes":{"execution-mode":"local"}}}' > /dev/null && echo "  ${ws}: ok" || echo "  ${ws}: skipped (workspace may not exist yet)"
+  done
+else
+  echo "  WARNING: TFE token not found, skipping"
+fi
 
 echo ""
 echo "=== common スタック apply (シークレット枠を作成) ==="
