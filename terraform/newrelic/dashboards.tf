@@ -13,7 +13,7 @@ resource "newrelic_one_dashboard" "claude_code_overview" {
       width  = 6
       height = 3
       nrql_query {
-        query = "SELECT sum(claude_code_cost_usage_total) FROM Metric TIMESERIES 1 day SINCE 7 days ago"
+        query = "SELECT sum(claude_code.cost.usage) FROM Metric TIMESERIES 1 day SINCE 7 days ago"
       }
     }
 
@@ -24,7 +24,7 @@ resource "newrelic_one_dashboard" "claude_code_overview" {
       width  = 6
       height = 3
       nrql_query {
-        query = "SELECT sum(claude_code_cost_usage_total) FROM Metric FACET model TIMESERIES 1 day SINCE 7 days ago"
+        query = "SELECT sum(claude_code.cost.usage) FROM Metric FACET model TIMESERIES 1 day SINCE 7 days ago"
       }
     }
 
@@ -35,7 +35,7 @@ resource "newrelic_one_dashboard" "claude_code_overview" {
       width  = 6
       height = 3
       nrql_query {
-        query = "SELECT sum(claude_code_token_usage_total) FROM Metric FACET type TIMESERIES 1 day SINCE 7 days ago"
+        query = "SELECT sum(claude_code.token.usage) FROM Metric FACET type TIMESERIES 1 day SINCE 7 days ago"
       }
     }
 
@@ -46,7 +46,7 @@ resource "newrelic_one_dashboard" "claude_code_overview" {
       width  = 3
       height = 3
       nrql_query {
-        query = "SELECT filter(sum(claude_code_token_usage_total), WHERE type = 'cacheRead') / (filter(sum(claude_code_token_usage_total), WHERE type = 'input') + filter(sum(claude_code_token_usage_total), WHERE type = 'cacheRead')) * 100 AS 'Cache %' FROM Metric SINCE 1 day ago"
+        query = "SELECT filter(sum(claude_code.token.usage), WHERE type = 'cacheRead') / (filter(sum(claude_code.token.usage), WHERE type = 'input') + filter(sum(claude_code.token.usage), WHERE type = 'cacheRead')) * 100 AS 'Cache %' FROM Metric SINCE 1 day ago"
       }
     }
 
@@ -57,7 +57,7 @@ resource "newrelic_one_dashboard" "claude_code_overview" {
       width  = 3
       height = 3
       nrql_query {
-        query = "SELECT sum(claude_code_token_usage_total) FROM Metric FACET model TIMESERIES 1 day SINCE 7 days ago"
+        query = "SELECT sum(claude_code.token.usage) FROM Metric FACET model TIMESERIES 1 day SINCE 7 days ago"
       }
     }
   }
@@ -73,7 +73,7 @@ resource "newrelic_one_dashboard" "claude_code_overview" {
       width  = 3
       height = 2
       nrql_query {
-        query = "SELECT sum(claude_code_session_count_total) AS 'Sessions' FROM Metric SINCE 1 day ago"
+        query = "SELECT sum(claude_code.session.count) AS 'Sessions' FROM Metric SINCE 1 day ago"
       }
     }
 
@@ -84,7 +84,7 @@ resource "newrelic_one_dashboard" "claude_code_overview" {
       width  = 3
       height = 2
       nrql_query {
-        query = "SELECT sum(claude_code_lines_of_code_count_total) AS 'Lines' FROM Metric SINCE 1 day ago"
+        query = "SELECT sum(claude_code.lines_of_code.count) AS 'Lines' FROM Metric SINCE 1 day ago"
       }
     }
 
@@ -95,7 +95,7 @@ resource "newrelic_one_dashboard" "claude_code_overview" {
       width  = 3
       height = 2
       nrql_query {
-        query = "SELECT sum(claude_code_commit_count_total) AS 'Commits' FROM Metric SINCE 1 day ago"
+        query = "SELECT sum(claude_code.commit.count) AS 'Commits' FROM Metric SINCE 1 day ago"
       }
     }
 
@@ -106,7 +106,7 @@ resource "newrelic_one_dashboard" "claude_code_overview" {
       width  = 3
       height = 2
       nrql_query {
-        query = "SELECT sum(claude_code_pull_request_count_total) AS 'PRs' FROM Metric SINCE 1 day ago"
+        query = "SELECT sum(claude_code.pull_request.count) AS 'PRs' FROM Metric SINCE 1 day ago"
       }
     }
 
@@ -117,7 +117,7 @@ resource "newrelic_one_dashboard" "claude_code_overview" {
       width  = 4
       height = 2
       nrql_query {
-        query = "SELECT filter(sum(claude_code_lines_of_code_count_total), WHERE type = 'added') AS 'Added', filter(sum(claude_code_lines_of_code_count_total), WHERE type = 'removed') AS 'Removed' FROM Metric SINCE 1 day ago"
+        query = "SELECT filter(sum(claude_code.lines_of_code.count), WHERE type = 'added') AS 'Added', filter(sum(claude_code.lines_of_code.count), WHERE type = 'removed') AS 'Removed' FROM Metric SINCE 1 day ago"
       }
     }
 
@@ -128,7 +128,7 @@ resource "newrelic_one_dashboard" "claude_code_overview" {
       width  = 8
       height = 3
       nrql_query {
-        query = "SELECT sum(claude_code_active_time_total) FROM Metric FACET type TIMESERIES 1 day SINCE 7 days ago"
+        query = "SELECT sum(claude_code.active_time.total) FROM Metric FACET type TIMESERIES 1 day SINCE 7 days ago"
       }
     }
   }
@@ -144,7 +144,7 @@ resource "newrelic_one_dashboard" "claude_code_overview" {
       width  = 6
       height = 3
       nrql_query {
-        query = "SELECT sum(claude_code_code_edit_tool_decision_total) FROM Metric FACET tool_name SINCE 7 days ago"
+        query = "SELECT sum(claude_code.code_edit_tool.decision) FROM Metric FACET tool_name SINCE 7 days ago"
       }
     }
 
@@ -155,7 +155,7 @@ resource "newrelic_one_dashboard" "claude_code_overview" {
       width  = 6
       height = 3
       nrql_query {
-        query = "SELECT sum(claude_code_code_edit_tool_decision_total) FROM Metric FACET language, decision SINCE 7 days ago"
+        query = "SELECT sum(claude_code.code_edit_tool.decision) FROM Metric FACET language, decision SINCE 7 days ago"
       }
     }
 
