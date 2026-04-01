@@ -11,6 +11,7 @@ locals {
     TF_CLOUD_ORG         = { folder = "/terraform", comment = "Terraform Cloud organization name" }
     NEW_RELIC_API_KEY    = { folder = "/terraform", comment = "New Relic User API key" }
     NEW_RELIC_ACCOUNT_ID = { folder = "/terraform", comment = "New Relic account ID" }
+    NPM_TOKEN            = { folder = "/terraform", comment = "npm publish token" }
   }
 }
 
