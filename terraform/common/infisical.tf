@@ -6,14 +6,14 @@ locals {
 
   # User-managed secrets: TF creates the entry, user sets the value.
   user_secrets = {
-    GITHUB_PAT                  = { folder = "/terraform", comment = "GitHub Personal Access Token" }
-    TF_API_TOKEN                = { folder = "/terraform", comment = "Terraform Cloud API token" }
-    TF_CLOUD_ORGANIZATION       = { folder = "/terraform", comment = "Terraform Cloud organization name" }
-    NEW_RELIC_API_KEY           = { folder = "/terraform", comment = "New Relic User API key" }
-    NEW_RELIC_ACCOUNT_ID        = { folder = "/terraform", comment = "New Relic account ID" }
-    NPM_TOKEN                   = { folder = "/terraform", comment = "npm publish token" }
-    TF_VAR_infisical_project_id = { folder = "/terraform", comment = "Infisical project ID for TF" }
-    TF_VAR_environment_slug     = { folder = "/terraform", comment = "Infisical environment slug for TF" }
+    GITHUB_PAT                             = { folder = "/terraform", comment = "GitHub Personal Access Token" }
+    TF_API_TOKEN                           = { folder = "/terraform", comment = "Terraform Cloud API token" }
+    TF_CLOUD_ORGANIZATION                  = { folder = "/terraform", comment = "Terraform Cloud organization name" }
+    NEW_RELIC_API_KEY                      = { folder = "/terraform", comment = "New Relic User API key" }
+    NEW_RELIC_ACCOUNT_ID                   = { folder = "/terraform", comment = "New Relic account ID" }
+    NPM_TOKEN                              = { folder = "/terraform", comment = "npm publish token" }
+    INFISICAL_UNIVERSAL_AUTH_CLIENT_ID     = { folder = "/terraform", comment = "Infisical Universal Auth client ID" }
+    INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET = { folder = "/terraform", comment = "Infisical Universal Auth client secret" }
   }
 }
 
