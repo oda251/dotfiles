@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SETTINGS="$HOME/.claude/settings.json"
+
+# Fetch fresh license key from Infisical
+key=$(infisical secrets get NEWRELIC_LICENSE_KEY --plain --silent --env prod --path /generated 2>/dev/null) || exit 0
+
+[ -z "$key" ] && exit 0
+
+header="Api-Key=${key}"
+current=$(jq -r '.env.OTEL_EXPORTER_OTLP_HEADERS // ""' "$SETTINGS" 2>/dev/null) || exit 0
+
+# Only rewrite if changed
+if [ "$current" != "$header" ]; then
+  tmp=$(mktemp)
+  jq --arg h "$header" '.env.OTEL_EXPORTER_OTLP_HEADERS = $h' "$SETTINGS" > "$tmp" && mv "$tmp" "$SETTINGS"
+fi
