@@ -74,7 +74,7 @@ read -p "設定完了したら Enter を押してください..."
 
 echo ""
 echo "=== 全スタック apply ==="
-(cd "${TF_DIR}" && terragrunt run-all apply)
+(cd "${TF_DIR}" && terragrunt run --all apply)
 
 echo ""
 echo "=== Bootstrap 完了 ==="
