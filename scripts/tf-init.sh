@@ -16,9 +16,12 @@ if [[ ! -f "$ENV_FILE" ]]; then
   read -sp "Client Secret: " client_secret
   echo ""
   read -p "Terraform Cloud Organization: " tf_cloud_org
+  echo ""
+  echo "CI 用 Machine Identity を Infisical UI で作成済みであれば Identity ID を入力"
+  read -p "CI Identity ID (未作成なら空 Enter): " ci_identity_id
 
-  printf 'export INFISICAL_UNIVERSAL_AUTH_CLIENT_ID=%s\nexport INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET=%s\nexport INFISICAL_ORG_ID=%s\nexport TF_VAR_infisical_project_id=%s\nexport TF_CLOUD_ORGANIZATION=%s\n' \
-    "$client_id" "$client_secret" "$org_id" "$project_id" "$tf_cloud_org" > "$ENV_FILE"
+  printf 'export INFISICAL_UNIVERSAL_AUTH_CLIENT_ID=%s\nexport INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET=%s\nexport INFISICAL_ORG_ID=%s\nexport TF_VAR_infisical_project_id=%s\nexport TF_CLOUD_ORGANIZATION=%s\nexport TF_VAR_infisical_ci_identity_id=%s\n' \
+    "$client_id" "$client_secret" "$org_id" "$project_id" "$tf_cloud_org" "$ci_identity_id" > "$ENV_FILE"
   echo ""
   echo "${ENV_FILE} を書き込みました。"
   source "$ENV_FILE"

@@ -16,6 +16,13 @@ locals {
   }
 }
 
+variable "infisical_ci_identity_id" {
+  description = "Infisical Machine Identity ID for CI (created manually in UI)"
+  type        = string
+  default     = ""
+}
+
+
 resource "infisical_secret_folder" "this" {
   for_each = local.secret_folders
 
@@ -40,4 +47,15 @@ resource "infisical_secret" "user_managed" {
     ignore_changes  = [value]
     prevent_destroy = true
   }
+}
+
+resource "infisical_project_identity" "ci" {
+  count       = var.infisical_ci_identity_id != "" ? 1 : 0
+  project_id  = var.infisical_project_id
+  identity_id = var.infisical_ci_identity_id
+  roles = [
+    {
+      role_slug = "viewer"
+    }
+  ]
 }
