@@ -39,24 +39,3 @@ resource "infisical_secret" "user_managed" {
     prevent_destroy = true
   }
 }
-
-# --- Machine Identities ---
-
-variable "infisical_org_id" {
-  description = "Infisical organization ID"
-  type        = string
-}
-
-resource "infisical_identity" "github_actions" {
-  name   = "github-actions"
-  role   = "member"
-  org_id = var.infisical_org_id
-}
-
-resource "infisical_identity_universal_auth" "github_actions" {
-  identity_id = infisical_identity.github_actions.id
-}
-
-resource "infisical_identity_universal_auth_client_secret" "github_actions" {
-  identity_id = infisical_identity.github_actions.id
-}
