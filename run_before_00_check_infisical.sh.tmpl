@@ -1,11 +1,10 @@
 #!/bin/bash
 {{- if lookPath "infisical" }}
-source ~/.local/share/chezmoi/terraform/.env.infisical 2>/dev/null
-if ! infisical secrets get NEWRELIC_LICENSE_KEY --plain --silent --env prod --path /generated --projectId "$TF_VAR_infisical_project_id" >/dev/null 2>&1; then
+if ! infisical secrets get NEWRELIC_LICENSE_KEY --plain --silent --env prod --path /generated >/dev/null 2>&1; then
   echo ""
   echo "⚠ Infisical にログインしていません。"
   echo "  一部の設定（OTEL等）が反映されません。"
-  echo "  → infisical login を実行してください。"
+  echo "  → infisical login && infisical init を実行してください。"
   echo ""
 fi
 {{ end -}}
