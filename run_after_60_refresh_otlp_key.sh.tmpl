@@ -1,0 +1,4 @@
+#!/bin/bash
+{{- if lookPath "infisical" }}
+"{{ .chezmoi.homeDir }}/.claude/hooks/refresh-otlp-key" &
+{{ end -}}
