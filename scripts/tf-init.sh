@@ -1,14 +1,8 @@
 #!/bin/bash
 set -euo pipefail
+source "$(dirname "$0")/tf-common.sh"
 
-REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-TF_DIR="${REPO_ROOT}/terraform"
-ENV_FILE="${TF_DIR}/.env.infisical"
-
-if [[ -f "$ENV_FILE" ]]; then
-  echo "=== 既存の ${ENV_FILE} を読み込みます ==="
-  source "$ENV_FILE"
-else
+if [[ ! -f "$ENV_FILE" ]]; then
   echo "=== Infisical Bootstrap ==="
 
   echo "1) https://app.infisical.com でアカウント・プロジェクトを作成"
@@ -30,7 +24,8 @@ else
   source "$ENV_FILE"
 fi
 
-if ! terraform providers lock >/dev/null 2>&1; then
+TFE_CREDS="$HOME/.terraform.d/credentials.tfrc.json"
+if ! jq -e '.credentials["app.terraform.io"]' "$TFE_CREDS" >/dev/null 2>&1; then
   echo ""
   echo "=== Terraform Cloud ログインが必要です ==="
   terraform login
@@ -39,7 +34,7 @@ fi
 # workspace を作成（init で自動作成）し、execution mode を local に設定
 echo ""
 echo "=== Workspace 初期化 & execution mode → local ==="
-TFE_TOKEN=$(jq -r '.credentials["app.terraform.io"].token' ~/.terraform.d/credentials.tfrc.json 2>/dev/null || true)
+TFE_TOKEN=$(jq -r '.credentials["app.terraform.io"].token' "$TFE_CREDS" 2>/dev/null || true)
 
 set_local_mode() {
   local ws="$1"
@@ -59,9 +54,9 @@ for d in "${TF_DIR}"/*/terragrunt.hcl; do
 done
 
 for stack in "${stacks[@]}"; do
-  (cd "${TF_DIR}/${stack}" && terragrunt init --terragrunt-non-interactive 2>/dev/null) || true
-  set_local_mode "$stack"
+  (cd "${TF_DIR}/${stack}" && terragrunt init --terragrunt-non-interactive 2>/dev/null && set_local_mode "$stack") &
 done
+wait
 
 echo ""
 echo "=== common スタック apply (シークレット枠を作成) ==="

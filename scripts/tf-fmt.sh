@@ -1,8 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-
-REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-TF_DIR="${REPO_ROOT}/terraform"
+source "$(dirname "$0")/tf-common.sh"
 
 cd "$TF_DIR"
 terraform fmt -recursive .
