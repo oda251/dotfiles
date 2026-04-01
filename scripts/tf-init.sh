@@ -35,18 +35,7 @@ fi
 echo ""
 echo "=== Workspace 初期化 & execution mode → local ==="
 export TFE_TOKEN=$(jq -r '.credentials["app.terraform.io"].token' "$TFE_CREDS" 2>/dev/null || true)
-
-set_local_mode() {
-  local ws="$1"
-  if [[ -n "$TFE_TOKEN" ]]; then
-    curl -sf \
-      -H "Authorization: Bearer ${TFE_TOKEN}" \
-      -H "Content-Type: application/vnd.api+json" \
-      -X PATCH \
-      "https://app.terraform.io/api/v2/organizations/${TF_CLOUD_ORGANIZATION}/workspaces/${ws}" \
-      -d '{"data":{"type":"workspaces","attributes":{"execution-mode":"local"}}}' > /dev/null && echo "  ${ws}: local" || echo "  ${ws}: skipped"
-  fi
-}
+export TF_CLOUD_ORGANIZATION="${TF_CLOUD_ORGANIZATION}"
 
 stacks=()
 for d in "${TF_DIR}"/*/terragrunt.hcl; do
@@ -54,9 +43,17 @@ for d in "${TF_DIR}"/*/terragrunt.hcl; do
 done
 
 for stack in "${stacks[@]}"; do
-  (cd "${TF_DIR}/${stack}" && terragrunt init --terragrunt-non-interactive 2>/dev/null && set_local_mode "$stack") &
+  echo "  ${stack}: init..."
+  (cd "${TF_DIR}/${stack}" && terragrunt init --terragrunt-non-interactive 2>/dev/null) || true
+  if [[ -n "$TFE_TOKEN" && -n "$TF_CLOUD_ORGANIZATION" ]]; then
+    curl -sf \
+      -H "Authorization: Bearer ${TFE_TOKEN}" \
+      -H "Content-Type: application/vnd.api+json" \
+      -X PATCH \
+      "https://app.terraform.io/api/v2/organizations/${TF_CLOUD_ORGANIZATION}/workspaces/${stack}" \
+      -d '{"data":{"type":"workspaces","attributes":{"execution-mode":"local"}}}' > /dev/null && echo "  ${stack}: local" || echo "  ${stack}: skipped"
+  fi
 done
-wait
 
 echo ""
 echo "=== common スタック apply (シークレット枠を作成) ==="
