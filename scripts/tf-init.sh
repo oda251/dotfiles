@@ -53,7 +53,12 @@ set_local_mode() {
   fi
 }
 
-for stack in common github newrelic; do
+stacks=()
+for d in "${TF_DIR}"/*/terragrunt.hcl; do
+  stacks+=("$(basename "$(dirname "$d")")")
+done
+
+for stack in "${stacks[@]}"; do
   (cd "${TF_DIR}/${stack}" && terragrunt init --terragrunt-non-interactive 2>/dev/null) || true
   set_local_mode "$stack"
 done
