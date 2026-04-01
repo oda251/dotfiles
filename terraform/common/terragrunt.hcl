@@ -1,12 +1,15 @@
 include "root" {
-  path = find_in_parent_folders()
+  path           = find_in_parent_folders()
+  expose         = true
+  merge_strategy = "deep"
 }
 
-# common はシークレットを作る側なので data source 不要
+# common はシークレットを作る側なので data source を除外してオーバーライド
 generate "infisical" {
-  path      = "provider_infisical.tf"
-  if_exists = "overwrite_terragrunt"
-  contents  = <<-EOF
+  path              = "provider_infisical.tf"
+  if_exists         = "overwrite"
+  disable_signature = true
+  contents          = <<-EOF
     provider "infisical" {
       host = "https://app.infisical.com"
     }
