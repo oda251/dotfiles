@@ -24,7 +24,7 @@ inputs = {
       has_terraform = true
     }
     sidekick = {
-      visibility    = "private"
+      visibility    = "public"
       has_infisical = true
     }
   }
