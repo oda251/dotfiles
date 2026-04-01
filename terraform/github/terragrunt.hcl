@@ -3,13 +3,12 @@ include "root" {
 }
 
 dependency "common" {
-  config_path = "../common"
+  config_path  = "../common"
+  skip_outputs = true
 }
 
 inputs = {
-  github_owner            = "oda251"
-  infisical_client_id     = dependency.common.outputs.github_actions_client_id
-  infisical_client_secret = dependency.common.outputs.github_actions_client_secret
+  github_owner = "oda251"
   repositories = {
     dotfiles = {
       description   = "chezmoi dotfiles"

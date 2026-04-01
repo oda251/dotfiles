@@ -34,7 +34,7 @@ fi
 # workspace を作成（init で自動作成）し、execution mode を local に設定
 echo ""
 echo "=== Workspace 初期化 & execution mode → local ==="
-TFE_TOKEN=$(jq -r '.credentials["app.terraform.io"].token' "$TFE_CREDS" 2>/dev/null || true)
+export TFE_TOKEN=$(jq -r '.credentials["app.terraform.io"].token' "$TFE_CREDS" 2>/dev/null || true)
 
 set_local_mode() {
   local ws="$1"
@@ -64,11 +64,13 @@ echo "=== common スタック apply (シークレット枠を作成) ==="
 
 echo ""
 echo "=== Infisical Web UI で /terraform フォルダ内のシークレットに値を設定してください ==="
-echo "  - GITHUB_PAT           : GitHub Personal Access Token"
-echo "  - TF_API_TOKEN         : Terraform Cloud API token"
-echo "  - TF_CLOUD_ORG         : Terraform Cloud organization 名"
-echo "  - NEW_RELIC_API_KEY    : New Relic User API key"
-echo "  - NEW_RELIC_ACCOUNT_ID : New Relic account ID"
+echo "  - GITHUB_PAT                 : GitHub Personal Access Token"
+echo "  - TF_API_TOKEN               : Terraform Cloud API token"
+echo "  - TF_CLOUD_ORG               : Terraform Cloud organization 名"
+echo "  - NEW_RELIC_API_KEY           : New Relic User API key"
+echo "  - NEW_RELIC_ACCOUNT_ID        : New Relic account ID"
+echo "  - INFISICAL_CI_CLIENT_ID      : Infisical CI 用 client ID"
+echo "  - INFISICAL_CI_CLIENT_SECRET  : Infisical CI 用 client secret"
 echo ""
 read -p "設定完了したら Enter を押してください..."
 

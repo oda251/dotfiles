@@ -1,25 +1,9 @@
-# Distribute Infisical credentials to repos for CI/CD.
-# GH Actions uses Universal Auth to fetch secrets from Infisical at runtime.
-# No static secrets stored in GitHub — only the Infisical client_id/secret.
-
-variable "infisical_client_id" {
-  description = "Infisical Universal Auth client ID for GitHub Actions"
-  type        = string
-}
-
-variable "infisical_client_secret" {
-  description = "Infisical Universal Auth client secret for GitHub Actions"
-  type        = string
-  sensitive   = true
-}
-
 locals {
   repos_with_terraform = { for k, v in var.repositories : k => v if v.has_terraform }
 
-  # Secrets: Infisical auth credentials
   cd_secrets = {
-    INFISICAL_CLIENT_ID     = var.infisical_client_id
-    INFISICAL_CLIENT_SECRET = var.infisical_client_secret
+    INFISICAL_CLIENT_ID     = data.infisical_secrets.terraform.secrets["INFISICAL_CI_CLIENT_ID"].value
+    INFISICAL_CLIENT_SECRET = data.infisical_secrets.terraform.secrets["INFISICAL_CI_CLIENT_SECRET"].value
   }
 
   repo_secrets = { for pair in flatten([

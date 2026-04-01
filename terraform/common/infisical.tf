@@ -6,11 +6,13 @@ locals {
 
   # User-managed secrets: TF creates the entry, user sets the value.
   user_secrets = {
-    GITHUB_PAT           = { folder = "/terraform", comment = "GitHub Personal Access Token" }
-    TF_API_TOKEN         = { folder = "/terraform", comment = "Terraform Cloud API token" }
-    TF_CLOUD_ORG         = { folder = "/terraform", comment = "Terraform Cloud organization name" }
-    NEW_RELIC_API_KEY    = { folder = "/terraform", comment = "New Relic User API key" }
-    NEW_RELIC_ACCOUNT_ID = { folder = "/terraform", comment = "New Relic account ID" }
+    GITHUB_PAT                 = { folder = "/terraform", comment = "GitHub Personal Access Token" }
+    TF_API_TOKEN               = { folder = "/terraform", comment = "Terraform Cloud API token" }
+    TF_CLOUD_ORG               = { folder = "/terraform", comment = "Terraform Cloud organization name" }
+    NEW_RELIC_API_KEY          = { folder = "/terraform", comment = "New Relic User API key" }
+    NEW_RELIC_ACCOUNT_ID       = { folder = "/terraform", comment = "New Relic account ID" }
+    INFISICAL_CI_CLIENT_ID     = { folder = "/terraform", comment = "Infisical Universal Auth client ID for CI" }
+    INFISICAL_CI_CLIENT_SECRET = { folder = "/terraform", comment = "Infisical Universal Auth client secret for CI" }
   }
 }
 
