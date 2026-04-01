@@ -24,6 +24,16 @@ resource "github_repository" "this" {
   has_projects = false
   has_wiki     = false
 
+  vulnerability_alerts = true
+  security_and_analysis {
+    secret_scanning {
+      status = "enabled"
+    }
+    secret_scanning_push_protection {
+      status = "enabled"
+    }
+  }
+
   delete_branch_on_merge = true
   allow_squash_merge     = true
   allow_merge_commit     = false
