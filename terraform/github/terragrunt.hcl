@@ -18,7 +18,8 @@ inputs = {
       has_terraform = true
     }
     garden = {
-      visibility = "public"
+      visibility    = "public"
+      has_terraform = true
     }
     sidekick = {
       visibility = "private"
