@@ -23,3 +23,4 @@ provider_infisical.tf
 # Environment
 .env
 terraform/.env.infisical
+.infisical.json
