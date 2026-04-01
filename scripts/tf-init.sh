@@ -75,4 +75,4 @@ echo "=== 全スタック apply ==="
 
 echo ""
 echo "=== Bootstrap 完了 ==="
-echo "以降は scripts/tf-apply.sh で全スタックを更新できます。"
+echo "以降は make tf-apply で全スタックを更新できます。"
