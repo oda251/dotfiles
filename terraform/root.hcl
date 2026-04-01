@@ -40,6 +40,5 @@ generate "infisical" {
 
 inputs = {
   infisical_project_id     = get_env("TF_VAR_infisical_project_id", "")
-  infisical_gha_identity_id = get_env("TF_VAR_infisical_gha_identity_id", "")
   environment_slug         = "prod"
 }

@@ -24,3 +24,14 @@ variable "github_owner" {
   description = "GitHub organization or user"
   type        = string
 }
+
+variable "infisical_client_id" {
+  description = "Infisical Universal Auth client ID (shared with TF)"
+  type        = string
+}
+
+variable "infisical_client_secret" {
+  description = "Infisical Universal Auth client secret (shared with TF)"
+  type        = string
+  sensitive   = true
+}
