@@ -24,7 +24,7 @@ resource "github_actions_environment_secret" "infisical_client_id" {
   repository      = each.value.repository
   environment     = each.value.environment
   secret_name     = "INFISICAL_CLIENT_ID"
-  plaintext_value = var.infisical_client_id
+  plaintext_value = data.infisical_secrets.terraform.secrets["INFISICAL_UNIVERSAL_AUTH_CLIENT_ID"].value
 }
 
 resource "github_actions_environment_secret" "infisical_client_secret" {
@@ -33,7 +33,7 @@ resource "github_actions_environment_secret" "infisical_client_secret" {
   repository      = each.value.repository
   environment     = each.value.environment
   secret_name     = "INFISICAL_CLIENT_SECRET"
-  plaintext_value = var.infisical_client_secret
+  plaintext_value = data.infisical_secrets.terraform.secrets["INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET"].value
 }
 
 resource "github_actions_environment_variable" "infisical_project_id" {

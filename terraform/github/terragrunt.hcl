@@ -8,9 +8,7 @@ dependency "common" {
 }
 
 inputs = {
-  github_owner            = "oda251"
-  infisical_client_id     = get_env("INFISICAL_UNIVERSAL_AUTH_CLIENT_ID", "")
-  infisical_client_secret = get_env("INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET", "")
+  github_owner = "oda251"
   repositories = {
     dotfiles = {
       description   = "chezmoi dotfiles"
