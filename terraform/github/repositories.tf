@@ -64,7 +64,7 @@ resource "github_repository_file" "workflow" {
 }
 
 resource "github_repository_ruleset" "main" {
-  for_each = var.repositories
+  for_each = { for k, v in var.repositories : k => v if v.visibility != "private" }
 
   repository  = github_repository.this[each.key].name
   name        = "main"
