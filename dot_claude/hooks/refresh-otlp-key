@@ -3,16 +3,23 @@ set -euo pipefail
 
 SETTINGS="$HOME/.claude/settings.json"
 
-# Fetch fresh license key from Infisical
+# Fetch OTLP credentials from Infisical
 key=$(infisical secrets get NEWRELIC_LICENSE_KEY --plain --silent --env prod --path /generated 2>/dev/null) || exit 0
+endpoint=$(infisical secrets get NEWRELIC_OTLP_ENDPOINT --plain --silent --env prod --path /generated 2>/dev/null) || exit 0
 
 [ -z "$key" ] && exit 0
+[ -z "$endpoint" ] && exit 0
 
 header="Api-Key=${key}"
-current=$(jq -r '.env.OTEL_EXPORTER_OTLP_HEADERS // ""' "$SETTINGS" 2>/dev/null) || exit 0
+
+# Read current values
+current_header=$(jq -r '.env.OTEL_EXPORTER_OTLP_HEADERS // ""' "$SETTINGS" 2>/dev/null) || exit 0
+current_endpoint=$(jq -r '.env.OTEL_EXPORTER_OTLP_ENDPOINT // ""' "$SETTINGS" 2>/dev/null) || exit 0
 
 # Only rewrite if changed
-if [ "$current" != "$header" ]; then
+if [ "$current_header" != "$header" ] || [ "$current_endpoint" != "$endpoint" ]; then
   tmp=$(mktemp)
-  jq --arg h "$header" '.env.OTEL_EXPORTER_OTLP_HEADERS = $h' "$SETTINGS" > "$tmp" && mv "$tmp" "$SETTINGS"
+  jq --arg h "$header" --arg e "$endpoint" \
+    '.env.OTEL_EXPORTER_OTLP_HEADERS = $h | .env.OTEL_EXPORTER_OTLP_ENDPOINT = $e' \
+    "$SETTINGS" > "$tmp" && mv "$tmp" "$SETTINGS"
 fi
