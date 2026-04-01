@@ -36,6 +36,8 @@ if ! terraform providers lock >/dev/null 2>&1; then
   terraform login
 fi
 
+export TF_CLOUD_FORCE_LOCAL=1
+
 echo ""
 echo "=== common スタック apply (シークレット枠を作成) ==="
 (cd "${TF_DIR}/common" && terragrunt apply)
