@@ -20,10 +20,9 @@ resource "newrelic_api_access_key" "ingest" {
 resource "infisical_secret" "generated" {
   for_each = local.generated_secrets
 
-  name             = each.key
-  value            = each.value.value
-  comment          = each.value.comment
-  environment_slug = var.environment_slug
-  project_id       = var.infisical_project_id
-  folder_path      = "/generated"
+  name         = each.key
+  value        = each.value.value
+  env_slug     = var.environment_slug
+  workspace_id = var.infisical_project_id
+  folder_path  = "/generated"
 }

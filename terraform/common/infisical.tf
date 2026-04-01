@@ -26,12 +26,11 @@ resource "infisical_secret_folder" "this" {
 resource "infisical_secret" "user_managed" {
   for_each = local.user_secrets
 
-  name             = each.key
-  value            = ""
-  comment          = each.value.comment
-  environment_slug = var.environment_slug
-  project_id       = var.infisical_project_id
-  folder_path      = each.value.folder
+  name         = each.key
+  value        = ""
+  env_slug     = var.environment_slug
+  workspace_id = var.infisical_project_id
+  folder_path  = each.value.folder
 
   depends_on = [infisical_secret_folder.this["terraform"]]
 
