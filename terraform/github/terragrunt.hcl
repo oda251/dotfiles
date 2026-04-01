@@ -21,7 +21,7 @@ inputs = {
       has_infisical = true
       has_terraform = true
     }
-    sidekick = {
+    onegai = {
       visibility    = "public"
       has_infisical = true
     }
