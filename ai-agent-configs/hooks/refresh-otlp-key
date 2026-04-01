@@ -2,6 +2,7 @@
 set -euo pipefail
 
 SETTINGS="$HOME/.claude/settings.json"
+CACHE="$HOME/.cache/otlp-credentials"
 
 # Fetch OTLP credentials from Infisical
 key=$(infisical secrets get NEWRELIC_LICENSE_KEY --plain --silent --env prod --path /generated 2>/dev/null) || exit 0
@@ -12,11 +13,14 @@ endpoint=$(infisical secrets get NEWRELIC_OTLP_ENDPOINT --plain --silent --env p
 
 header="Api-Key=${key}"
 
-# Read current values
+# Update cache for chezmoi template
+mkdir -p "$(dirname "$CACHE")"
+printf '%s\n%s\n' "$endpoint" "$header" > "$CACHE"
+
+# Update settings.json for current/next session
 current_header=$(jq -r '.env.OTEL_EXPORTER_OTLP_HEADERS // ""' "$SETTINGS" 2>/dev/null) || exit 0
 current_endpoint=$(jq -r '.env.OTEL_EXPORTER_OTLP_ENDPOINT // ""' "$SETTINGS" 2>/dev/null) || exit 0
 
-# Only rewrite if changed
 if [ "$current_header" != "$header" ] || [ "$current_endpoint" != "$endpoint" ]; then
   tmp=$(mktemp)
   jq --arg h "$header" --arg e "$endpoint" \

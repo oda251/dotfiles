@@ -5,8 +5,18 @@
     "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
     "OTEL_METRICS_EXPORTER": "otlp",
     "OTEL_LOGS_EXPORTER": "otlp",
-    "OTEL_EXPORTER_OTLP_ENDPOINT": "",
-    "OTEL_EXPORTER_OTLP_HEADERS": "",
+    {{- $cache := joinPath .chezmoi.homeDir ".cache/otlp-credentials" }}
+    {{- $endpoint := "" }}
+    {{- $header := "" }}
+    {{- if stat $cache }}
+    {{-   $lines := splitList "\n" (include $cache | trim) }}
+    {{-   if ge (len $lines) 2 }}
+    {{-     $endpoint = index $lines 0 }}
+    {{-     $header = index $lines 1 }}
+    {{-   end }}
+    {{- end }}
+    "OTEL_EXPORTER_OTLP_ENDPOINT": "{{ $endpoint }}",
+    "OTEL_EXPORTER_OTLP_HEADERS": "{{ $header }}",
     "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE": "delta",
     "OTEL_LOG_USER_PROMPTS": "1",
     "OTEL_LOG_TOOL_DETAILS": "1",
@@ -24,6 +34,11 @@
             "type": "command",
             "command": "\"$HOME/.claude/hooks/session-start\"",
             "async": false
+          },
+          {
+            "type": "command",
+            "command": "bash \"$HOME/.claude/hooks/refresh-otlp-key\"",
+            "async": true
           }
         ]
       }
