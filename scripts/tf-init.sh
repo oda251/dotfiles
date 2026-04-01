@@ -17,7 +17,7 @@ if [[ ! -f "$ENV_FILE" ]]; then
   echo ""
   read -p "Terraform Cloud Organization: " tf_cloud_org
 
-  printf 'export INFISICAL_UNIVERSAL_AUTH_CLIENT_ID=%s\nexport INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET=%s\nexport INFISICAL_ORG_ID=%s\nexport TF_VAR_infisical_project_id=%s\nexport TF_CLOUD_ORGANIZATION=%s\n' \
+  printf "export INFISICAL_UNIVERSAL_AUTH_CLIENT_ID='%s'\nexport INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET='%s'\nexport INFISICAL_ORG_ID='%s'\nexport TF_VAR_infisical_project_id='%s'\nexport TF_CLOUD_ORGANIZATION='%s'\n" \
     "$client_id" "$client_secret" "$org_id" "$project_id" "$tf_cloud_org" > "$ENV_FILE"
   echo ""
   echo "${ENV_FILE} を書き込みました。"
@@ -34,8 +34,7 @@ fi
 # workspace を作成（init で自動作成）し、execution mode を local に設定
 echo ""
 echo "=== Workspace 初期化 & execution mode → local ==="
-export TFE_TOKEN=$(jq -r '.credentials["app.terraform.io"].token' "$TFE_CREDS" 2>/dev/null || true)
-export TF_CLOUD_ORGANIZATION="${TF_CLOUD_ORGANIZATION}"
+TFE_TOKEN=$(jq -r '.credentials["app.terraform.io"].token' "$TFE_CREDS" 2>/dev/null || true)
 
 stacks=()
 for d in "${TF_DIR}"/*/terragrunt.hcl; do
@@ -45,7 +44,7 @@ done
 for stack in "${stacks[@]}"; do
   echo "  ${stack}: init..."
   (cd "${TF_DIR}/${stack}" && terragrunt init --terragrunt-non-interactive 2>/dev/null) || true
-  if [[ -n "$TFE_TOKEN" && -n "$TF_CLOUD_ORGANIZATION" ]]; then
+  if [[ -n "$TFE_TOKEN" && -n "${TF_CLOUD_ORGANIZATION:-}" ]]; then
     curl -sf \
       -H "Authorization: Bearer ${TFE_TOKEN}" \
       -H "Content-Type: application/vnd.api+json" \

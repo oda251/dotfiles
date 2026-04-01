@@ -1,5 +1,5 @@
-{{- if lookPath "infisical" -}}
 #!/bin/bash
+{{- if lookPath "infisical" }}
 source ~/.local/share/chezmoi/terraform/.env.infisical 2>/dev/null
 if ! infisical secrets get NEWRELIC_LICENSE_KEY --plain --silent --env prod --path /generated --projectId "$TF_VAR_infisical_project_id" >/dev/null 2>&1; then
   echo ""
