@@ -6,6 +6,7 @@ variable "repositories" {
     topics        = optional(list(string), [])
     is_template   = optional(bool, false)
     template      = optional(string)
+    has_infisical = optional(bool, false) # true なら Infisical credentials を配布
     has_terraform = optional(bool, false) # true なら TF workflow を配置
   }))
 }

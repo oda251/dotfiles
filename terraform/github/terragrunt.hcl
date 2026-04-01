@@ -15,14 +15,17 @@ inputs = {
     dotfiles = {
       description   = "chezmoi dotfiles"
       visibility    = "public"
+      has_infisical = true
       has_terraform = true
     }
     garden = {
       visibility    = "public"
+      has_infisical = true
       has_terraform = true
     }
     sidekick = {
-      visibility = "private"
+      visibility    = "private"
+      has_infisical = true
     }
   }
 }

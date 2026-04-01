@@ -1,5 +1,5 @@
 locals {
-  repos_with_terraform = { for k, v in var.repositories : k => v if v.has_terraform }
+  repos_with_infisical = { for k, v in var.repositories : k => v if v.has_infisical }
 
   cd_secrets = {
     INFISICAL_CLIENT_ID     = var.infisical_client_id
@@ -7,7 +7,7 @@ locals {
   }
 
   repo_secrets = { for pair in flatten([
-    for repo_key, repo in local.repos_with_terraform : [
+    for repo_key, repo in local.repos_with_infisical : [
       for secret_key, secret_value in local.cd_secrets : {
         key   = "${repo_key}:${secret_key}"
         repo  = repo_key
@@ -27,7 +27,7 @@ resource "github_actions_secret" "this" {
 }
 
 resource "github_actions_variable" "infisical_project_id" {
-  for_each = local.repos_with_terraform
+  for_each = local.repos_with_infisical
 
   repository    = github_repository.this[each.key].name
   variable_name = "INFISICAL_PROJECT_ID"
