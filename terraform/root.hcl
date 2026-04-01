@@ -34,11 +34,8 @@ generate "infisical" {
     data "infisical_secrets" "terraform" {
       env_slug     = var.environment_slug
       workspace_id = var.infisical_project_id
-      folder_path  = "/terraform"
+      folder_path  = "/terraform/env"
     }
   EOF
 }
 
-inputs = {
-  environment_slug = "prod"
-}
