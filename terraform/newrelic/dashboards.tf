@@ -166,7 +166,7 @@ resource "newrelic_one_dashboard" "claude_code_overview" {
       width  = 6
       height = 3
       nrql_query {
-        query = "SELECT count(*) FROM Log WHERE service.name = 'claude-code' AND event_name = 'tool_result' FACET tool_name SINCE 7 days ago"
+        query = "SELECT count(*) FROM Log WHERE service.name = 'claude-code' AND event.name = 'tool_result' FACET tool_name SINCE 7 days ago"
       }
     }
 
@@ -177,7 +177,7 @@ resource "newrelic_one_dashboard" "claude_code_overview" {
       width  = 6
       height = 3
       nrql_query {
-        query = "SELECT count(*) FROM Log WHERE service.name = 'claude-code' AND event_name = 'tool_result' AND tool_name = 'Skill' AND skill_name IS NOT NULL FACET skill_name SINCE 7 days ago"
+        query = "SELECT count(*) FROM Log WHERE service.name = 'claude-code' AND event.name = 'tool_result' AND tool_name = 'Skill' FACET message SINCE 7 days ago"
       }
     }
 
@@ -188,7 +188,7 @@ resource "newrelic_one_dashboard" "claude_code_overview" {
       width  = 6
       height = 3
       nrql_query {
-        query = "SELECT count(*) FROM Log WHERE service.name = 'claude-code' AND event_name = 'tool_result' AND tool_name IN ('Read', 'Glob', 'Grep') FACET tool_name SINCE 7 days ago"
+        query = "SELECT count(*) FROM Log WHERE service.name = 'claude-code' AND event.name = 'tool_result' AND tool_name IN ('Read', 'Glob', 'Grep') FACET tool_name SINCE 7 days ago"
       }
     }
 
@@ -199,7 +199,7 @@ resource "newrelic_one_dashboard" "claude_code_overview" {
       width  = 6
       height = 3
       nrql_query {
-        query = "SELECT count(*) FROM Log WHERE service.name = 'claude-code' AND event_name = 'tool_result' AND mcp_server_scope IS NOT NULL FACET mcp_server_scope SINCE 7 days ago"
+        query = "SELECT count(*) FROM Log WHERE service.name = 'claude-code' AND event.name = 'tool_result' AND tool_name LIKE 'mcp__%' FACET tool_name SINCE 7 days ago"
       }
     }
   }
@@ -215,7 +215,7 @@ resource "newrelic_one_dashboard" "claude_code_overview" {
       width  = 6
       height = 3
       nrql_query {
-        query = "SELECT percentile(duration_ms, 50, 95) FROM Log WHERE service.name = 'claude-code' AND event_name = 'api_request' TIMESERIES 1 hour SINCE 7 days ago"
+        query = "SELECT percentile(duration_ms, 50, 95) FROM Log WHERE service.name = 'claude-code' AND event.name = 'api_request' TIMESERIES 1 hour SINCE 7 days ago"
       }
     }
 
@@ -226,7 +226,7 @@ resource "newrelic_one_dashboard" "claude_code_overview" {
       width  = 6
       height = 3
       nrql_query {
-        query = "SELECT count(*) FROM Log WHERE service.name = 'claude-code' AND event_name = 'api_error' FACET status_code TIMESERIES 1 hour SINCE 7 days ago"
+        query = "SELECT count(*) FROM Log WHERE service.name = 'claude-code' AND event.name = 'api_error' FACET message TIMESERIES 1 hour SINCE 7 days ago"
       }
     }
 
@@ -237,7 +237,7 @@ resource "newrelic_one_dashboard" "claude_code_overview" {
       width  = 6
       height = 4
       nrql_query {
-        query = "SELECT count(*) FROM Log WHERE service.name = 'claude-code' AND event_name = 'tool_result' AND tool_name = 'Read' AND file_path IS NOT NULL FACET file_path LIMIT 20 SINCE 7 days ago"
+        query = "SELECT count(*) FROM Log WHERE service.name = 'claude-code' AND event.name = 'tool_result' AND tool_name = 'Read' AND tool_input.file_path IS NOT NULL FACET tool_input.file_path LIMIT 20 SINCE 7 days ago"
       }
     }
 
@@ -248,7 +248,7 @@ resource "newrelic_one_dashboard" "claude_code_overview" {
       width  = 6
       height = 4
       nrql_query {
-        query = "SELECT timestamp, message FROM Log WHERE service.name = 'claude-code' AND event_name = 'user_prompt' LIMIT 50 SINCE 7 days ago"
+        query = "SELECT timestamp, prompt FROM Log WHERE service.name = 'claude-code' AND event.name = 'user_prompt' LIMIT 50 SINCE 7 days ago"
       }
     }
   }
