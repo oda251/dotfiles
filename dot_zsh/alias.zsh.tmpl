@@ -35,6 +35,7 @@ alias v='nvim'
 alias lg='lazygit'
 alias now="date '+%Y%m%d%H%M%S'"
 alias tf='terraform'
+slidev() { local args=(); for a in "$@"; do [[ -e "$a" ]] && args+=("$(realpath "$a")") || args+=("$a"); done; local cwd="$PWD"; cd ~/.local/share/chezmoi && npx slidev "${args[@]}"; cd "$cwd"; }
 alias copilot='copilot --allow-all-tools'
 
 claude() {
