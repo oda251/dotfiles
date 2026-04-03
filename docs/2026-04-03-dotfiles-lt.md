@@ -1,15 +1,29 @@
 ---
 theme: default
-title: dotfiles のすすめ
+title: dotfiles
 ---
 
-# dotfiles のすすめ
+<style>
+.slidev-layout {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.slidev-layout > h1,
+.slidev-layout > h2,
+.slidev-layout > h3 {
+  position: absolute;
+  top: 3rem;
+  left: 3.5rem;
+}
+</style>
 
-環境構築、もう悩まない
+# dotfiles
 
 ---
 
-## こんな経験ありませんか？
+## 課題
 
 - PC 買い替えたら **環境構築に丸一日** かかった
 - 会社 PC と自宅 PC で **設定がバラバラ** になってる
@@ -22,7 +36,7 @@ title: dotfiles のすすめ
 
 ---
 
-## dotfiles とは
+## dotfiles
 
 `.zshrc`, `.gitconfig` などの設定ファイル群を **Git で管理する仕組み**
 
@@ -32,41 +46,35 @@ title: dotfiles のすすめ
 
 ---
 
-## ツール構成（基盤から順に）
+## ツール構成
 
-```mermaid
-graph TB
-    subgraph "OS Layer"
-        A[Homebrew / winget]
+```mermaid {scale: 0.6}
+graph LR
+    subgraph foundation [Foundation]
+        B[chezmoi]
+        C[mise]
+        A[Homebrew/winget]
     end
-    subgraph "Foundation"
-        B[chezmoi — dotfiles 管理]
-        C[mise — ツールバージョン管理]
+    subgraph shell [Shell & Terminal]
+        D[zsh / fzf / zoxide]
+        E[Ghostty / Zellij]
     end
-    subgraph "Shell & Terminal"
-        D[zsh + fzf + zoxide + starship]
-        E[Ghostty + Zellij]
+    subgraph devtools [Dev Tools]
+        F[Neovim / lazygit / yazi]
+        G[Claude Code / Cursor]
     end
-    subgraph "Dev Tools"
-        F[Neovim + lazygit + yazi]
-        G[Claude Code + Cursor + Codex]
-    end
-    subgraph "Infra"
-        H[Terraform + Infisical]
+    subgraph infra [Infra]
+        H[Terraform / Infisical]
     end
 
-    A --> B
-    A --> C
-    B --> D
-    B --> E
-    C --> F
-    C --> G
-    B --> H
+    foundation --> shell
+    foundation --> devtools
+    foundation --> infra
 ```
 
 ---
 
-## chezmoi — dotfiles マネージャ
+## chezmoi
 
 設定ファイルの配布・テンプレート化・セットアップスクリプトを一元管理
 
@@ -83,7 +91,7 @@ sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply oda251
 
 ---
 
-## mise — ランタイム・CLI バージョン管理
+## mise
 
 `mise.toml` 1ファイルで宣言的に管理
 
@@ -94,13 +102,18 @@ uv = "latest"
 rust = "latest"
 fzf = "latest"
 ripgrep = "latest"
-```
 
-asdf の上位互換 — 高速で、npm パッケージや GitHub リリースも管理できる
+[env]  # direnv 的な環境変数管理も可能
+NODE_ENV = "development"
+DATABASE_URL = "postgres://localhost/mydb"
+
+[hooks.enter]  # ディレクトリ移動時に自動実行
+script = "echo 'Welcome to the project!'"
+```
 
 ---
 
-## シェル環境
+## シェル
 
 | ツール | 役割 |
 |--------|------|
@@ -113,7 +126,7 @@ asdf の上位互換 — 高速で、npm パッケージや GitHub リリース�
 
 ---
 
-## ターミナル & エディタ
+## ターミナル & エディタ & TUI
 
 | ツール | 役割 |
 |--------|------|
@@ -125,7 +138,7 @@ asdf の上位互換 — 高速で、npm パッケージや GitHub リリース�
 
 ---
 
-## Terraform — インフラも dotfiles で管理
+## Terraform
 
 GitHub リポジトリや New Relic の設定を Terraform + Terragrunt でコード化
 
@@ -141,7 +154,7 @@ terraform/
 
 ---
 
-## AI エージェント設定の一元管理
+## AI エージェント設定
 
 Claude Code / Cursor / Codex の設定を **1箇所で管理し、自動配布**
 
@@ -165,7 +178,3 @@ lefthook（Git フック）でコミット前に自動同期 → **設定の乖�
 | 設定は手動コピー | **Git で自動管理** |
 | ツールバージョンはバラバラ | **mise.toml で宣言** |
 | AI ツール設定はツールごと個別 | **1箇所で一元管理** |
-
-<br>
-
-**dotfiles は「未来の自分への贈り物」**
