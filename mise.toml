@@ -4,4 +4,4 @@ terragrunt = "latest"
 
 [hooks.enter]
 shell = "bash"
-script = "lefthook install"
+script = "lefthook install --force"
