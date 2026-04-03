@@ -1,7 +1,6 @@
 ---
-marp: true
 theme: default
-paginate: true
+title: dotfiles のすすめ
 ---
 
 # dotfiles のすすめ
@@ -16,6 +15,8 @@ paginate: true
 - 会社 PC と自宅 PC で **設定がバラバラ** になってる
 - 「あの便利な alias どこに書いたっけ？」が頻発する
 - OS 再インストール後に **何を入れてたか思い出せない**
+
+<br>
 
 **→ 全部 dotfiles で解決できます**
 
@@ -164,5 +165,7 @@ lefthook（Git フック）でコミット前に自動同期 → **設定の乖�
 | 設定は手動コピー | **Git で自動管理** |
 | ツールバージョンはバラバラ | **mise.toml で宣言** |
 | AI ツール設定はツールごと個別 | **1箇所で一元管理** |
+
+<br>
 
 **dotfiles は「未来の自分への贈り物」**
