@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "dependencies": {
+    "@slidev/theme-default": "^0.25.0",
+    "mermaid": "latest"
+  }
+}

@@ -20,6 +20,9 @@ dot_zsh/local.zsh
 backend.tf
 provider_infisical.tf
 
+# Node
+node_modules/
+
 # Environment
 .env
 terraform/.env.infisical
