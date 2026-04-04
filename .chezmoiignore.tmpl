@@ -32,6 +32,13 @@ Documents/WindowsPowerShell/
 # Linux/macOS-specific configs (ignore on Windows)
 {{ if eq .chezmoi.os "windows" }}
 .config/zellij/
+terraform/
+ai-agent-configs/
+lefthook.yml
+Makefile
+package.json
+package-lock.json
+node_modules/
 {{ end }}
 
 # Ignore all PowerShell scripts on non-Windows
