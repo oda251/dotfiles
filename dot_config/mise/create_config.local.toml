@@ -1,0 +1,3 @@
+# Machine-local mise tools (not managed by chezmoi)
+# Add tools specific to this machine here.
+[tools]
