@@ -3,7 +3,8 @@
   "Sources": [
     {
       "Packages": [
-        { "PackageIdentifier": "jdx.mise" }
+        { "PackageIdentifier": "jdx.mise" },
+        { "PackageIdentifier": "equalsraf.win32yank" }
       ],
       "SourceDetails": {
         "Argument": "https://cdn.winget.microsoft.com/cache",

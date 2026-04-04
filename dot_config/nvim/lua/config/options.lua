@@ -23,6 +23,33 @@ vim.opt.smartcase = true      -- 大文字を含めて検索したら区別す�
 
 -- クリップボード
 vim.opt.clipboard = "unnamedplus" -- システムのクリップボードと同期
+if vim.fn.has("wsl") == 1 then
+  vim.g.clipboard = {
+    name = "win32yank",
+    copy = {
+      ["+"] = "win32yank.exe -i --crlf",
+      ["*"] = "win32yank.exe -i --crlf",
+    },
+    paste = {
+      ["+"] = "win32yank.exe -o --lf",
+      ["*"] = "win32yank.exe -o --lf",
+    },
+    cache_enabled = 0,
+  }
+elseif vim.fn.has("mac") == 1 then
+  vim.g.clipboard = {
+    name = "macOS",
+    copy = {
+      ["+"] = "pbcopy",
+      ["*"] = "pbcopy",
+    },
+    paste = {
+      ["+"] = "pbpaste",
+      ["*"] = "pbpaste",
+    },
+    cache_enabled = 0,
+  }
+end
 
 -- ファイル
 vim.opt.autoread = true       -- ファイルが外部で変更されたら自動で読み直す
