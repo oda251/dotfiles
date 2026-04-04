@@ -33,9 +33,9 @@ lazygit = "latest"
 delta = "latest"
 gh = "latest"
 jq = "latest"
-"ubi:Infisical/cli" = { version = "latest", exe = "infisical" }
 
 {{- if ne .chezmoi.os "windows" }}
+"ubi:Infisical/cli" = { version = "latest", exe = "infisical" }
 lazydocker = "latest"
 zellij = "latest"
 {{- if ne .chezmoi.os "darwin" }}
