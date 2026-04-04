@@ -33,6 +33,7 @@ lazygit = "latest"
 delta = "latest"
 gh = "latest"
 jq = "latest"
+neovim = "latest"
 
 {{- if ne .chezmoi.os "windows" }}
 "ubi:Infisical/cli" = { version = "latest", exe = "infisical" }
@@ -41,7 +42,6 @@ zellij = "latest"
 {{- if ne .chezmoi.os "darwin" }}
 make = "latest"
 {{- end }}
-neovim = "latest"
 "github:anomalyco/opencode" = "latest"
 bottom = "latest"
 oxlint = "latest"
