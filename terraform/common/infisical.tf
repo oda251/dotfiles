@@ -6,7 +6,7 @@ locals {
   sub_folders = {
     env   = { name = "env", path = "/terraform" }
     vars  = { name = "vars", path = "/terraform" }
-    local = { name = "local", path = "/terraform" }
+    local = { name = "local", path = "/" }
   }
 
   # User-managed secrets: TF creates the entry, user sets the value.
@@ -23,7 +23,7 @@ locals {
     infisical_project_id = { folder = "/terraform/vars", comment = "Infisical project ID" }
     environment_slug     = { folder = "/terraform/vars", comment = "Infisical environment slug" }
     # SOPS age secret key
-    SOPS_AGE_SECRET_KEY = { folder = "/terraform/local", comment = "SOPS age secret key for decrypting private-repos.enc.yaml" }
+    SOPS_AGE_SECRET_KEY = { folder = "/local", comment = "SOPS age secret key for decrypting private-repos.enc.yaml" }
   }
 }
 
