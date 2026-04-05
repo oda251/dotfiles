@@ -1,0 +1,13 @@
+[hooks.enter]
+shell = "bash"
+script = '''
+if [ ! -f "${SOPS_AGE_KEY_FILE:-$HOME/.config/sops/age/keys.txt}" ]; then
+  echo -e "\033[33m⚠ SOPS age key not found. Run 'age-keygen -o ~/.config/sops/age/keys.txt' or restore from backup.\033[0m"
+fi
+if ! infisical user get 2>/dev/null | grep -q "email"; then
+  echo -e "\033[33m⚠ Infisical not logged in. Run 'infisical login'.\033[0m"
+fi
+if [ ! -f ".infisical.json" ]; then
+  echo -e "\033[33m⚠ Infisical project not linked. Run 'infisical init'.\033[0m"
+fi
+'''

@@ -3,7 +3,7 @@ data "github_user" "current" {
 }
 
 resource "github_repository_environment" "production" {
-  for_each = { for k, v in var.repositories : k => v if v.has_infisical }
+  for_each = { for k, v in local.all_repositories : k => v if v.has_infisical }
 
   repository  = github_repository.this[each.key].name
   environment = "production"

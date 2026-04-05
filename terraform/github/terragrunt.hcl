@@ -7,6 +7,10 @@ dependency "common" {
   skip_outputs = true
 }
 
+locals {
+  private = yamldecode(sops_decrypt_file("${get_terragrunt_dir()}/private-repos.enc.yaml"))
+}
+
 inputs = {
   github_owner = "oda251"
   repositories = {
@@ -26,4 +30,5 @@ inputs = {
       has_infisical = true
     }
   }
+  private_repositories = local.private.repositories
 }

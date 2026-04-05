@@ -36,6 +36,8 @@ jq = "latest"
 neovim = "latest"
 
 {{- if ne .chezmoi.os "windows" }}
+age = "latest"
+sops = "latest"
 "ubi:Infisical/cli" = { version = "latest", exe = "infisical" }
 lazydocker = "latest"
 zellij = "latest"

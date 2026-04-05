@@ -11,8 +11,26 @@ variable "repositories" {
   }))
 }
 
+variable "private_repositories" {
+  description = "Map of private repository name to config (from SOPS)"
+  type = map(object({
+    description   = optional(string, "")
+    topics        = optional(list(string), [])
+    is_template   = optional(bool, false)
+    template      = optional(string)
+    has_infisical = optional(bool, false)
+    has_terraform = optional(bool, false)
+  }))
+  default = {}
+}
+
+locals {
+  private_repos    = { for k, v in var.private_repositories : k => merge(v, { visibility = "private" }) }
+  all_repositories = merge(var.repositories, local.private_repos)
+}
+
 resource "github_repository" "this" {
-  for_each = var.repositories
+  for_each = local.all_repositories
 
   name        = each.key
   description = each.value.description
@@ -50,10 +68,10 @@ resource "github_repository" "this" {
 
 locals {
   workflows = merge(
-    { for k, v in var.repositories : "${k}/gate" => {
+    { for k, v in local.all_repositories : "${k}/gate" => {
       repo = k, file = "gate.yml", message = "chore: add gate workflow (managed by Terraform)"
     } },
-    { for k, v in var.repositories : "${k}/terraform" => {
+    { for k, v in local.all_repositories : "${k}/terraform" => {
       repo = k, file = "terraform.yml", message = "chore: update Terraform workflow (managed by Terraform)"
     } if v.has_terraform },
   )
@@ -75,7 +93,7 @@ resource "github_repository_file" "workflow" {
 }
 
 resource "github_repository_ruleset" "main" {
-  for_each = { for k, v in var.repositories : k => v if v.visibility != "private" }
+  for_each = { for k, v in local.all_repositories : k => v if v.visibility != "private" }
 
   repository  = github_repository.this[each.key].name
   name        = "main"

@@ -4,8 +4,9 @@
 locals {
   root_folders = toset(["terraform", "generated"])
   sub_folders = {
-    env  = { name = "env", path = "/terraform" }
-    vars = { name = "vars", path = "/terraform" }
+    env   = { name = "env", path = "/terraform" }
+    vars  = { name = "vars", path = "/terraform" }
+    local = { name = "local", path = "/terraform" }
   }
 
   # User-managed secrets: TF creates the entry, user sets the value.
@@ -16,12 +17,13 @@ locals {
     TF_CLOUD_ORGANIZATION                  = { folder = "/terraform/env", comment = "Terraform Cloud organization name" }
     NEW_RELIC_API_KEY                      = { folder = "/terraform/env", comment = "New Relic User API key" }
     NEW_RELIC_ACCOUNT_ID                   = { folder = "/terraform/env", comment = "New Relic account ID" }
-    NPM_TOKEN                              = { folder = "/terraform/env", comment = "npm publish token" }
     INFISICAL_UNIVERSAL_AUTH_CLIENT_ID     = { folder = "/terraform/env", comment = "Infisical Universal Auth client ID" }
     INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET = { folder = "/terraform/env", comment = "Infisical Universal Auth client secret" }
     # terraform category (Sync → HCP TF workspace terraform vars)
     infisical_project_id = { folder = "/terraform/vars", comment = "Infisical project ID" }
     environment_slug     = { folder = "/terraform/vars", comment = "Infisical environment slug" }
+    # SOPS age secret key
+    SOPS_AGE_SECRET_KEY = { folder = "/terraform/local", comment = "SOPS age secret key for decrypting private-repos.enc.yaml" }
   }
 }
 
@@ -59,7 +61,6 @@ resource "infisical_secret" "user_managed" {
   depends_on = [infisical_secret_folder.root, infisical_secret_folder.sub]
 
   lifecycle {
-    ignore_changes  = [value]
-    prevent_destroy = true
+    ignore_changes = [value]
   }
 }

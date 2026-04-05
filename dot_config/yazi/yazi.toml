@@ -10,6 +10,10 @@ edit = [
 image = [
 	{ run = 'open "$@"', desc = "Open Image" }
 ]
+# SOPS 暗号化ファイル: 復号してエディタで開き、保存時に再暗号化
+sops = [
+	{ run = 'sops "$@"', block = true, desc = "SOPS Edit" }
+]
 # ブラウザ（HTMLなど）
 web = [
 	{ run = 'open "$@"', desc = "Open in Browser" }
@@ -17,6 +21,10 @@ web = [
 
 [open]
 prepend_rules = [
+	# SOPS
+	{ url = "*.enc.yaml", use = [ "sops", "edit" ] },
+	{ url = "*.enc.json", use = [ "sops", "edit" ] },
+
 	# HTML
 	{ url = "*.html", use = [ "web", "edit" ] },
 	{ mime = "text/html", use = [ "web", "edit" ] },
