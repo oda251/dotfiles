@@ -43,12 +43,16 @@ resource "github_repository" "this" {
   has_wiki     = false
 
   vulnerability_alerts = true
-  security_and_analysis {
-    secret_scanning {
-      status = "enabled"
-    }
-    secret_scanning_push_protection {
-      status = "enabled"
+
+  dynamic "security_and_analysis" {
+    for_each = each.value.visibility == "public" ? [1] : []
+    content {
+      secret_scanning {
+        status = "enabled"
+      }
+      secret_scanning_push_protection {
+        status = "enabled"
+      }
     }
   }
 
@@ -70,7 +74,7 @@ locals {
   workflows = merge(
     { for k, v in local.all_repositories : "${k}/gate" => {
       repo = k, file = "gate.yml", message = "chore: add gate workflow (managed by Terraform)"
-    } },
+    } if v.visibility != "private" },
     { for k, v in local.all_repositories : "${k}/terraform" => {
       repo = k, file = "terraform.yml", message = "chore: update Terraform workflow (managed by Terraform)"
     } if v.has_terraform },

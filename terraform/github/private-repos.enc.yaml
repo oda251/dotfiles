@@ -1,4 +1,6 @@
-repositories: {}
+repositories:
+    career:
+        description: ""
 #ENC[AES256_GCM,data:0mffNeGjsWC4,iv:pBuZMFW/Muklo4D3b+lmDYZVvdm/GNbCM4ONyRypXkU=,tag:DYxACCjxDlhMrrTFyefZzA==,type:comment]
 #ENC[AES256_GCM,data:UZhSwvWyjGQ/CHIAShd2s29D,iv:UmixVsL6spTifWHBXNF9EkNk5c9LG6isFt0Ad70Fioc=,tag:kzVOnpkExq9w+wPbzu7S8w==,type:comment]
 #ENC[AES256_GCM,data:RtBC/yEQxz1p6HLWWTYj5DcMplr2LaGEwnxM8GDE,iv:rVmVgTwBOi8t+egUefThNuZlTatavVabWXJETA3q3zw=,tag:Ten49P6ZHxmwcISk7L1RQQ==,type:comment]
@@ -15,7 +17,7 @@ sops:
             cmh4ckdBK1k3RHcrQ2ZmbE1OZUJFdUEKs/E/rG5/TZkrkPn4qNj0Zb1B9jLjI3JF
             Nxv0LRpdla8gCNt7t3l8pKMEPnaykKULYG6G1xgNM+/41WFHM8veDg==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-04-05T01:53:02Z"
-    mac: ENC[AES256_GCM,data:lcmJKG+XgcJ/gD3JMVpSgsmiWUGFHN3VRBksTTTEU/HBVneXnIPW6VQbaDXMPmZzPb62EFQ2Pru2DF/iZ3K6k3nQTYrOaYoJjUscwvkeFoGu4747VBGGoy0Fg2FuM7jbl2s4PTNeLON9xM6y2IuYWSFl1x5pMOWVvynS10+qMdw=,iv:dwL/HZNaS4hbF5I/eybqjWNLBWaF0I/hhp4J/z8tbU8=,tag:2DWtNW/0Az5MbBLk4mSxFw==,type:str]
+    lastmodified: "2026-04-05T04:27:41Z"
+    mac: ENC[AES256_GCM,data:A6JyfvglKhnXmicGgsQRB8RcuJfVm8NBX8VQ2jhnK4AqyI84nM1m1nm9HnQwyqJoHh4URfr4kBR4+1mkNpceYsWXEDjTaOwBBsO6yJIHvULtsDup3eRVx4tRdF5DQW3fN6lC5O9H0a1YpyFM4KitV0s3W7bzVw1mf2Hecj5Gfp8=,iv:A6JKi5lGk8vltt/te9GzY6wgfnA8JdQnYnqW5jG8hmg=,tag:yAZnB7+mxZWHGsHfHEB/Ag==,type:str]
     unencrypted_suffix: _unencrypted
     version: 3.12.2

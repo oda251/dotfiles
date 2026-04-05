@@ -5,5 +5,5 @@ pre-commit:
       stage_fixed: true
     terraform-fmt:
       glob: "terraform/**/*.tf"
-      run: terraform fmt -recursive terraform/
+      run: mise exec -- terraform fmt -recursive terraform/
       stage_fixed: true

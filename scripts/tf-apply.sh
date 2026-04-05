@@ -4,20 +4,24 @@ source "$(dirname "$0")/tf-common.sh"
 
 cd "$TF_DIR"
 
-terragrunt run --all apply --no-auto-approve 2>&1 | grep -v 'Cannot confirm apply' | tee /tmp/tg-apply.log || true
+terragrunt run --all --non-interactive apply --no-auto-approve 2>&1 | tee /tmp/tg-apply.log || true
 
-# Collect workspaces with no changes
-no_change_ws=$(grep -oP '\[(\w+)\] terraform: No changes' /tmp/tg-apply.log | grep -oP '\[\K\w+' || true)
-
-# Show URLs only for workspaces that have changes
-pending_urls=""
+# Parse log: collect URLs and no-change workspaces in single pass
+declare -A no_change
+declare -A urls
 while IFS= read -r line; do
-  [[ -z "$line" ]] && continue
-  ws=$(echo "$line" | grep -oP 'app/[^/]+/\K[^/]+')
-  if ! echo "$no_change_ws" | grep -qx "$ws"; then
-    pending_urls+="$line"$'\n'
+  if [[ "$line" =~ \[([a-z_-]+)\].*No\ changes ]]; then
+    no_change[${BASH_REMATCH[1]}]=1
+  elif [[ "$line" =~ https://app\.terraform\.io/app/[^/]+/([^/]+)/runs/[^[:space:]]+ ]]; then
+    urls[${BASH_REMATCH[1]}]=${BASH_REMATCH[0]}
   fi
-done < <(grep -oP 'https://app\.terraform\.io/app/\S+' /tmp/tg-apply.log || true)
+done < /tmp/tg-apply.log
+
+# Filter URLs for workspaces with changes
+pending_urls=""
+for ws in "${!urls[@]}"; do
+  [[ -z "${no_change[$ws]:-}" ]] && pending_urls+="${urls[$ws]}"$'\n'
+done
 
 if [[ -n "$pending_urls" ]]; then
   echo ""
