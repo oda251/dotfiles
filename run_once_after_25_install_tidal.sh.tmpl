@@ -5,6 +5,6 @@ set -euo pipefail
 if ! command -v tidal &>/dev/null && command -v cabal &>/dev/null; then
   echo "Installing TidalCycles..."
   cabal update
-  cabal install tidal
+  cabal install --lib tidal
 fi
 {{- end }}
