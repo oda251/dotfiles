@@ -2,7 +2,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-packages=(gcc g++ unzip fontconfig zsh)
+packages=(gcc g++ unzip fontconfig zsh libgmp-dev)
 missing=()
 
 for pkg in "${packages[@]}"; do
