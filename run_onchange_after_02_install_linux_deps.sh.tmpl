@@ -15,4 +15,10 @@ if [[ ${#missing[@]} -gt 0 ]]; then
   sudo apt-get update -qq
   sudo apt-get install -y -qq "${missing[@]}"
 fi
+
+# WSL: symlink win32yank.exe for Neovim clipboard
+win32yank_src="/mnt/c/Users/odada/AppData/Local/Microsoft/WinGet/Packages/equalsraf.win32yank_Microsoft.Winget.Source_8wekyb3d8bbwe/win32yank.exe"
+if [[ -f "$win32yank_src" ]]; then
+  sudo ln -sf "$win32yank_src" /usr/local/bin/win32yank.exe
+fi
 {{- end }}

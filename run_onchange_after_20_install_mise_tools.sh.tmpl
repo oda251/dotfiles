@@ -49,12 +49,6 @@ if command -v git-lfs >/dev/null 2>&1; then
   git lfs install --skip-repo
 fi
 
-if command -v playwright-cli >/dev/null 2>&1; then
-  playwright-cli install --skills
-else
-  echo "playwright-cli not found; install via mise (npm:@playwright/cli) before running setup" >&2
-  exit 1
-fi
 
 if ! command -v claude >/dev/null 2>&1; then
   if command -v curl >/dev/null 2>&1; then
