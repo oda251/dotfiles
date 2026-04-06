@@ -1,3 +1,6 @@
+[tools]
+tflint = "latest"
+
 [hooks.enter]
 shell = "bash"
 script = '''
