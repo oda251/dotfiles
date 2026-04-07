@@ -4,8 +4,7 @@
     {
       "Packages": [
         { "PackageIdentifier": "jdx.mise" },
-        { "PackageIdentifier": "equalsraf.win32yank" },
-        { "PackageIdentifier": "SuperCollider.SuperCollider" }
+        { "PackageIdentifier": "equalsraf.win32yank" }
       ],
       "SourceDetails": {
         "Argument": "https://cdn.winget.microsoft.com/cache",
