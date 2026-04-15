@@ -13,7 +13,7 @@ next: review
   `{lang}-{framework}.md`）があれば従う
 - `~/.claude/references/policy/testing.md` に従う
 - ライブラリ追加・プロジェクト初期設定など技術選定を伴う場合は
-  `~/.claude/references/setup/` を参照する
+  `~/.claude/references/stack/` を参照する
 
 ## TDD 適用判断
 
