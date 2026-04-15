@@ -20,6 +20,7 @@ TypeScript プロジェクトの技術選定。
 ## Lint / Format: oxlint + oxfmt
 
 - ESLint/Prettier ではなく oxlint + oxfmt を使う
+- `oxlint --type-check --type-aware` で型情報を使ったルールを有効化する
 - `no-explicit-any`, `no-enum`, `no-non-null-assertion`, `no-var` を有効にする
 - `switch-exhaustiveness-check`, `prefer-const`, `eqeqeq`, `consistent-type-imports`, `no-unused-vars` を有効にする
 - `no-restricted-imports` で `../` パターンを禁止する（`./` は許可。パスエイリアスを使う）
