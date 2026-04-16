@@ -11,6 +11,10 @@ permissions:
   contents: read
   pull-requests: write
 
+concurrency:
+  group: pulumi-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 'main' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   preview:
     if: github.event_name == 'pull_request'
@@ -27,6 +31,12 @@ jobs:
           bun-version: latest
 
       - run: bun install --frozen-lockfile
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.pulumi/plugins
+          key: pulumi-plugins-${{ runner.os }}-${{ hashFiles('pulumi/bun.lock') }}
+          restore-keys: pulumi-plugins-${{ runner.os }}-
 
       - uses: pulumi/actions@v6
         with:
@@ -52,6 +62,12 @@ jobs:
           bun-version: latest
 
       - run: bun install --frozen-lockfile
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.pulumi/plugins
+          key: pulumi-plugins-${{ runner.os }}-${{ hashFiles('pulumi/bun.lock') }}
+          restore-keys: pulumi-plugins-${{ runner.os }}-
 
       - uses: pulumi/actions@v6
         with:
