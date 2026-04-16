@@ -1,0 +1,8 @@
+name: dotfiles
+description: Dotfiles infrastructure (GitHub repos, NewRelic dashboards) — replaces terraform/
+runtime:
+  name: nodejs
+  options:
+    packagemanager: bun
+    typescript: true
+main: index.ts

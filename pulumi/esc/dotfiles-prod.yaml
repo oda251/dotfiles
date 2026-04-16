@@ -1,0 +1,89 @@
+# Pulumi ESC environment definition for dotfiles/prod.
+#
+# This file is the source-of-truth content for the ESC environment
+# `oda251/dotfiles/prod`. Apply via:
+#   esc env edit oda251/dotfiles/prod
+# Or initial create:
+#   esc env init oda251/dotfiles/prod < this-file
+#
+# Replace PLACEHOLDER values via `esc env set --secret` or the UI.
+
+values:
+  # Encrypted secrets (set via `esc env set --secret`)
+  secrets:
+    githubToken:
+      fn::secret: PLACEHOLDER_GITHUB_PAT
+    newrelicApiKey:
+      fn::secret: PLACEHOLDER_NEWRELIC_API_KEY
+    infisicalClientId:
+      fn::secret: PLACEHOLDER_INFISICAL_UA_CLIENT_ID
+    infisicalClientSecret:
+      fn::secret: PLACEHOLDER_INFISICAL_UA_CLIENT_SECRET
+
+  newrelic:
+    accountId: "7893158"
+    region: US
+
+  # Re-enable AFTER first `pulumi up` (chicken-egg: stack outputs don't exist yet).
+  # stackRefs:
+  #   fn::open::pulumi-stacks:
+  #     stacks:
+  #       dotfilesProd:
+  #         stack: dotfiles/prod
+
+  infisical:
+    projectSlug: dotfiles-5-c-vy
+
+  # Repository definitions (replaces terraform/github/terragrunt.hcl + private-repos.enc.yaml)
+  repos:
+    public:
+      - name: template
+        description: Template repository with CI boilerplate
+        isTemplate: true
+      # NOTE: dotfiles itself uses Pulumi/ESC, so hasInfisical=false (no
+       # Infisical creds needed) and hasTerraform=false (no terraform.yml).
+       # Its production env + PULUMI_ACCESS_TOKEN are bootstrapped by hand.
+      - name: dotfiles
+        description: chezmoi dotfiles
+        topics: [dotfiles, chezmoi]
+        template: template
+        hasInfisical: false
+        hasTerraform: false
+      - name: garden
+        template: template
+        hasInfisical: true
+        hasTerraform: true
+      - name: onegai
+        template: template
+        hasInfisical: true
+    # Note: ESC env access already controls who can see these names.
+    # If extra secrecy is needed, mark each entry's `name` as fn::secret.
+    private:
+      - name: career
+        description: ""
+      - name: obsidian-vault
+        vulnerabilityAlerts: false
+
+  # Pulumi config (consumed by `new pulumi.Config(...)` in TS code)
+  pulumiConfig:
+    github:owner: oda251
+    github:token: ${secrets.githubToken}
+    newrelic:apiKey: ${secrets.newrelicApiKey}
+    newrelic:accountId: ${newrelic.accountId}
+    newrelic:region: ${newrelic.region}
+    infisical:clientId: ${secrets.infisicalClientId}
+    infisical:clientSecret: ${secrets.infisicalClientSecret}
+    infisical:projectSlug: ${infisical.projectSlug}
+    repos:public: ${repos.public}
+    repos:private: ${repos.private}
+
+  # Env vars exported when wrapping commands with `esc run`
+  # (Pulumi providers auto-discover these — also useful for ad-hoc CLI work)
+  environmentVariables:
+    GITHUB_TOKEN: ${secrets.githubToken}
+    NEW_RELIC_API_KEY: ${secrets.newrelicApiKey}
+    NEW_RELIC_ACCOUNT_ID: ${newrelic.accountId}
+    NEW_RELIC_REGION: ${newrelic.region}
+    # Uncomment after stackRefs is re-enabled (post first apply)
+    # NEWRELIC_LICENSE_KEY: ${stackRefs.dotfilesProd.newrelicLicenseKey}
+    # NEWRELIC_OTLP_ENDPOINT: ${stackRefs.dotfilesProd.otlpEndpoint}

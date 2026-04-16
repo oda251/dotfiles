@@ -1,0 +1,27 @@
+{
+  "resources": [
+    { "type": "github:index/repository:Repository", "name": "dotfiles",       "id": "dotfiles" },
+    { "type": "github:index/repository:Repository", "name": "garden",         "id": "garden" },
+    { "type": "github:index/repository:Repository", "name": "onegai",         "id": "onegai" },
+    { "type": "github:index/repository:Repository", "name": "career",         "id": "career" },
+    { "type": "github:index/repository:Repository", "name": "obsidian-vault", "id": "obsidian-vault" },
+
+    { "type": "github:index/repositoryRuleset:RepositoryRuleset", "name": "dotfiles/main", "id": "dotfiles:14579360" },
+    { "type": "github:index/repositoryRuleset:RepositoryRuleset", "name": "garden/main",   "id": "garden:14579819" },
+    { "type": "github:index/repositoryRuleset:RepositoryRuleset", "name": "onegai/main",   "id": "onegai:14595664" },
+
+    { "type": "github:index/repositoryEnvironment:RepositoryEnvironment", "name": "garden/production", "id": "garden:production" },
+    { "type": "github:index/repositoryEnvironment:RepositoryEnvironment", "name": "onegai/production", "id": "onegai:production" },
+
+    { "type": "github:index/actionsEnvironmentSecret:ActionsEnvironmentSecret", "name": "garden/production/INFISICAL_CLIENT_ID",     "id": "garden:production:INFISICAL_CLIENT_ID" },
+    { "type": "github:index/actionsEnvironmentSecret:ActionsEnvironmentSecret", "name": "garden/production/INFISICAL_CLIENT_SECRET", "id": "garden:production:INFISICAL_CLIENT_SECRET" },
+    { "type": "github:index/actionsEnvironmentVariable:ActionsEnvironmentVariable", "name": "garden/production/INFISICAL_PROJECT_SLUG", "id": "garden:production:INFISICAL_PROJECT_SLUG" },
+
+    { "type": "github:index/actionsEnvironmentSecret:ActionsEnvironmentSecret", "name": "onegai/production/INFISICAL_CLIENT_ID",     "id": "onegai:production:INFISICAL_CLIENT_ID" },
+    { "type": "github:index/actionsEnvironmentSecret:ActionsEnvironmentSecret", "name": "onegai/production/INFISICAL_CLIENT_SECRET", "id": "onegai:production:INFISICAL_CLIENT_SECRET" },
+    { "type": "github:index/actionsEnvironmentVariable:ActionsEnvironmentVariable", "name": "onegai/production/INFISICAL_PROJECT_SLUG", "id": "onegai:production:INFISICAL_PROJECT_SLUG" },
+
+    { "type": "newrelic:index/oneDashboard:OneDashboard", "name": "claude_code_overview", "id": "Nzg5MzE1OHxWSVp8REFTSEJPQVJEfGRhOjEyMzI1MjU4" },
+    { "type": "newrelic:index/apiAccessKey:ApiAccessKey", "name": "ingest", "id": "759683A00FBF179CD8794F2295ACD4BCA53792F7546287778E79AF16AA8EDA75:INGEST" }
+  ]
+}
