@@ -8,6 +8,7 @@ on:
     paths: [pulumi/**]
 
 permissions:
+  id-token: write       # required for GitHub OIDC token issuance
   contents: read
   pull-requests: write
 
@@ -38,14 +39,18 @@ jobs:
           key: pulumi-plugins-${{ runner.os }}-${{ hashFiles('pulumi/bun.lock') }}
           restore-keys: pulumi-plugins-${{ runner.os }}-
 
+      - uses: pulumi/auth-actions@v1
+        with:
+          organization: oda251
+          requested-token-type: urn:pulumi:token-type:access_token:personal
+          scope: user:oda251
+
       - uses: pulumi/actions@v6
         with:
           command: preview
           stack-name: oda251/dotfiles/prod
           comment-on-pr: true
           work-dir: pulumi
-        env:
-          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
   up:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -69,10 +74,14 @@ jobs:
           key: pulumi-plugins-${{ runner.os }}-${{ hashFiles('pulumi/bun.lock') }}
           restore-keys: pulumi-plugins-${{ runner.os }}-
 
+      - uses: pulumi/auth-actions@v1
+        with:
+          organization: oda251
+          requested-token-type: urn:pulumi:token-type:access_token:personal
+          scope: user:oda251
+
       - uses: pulumi/actions@v6
         with:
           command: up
           stack-name: oda251/dotfiles/prod
           work-dir: pulumi
-        env:
-          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}

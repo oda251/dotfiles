@@ -15,8 +15,6 @@ values:
       fn::secret: PLACEHOLDER_GITHUB_PAT
     newrelicApiKey:
       fn::secret: PLACEHOLDER_NEWRELIC_API_KEY
-    pulumiAccessToken:
-      fn::secret: PLACEHOLDER_PULUMI_ACCESS_TOKEN
 
   newrelic:
     accountId: "7893158"
@@ -62,7 +60,6 @@ values:
     newrelic:apiKey: ${secrets.newrelicApiKey}
     newrelic:accountId: ${newrelic.accountId}
     newrelic:region: ${newrelic.region}
-    pulumi:accessToken: ${secrets.pulumiAccessToken}
     repos:public: ${repos.public}
     repos:private: ${repos.private}
 

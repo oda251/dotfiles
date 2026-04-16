@@ -30,7 +30,6 @@ const parseRepos = (raw: unknown, source: string): RepoSpec[] => {
 const cfgGithub = new pulumi.Config("github");
 const cfgNewrelic = new pulumi.Config("newrelic");
 const cfgRepos = new pulumi.Config("repos");
-const cfgPulumi = new pulumi.Config("pulumi");
 
 export const Config = {
   github: {
@@ -41,9 +40,6 @@ export const Config = {
     region: cfgNewrelic.get("region") ?? "US",
     apiKey: cfgNewrelic.requireSecret("apiKey"),
     accountId: cfgNewrelic.require("accountId"),
-  },
-  pulumi: {
-    accessToken: cfgPulumi.requireSecret("accessToken"),
   },
   repos: {
     public: parseRepos(cfgRepos.requireObject("public"), "public"),
