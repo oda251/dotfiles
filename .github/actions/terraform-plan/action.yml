@@ -37,7 +37,7 @@ runs:
         PLAN_FILE="$(mktemp)"
 
         EXIT_CODE=0
-        terragrunt run --all plan --non-interactive --no-auto-init -no-color -input=false -detailed-exitcode 2>&1 | tee "$PLAN_FILE" || EXIT_CODE=$?
+        terragrunt run --all --non-interactive plan -- -detailed-exitcode -input=false -no-color 2>&1 | tee "$PLAN_FILE" || EXIT_CODE=$?
 
         echo "plan_text_path=$PLAN_FILE" >> "$GITHUB_OUTPUT"
 

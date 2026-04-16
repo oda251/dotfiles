@@ -38,7 +38,7 @@ runs:
     - name: Init
       shell: bash
       working-directory: ${{ inputs.working_directory }}
-      run: terragrunt run --all init -no-color --non-interactive -input=false
+      run: terragrunt run --all --non-interactive init -- -input=false -no-color
       env:
         TF_TOKEN_app_terraform_io: ${{ env.TF_API_TOKEN }}
         TF_CLOUD_ORGANIZATION: ${{ env.TF_CLOUD_ORGANIZATION }}

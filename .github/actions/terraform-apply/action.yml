@@ -27,7 +27,7 @@ runs:
         set -o pipefail
         APPLY_FILE="$(mktemp)"
         echo "apply_text_path=$APPLY_FILE" >> "$GITHUB_OUTPUT"
-        terragrunt run --all apply -auto-approve --non-interactive --no-auto-init -no-color -input=false 2>&1 | tee "$APPLY_FILE"
+        terragrunt run --all --non-interactive apply -- -auto-approve -input=false -no-color 2>&1 | tee "$APPLY_FILE"
       env:
         TF_TOKEN_app_terraform_io: ${{ env.TF_API_TOKEN }}
         TF_CLOUD_ORGANIZATION: ${{ env.TF_CLOUD_ORGANIZATION }}
