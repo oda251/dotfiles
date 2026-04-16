@@ -41,7 +41,6 @@ values:
       - name: garden
         template: template
         hasESC: true
-        hasTerraform: true
       - name: onegai
         template: template
         hasESC: true

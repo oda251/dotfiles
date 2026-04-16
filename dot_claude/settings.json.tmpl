@@ -15,9 +15,9 @@
     {{-     $header = index $lines 1 }}
     {{-   end }}
     {{- end }}
-    {{- if and (eq $endpoint "") (lookPath "infisical") }}
-    {{-   $endpoint = output "bash" "-c" "infisical secrets get NEWRELIC_OTLP_ENDPOINT --plain --silent --env prod --path /generated 2>/dev/null || true" | trim }}
-    {{-   $key := output "bash" "-c" "infisical secrets get NEWRELIC_LICENSE_KEY --plain --silent --env prod --path /generated 2>/dev/null || true" | trim }}
+    {{- if and (eq $endpoint "") (lookPath "esc") }}
+    {{-   $endpoint = output "bash" "-c" "esc env open oda251/dotfiles/prod environmentVariables.NEWRELIC_OTLP_ENDPOINT 2>/dev/null | tr -d '\"' || true" | trim }}
+    {{-   $key := output "bash" "-c" "esc env open oda251/dotfiles/prod environmentVariables.NEWRELIC_LICENSE_KEY 2>/dev/null | tr -d '\"' || true" | trim }}
     {{-   if ne $key "" }}
     {{-     $header = printf "Api-Key=%s" $key }}
     {{-   end }}
