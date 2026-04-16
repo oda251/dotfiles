@@ -53,3 +53,10 @@ resource "github_actions_environment_variable" "infisical_project_slug" {
   variable_name = "INFISICAL_PROJECT_SLUG"
   value         = data.infisical_secrets.terraform.secrets["INFISICAL_PROJECT_SLUG"].value
 }
+
+# dotfiles env variable was created manually during CD bootstrap.
+# Import once to bring it under TF state; safe to remove after first apply.
+import {
+  to = github_actions_environment_variable.infisical_project_slug["dotfiles"]
+  id = "dotfiles:production:INFISICAL_PROJECT_SLUG"
+}

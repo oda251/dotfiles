@@ -19,9 +19,10 @@ locals {
     NEW_RELIC_ACCOUNT_ID                   = { folder = "/terraform/env", comment = "New Relic account ID" }
     INFISICAL_UNIVERSAL_AUTH_CLIENT_ID     = { folder = "/terraform/env", comment = "Infisical Universal Auth client ID" }
     INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET = { folder = "/terraform/env", comment = "Infisical Universal Auth client secret" }
-    # Note: INFISICAL_PROJECT_SLUG, SOPS_AGE_KEY, TF_VAR_infisical_project_id,
-    # TF_VAR_environment_slug also exist in /terraform/env but are managed
-    # manually (outside Terraform) to avoid import conflicts on bootstrap.
+    INFISICAL_PROJECT_SLUG                 = { folder = "/terraform/env", comment = "Infisical project slug (used by GHA secrets-action)" }
+    SOPS_AGE_KEY                           = { folder = "/terraform/env", comment = "SOPS age private key (for decrypting private-repos.enc.yaml in CI)" }
+    TF_VAR_infisical_project_id            = { folder = "/terraform/env", comment = "Infisical project UUID (as TF variable for local-exec runs)" }
+    TF_VAR_environment_slug                = { folder = "/terraform/env", comment = "Infisical environment slug (as TF variable for local-exec runs)" }
     # terraform category (Sync → HCP TF workspace terraform vars)
     infisical_project_id = { folder = "/terraform/vars", comment = "Infisical project ID" }
     environment_slug     = { folder = "/terraform/vars", comment = "Infisical environment slug" }
@@ -66,4 +67,18 @@ resource "infisical_secret" "user_managed" {
   lifecycle {
     ignore_changes = [value]
   }
+}
+
+# Bootstrap secrets that were created manually before TF managed them.
+# Importing brings them under TF state on the next local apply.
+# After import succeeds these blocks become no-ops; safe to remove later.
+import {
+  for_each = toset([
+    "INFISICAL_PROJECT_SLUG",
+    "SOPS_AGE_KEY",
+    "TF_VAR_infisical_project_id",
+    "TF_VAR_environment_slug",
+  ])
+  to = infisical_secret.user_managed[each.key]
+  id = "${var.infisical_project_id}:${var.environment_slug}:${local.user_secrets[each.key].folder}:${each.key}"
 }
