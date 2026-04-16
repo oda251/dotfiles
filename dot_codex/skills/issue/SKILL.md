@@ -1,4 +1,5 @@
 ---
+name: issue-manage
 description: GitHubリポジトリにissueやFeature Requestを起票したいとき
 inputs:
   repo: 対象リポジトリ（owner/name）。省略時は現在のgit remoteから推定
