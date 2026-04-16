@@ -1,9 +1,9 @@
 name: Terraform Setup
-description: Install Terraform/Terragrunt, init, and set TFC workspace to local execution
+description: Install Terraform/Terragrunt, set all TFC workspaces to local execution, and init all stacks
 
 inputs:
   working_directory:
-    description: "Terraform working directory"
+    description: "Terraform root directory (containing root.hcl and stack subdirs)"
     required: true
 
 runs:
@@ -17,25 +17,28 @@ runs:
       with:
         terragrunt-version: latest
 
-    - name: Init
+    - name: Set all workspaces to local execution
       shell: bash
       working-directory: ${{ inputs.working_directory }}
-      run: terragrunt init -no-color
+      run: |
+        for dir in */; do
+          [ -f "${dir}terragrunt.hcl" ] || continue
+          WS=$(basename "$dir")
+          curl -sf \
+            --header "Authorization: Bearer $TF_TOKEN_app_terraform_io" \
+            --header "Content-Type: application/vnd.api+json" \
+            --request PATCH \
+            "https://app.terraform.io/api/v2/organizations/$TF_CLOUD_ORGANIZATION/workspaces/$WS" \
+            --data '{"data":{"type":"workspaces","attributes":{"execution-mode":"local"}}}' >/dev/null
+        done
       env:
         TF_TOKEN_app_terraform_io: ${{ env.TF_API_TOKEN }}
         TF_CLOUD_ORGANIZATION: ${{ env.TF_CLOUD_ORGANIZATION }}
 
-    - name: Set workspace to local execution
+    - name: Init
       shell: bash
       working-directory: ${{ inputs.working_directory }}
-      run: |
-        WORKSPACE=$(basename "$PWD")
-        curl -sf \
-          --header "Authorization: Bearer $TF_TOKEN_app_terraform_io" \
-          --header "Content-Type: application/vnd.api+json" \
-          --request PATCH \
-          "https://app.terraform.io/api/v2/organizations/$TF_CLOUD_ORGANIZATION/workspaces/$WORKSPACE" \
-          --data '{"data":{"type":"workspaces","attributes":{"execution-mode":"local"}}}'
+      run: terragrunt run --all init -no-color --non-interactive -input=false
       env:
         TF_TOKEN_app_terraform_io: ${{ env.TF_API_TOKEN }}
         TF_CLOUD_ORGANIZATION: ${{ env.TF_CLOUD_ORGANIZATION }}
