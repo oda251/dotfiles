@@ -104,7 +104,7 @@ export const createRepository = (spec: RepoSpec): RepoBundle => {
     );
   }
 
-  if (spec.hasInfisical) {
+  if (spec.hasESC) {
     createProductionEnvironment(spec.name, repo);
   }
 

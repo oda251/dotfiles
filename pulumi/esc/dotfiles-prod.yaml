@@ -15,10 +15,8 @@ values:
       fn::secret: PLACEHOLDER_GITHUB_PAT
     newrelicApiKey:
       fn::secret: PLACEHOLDER_NEWRELIC_API_KEY
-    infisicalClientId:
-      fn::secret: PLACEHOLDER_INFISICAL_UA_CLIENT_ID
-    infisicalClientSecret:
-      fn::secret: PLACEHOLDER_INFISICAL_UA_CLIENT_SECRET
+    pulumiAccessToken:
+      fn::secret: PLACEHOLDER_PULUMI_ACCESS_TOKEN
 
   newrelic:
     accountId: "7893158"
@@ -30,31 +28,25 @@ values:
         dotfilesProd:
           stack: dotfiles/prod
 
-  infisical:
-    projectSlug: dotfiles-5-c-vy
-
   # Repository definitions (replaces terraform/github/terragrunt.hcl + private-repos.enc.yaml)
   repos:
     public:
       - name: template
         description: Template repository with CI boilerplate
         isTemplate: true
-      # NOTE: dotfiles itself uses Pulumi/ESC, so hasInfisical=false (no
-       # Infisical creds needed) and hasTerraform=false (no terraform.yml).
-       # Its production env + PULUMI_ACCESS_TOKEN are bootstrapped by hand.
       - name: dotfiles
         description: chezmoi dotfiles
         topics: [dotfiles, chezmoi]
         template: template
-        hasInfisical: false
+        hasESC: true
         hasTerraform: false
       - name: garden
         template: template
-        hasInfisical: true
+        hasESC: true
         hasTerraform: true
       - name: onegai
         template: template
-        hasInfisical: true
+        hasESC: true
     # Note: ESC env access already controls who can see these names.
     # If extra secrecy is needed, mark each entry's `name` as fn::secret.
     private:
@@ -70,9 +62,7 @@ values:
     newrelic:apiKey: ${secrets.newrelicApiKey}
     newrelic:accountId: ${newrelic.accountId}
     newrelic:region: ${newrelic.region}
-    infisical:clientId: ${secrets.infisicalClientId}
-    infisical:clientSecret: ${secrets.infisicalClientSecret}
-    infisical:projectSlug: ${infisical.projectSlug}
+    pulumi:accessToken: ${secrets.pulumiAccessToken}
     repos:public: ${repos.public}
     repos:private: ${repos.private}
 

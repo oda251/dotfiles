@@ -8,7 +8,7 @@ const RepoSpecSchema = v.object({
   topics: v.optional(v.array(v.string()), []),
   isTemplate: v.optional(v.boolean(), false),
   template: v.optional(v.string()),
-  hasInfisical: v.optional(v.boolean(), false),
+  hasESC: v.optional(v.boolean(), false),
   hasTerraform: v.optional(v.boolean(), false),
   vulnerabilityAlerts: v.optional(v.boolean(), true),
 });
@@ -30,7 +30,7 @@ const parseRepos = (raw: unknown, source: string): RepoSpec[] => {
 const cfgGithub = new pulumi.Config("github");
 const cfgNewrelic = new pulumi.Config("newrelic");
 const cfgRepos = new pulumi.Config("repos");
-const cfgInfisical = new pulumi.Config("infisical");
+const cfgPulumi = new pulumi.Config("pulumi");
 
 export const Config = {
   github: {
@@ -42,10 +42,8 @@ export const Config = {
     apiKey: cfgNewrelic.requireSecret("apiKey"),
     accountId: cfgNewrelic.require("accountId"),
   },
-  infisical: {
-    clientId: cfgInfisical.requireSecret("clientId"),
-    clientSecret: cfgInfisical.requireSecret("clientSecret"),
-    projectSlug: cfgInfisical.require("projectSlug"),
+  pulumi: {
+    accessToken: cfgPulumi.requireSecret("accessToken"),
   },
   repos: {
     public: parseRepos(cfgRepos.requireObject("public"), "public"),

@@ -24,34 +24,12 @@ export const createProductionEnvironment = (
   );
 
   new github.ActionsEnvironmentSecret(
-    `${repoName}/production/INFISICAL_CLIENT_ID`,
+    `${repoName}/production/PULUMI_ACCESS_TOKEN`,
     {
       repository: repo.name,
       environment: env.environment,
-      secretName: "INFISICAL_CLIENT_ID",
-      plaintextValue: Config.infisical.clientId,
-    },
-    {},
-  );
-
-  new github.ActionsEnvironmentSecret(
-    `${repoName}/production/INFISICAL_CLIENT_SECRET`,
-    {
-      repository: repo.name,
-      environment: env.environment,
-      secretName: "INFISICAL_CLIENT_SECRET",
-      plaintextValue: Config.infisical.clientSecret,
-    },
-    {},
-  );
-
-  new github.ActionsEnvironmentVariable(
-    `${repoName}/production/INFISICAL_PROJECT_SLUG`,
-    {
-      repository: repo.name,
-      environment: env.environment,
-      variableName: "INFISICAL_PROJECT_SLUG",
-      value: Config.infisical.projectSlug,
+      secretName: "PULUMI_ACCESS_TOKEN",
+      plaintextValue: Config.pulumi.accessToken,
     },
     {},
   );

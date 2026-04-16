@@ -1,0 +1,14 @@
+{
+  "resources": [
+    {
+      "type": "github:index/repositoryEnvironment:RepositoryEnvironment",
+      "name": "dotfiles/production",
+      "id": "dotfiles:production"
+    },
+    {
+      "type": "github:index/actionsEnvironmentSecret:ActionsEnvironmentSecret",
+      "name": "dotfiles/production/PULUMI_ACCESS_TOKEN",
+      "id": "dotfiles:production:PULUMI_ACCESS_TOKEN"
+    }
+  ]
+}

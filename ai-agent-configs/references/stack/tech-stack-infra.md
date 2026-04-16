@@ -33,8 +33,8 @@ pulumi/
 
 `RepoSpec` にブール値フラグを立てて、リポジトリごとに追加リソースを配置する:
 
-- `hasInfisical`: Production environment + Infisical 用 secrets/variables を配置（シークレット連携が必要なリポのみ）
-- `hasESC`: CD で Pulumi を走らせるリポに `PULUMI_ACCESS_TOKEN` を Environment Secret として配布（Pulumi Cloud への認証用）。`dotfiles` リポ自身の production env はこのフラグで管理する想定
+- `hasESC`: Production environment（reviewer gate）と `PULUMI_ACCESS_TOKEN` Environment Secret を配置。CD で Pulumi を走らせるリポに付与する（`dotfiles` リポ自身を含む）
+- `hasTerraform`: `.github/workflows/terraform.yml` をリポに配布（Terraform を併用する既存リポ向け）
 
 状態を boolean で持つことで、リポ追加時は YAML に1行足すだけで付随リソースが揃う。
 
