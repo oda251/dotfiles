@@ -27,7 +27,7 @@ jobs:
           client-id: $${{ secrets.INFISICAL_CLIENT_ID }}
           client-secret: $${{ secrets.INFISICAL_CLIENT_SECRET }}
           env-slug: "prod"
-          project-slug: $${{ vars.INFISICAL_PROJECT_ID }}
+          project-slug: $${{ vars.INFISICAL_PROJECT_SLUG }}
           secret-path: "/terraform/env"
 
       - name: Plan
@@ -62,7 +62,7 @@ jobs:
           client-id: $${{ secrets.INFISICAL_CLIENT_ID }}
           client-secret: $${{ secrets.INFISICAL_CLIENT_SECRET }}
           env-slug: "prod"
-          project-slug: $${{ vars.INFISICAL_PROJECT_ID }}
+          project-slug: $${{ vars.INFISICAL_PROJECT_SLUG }}
           secret-path: "/terraform/env"
 
       - uses: oda251/dotfiles/.github/actions/terraform-apply@main

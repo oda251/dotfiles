@@ -44,3 +44,12 @@ resource "github_actions_environment_variable" "infisical_project_id" {
   variable_name = "INFISICAL_PROJECT_ID"
   value         = var.infisical_project_id
 }
+
+resource "github_actions_environment_variable" "infisical_project_slug" {
+  for_each = github_repository_environment.production
+
+  repository    = each.value.repository
+  environment   = each.value.environment
+  variable_name = "INFISICAL_PROJECT_SLUG"
+  value         = data.infisical_secrets.terraform.secrets["INFISICAL_PROJECT_SLUG"].value
+}

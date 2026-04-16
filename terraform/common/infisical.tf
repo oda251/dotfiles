@@ -19,6 +19,7 @@ locals {
     NEW_RELIC_ACCOUNT_ID                   = { folder = "/terraform/env", comment = "New Relic account ID" }
     INFISICAL_UNIVERSAL_AUTH_CLIENT_ID     = { folder = "/terraform/env", comment = "Infisical Universal Auth client ID" }
     INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET = { folder = "/terraform/env", comment = "Infisical Universal Auth client secret" }
+    INFISICAL_PROJECT_SLUG                 = { folder = "/terraform/env", comment = "Infisical project slug (used by GHA secrets-action)" }
     # terraform category (Sync → HCP TF workspace terraform vars)
     infisical_project_id = { folder = "/terraform/vars", comment = "Infisical project ID" }
     environment_slug     = { folder = "/terraform/vars", comment = "Infisical environment slug" }
