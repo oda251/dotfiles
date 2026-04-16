@@ -6,6 +6,11 @@
 # concat|destination|source1|source2|...
 # sync|source_dir|destination_dir
 
+# Top-level instructions (distributed to each agent's entry file)
+copy|ai-agent-configs/AGENT.md|dot_claude/CLAUDE.md
+copy|ai-agent-configs/AGENT.md|dot_codex/AGENTS.md
+copy|ai-agent-configs/AGENT.md|dot_cursor/rules/AGENTS.mdc
+
 # Agents (Claude Code only)
 sync|ai-agent-configs/agents|dot_claude/exact_agents
 
