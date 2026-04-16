@@ -60,4 +60,4 @@ runs:
         echo "plan_hash=$HASH" >> "$GITHUB_OUTPUT"
       env:
         TF_TOKEN_app_terraform_io: ${{ env.TF_API_TOKEN }}
-        TF_CLOUD_ORGANIZATION: ${{ env.TF_CLOUD_ORG }}
+        TF_CLOUD_ORGANIZATION: ${{ env.TF_CLOUD_ORGANIZATION }}

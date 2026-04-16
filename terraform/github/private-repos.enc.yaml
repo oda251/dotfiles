@@ -1,6 +1,7 @@
 repositories:
     career:
         description: ""
+    obsidian-vault: {}
 #ENC[AES256_GCM,data:0mffNeGjsWC4,iv:pBuZMFW/Muklo4D3b+lmDYZVvdm/GNbCM4ONyRypXkU=,tag:DYxACCjxDlhMrrTFyefZzA==,type:comment]
 #ENC[AES256_GCM,data:UZhSwvWyjGQ/CHIAShd2s29D,iv:UmixVsL6spTifWHBXNF9EkNk5c9LG6isFt0Ad70Fioc=,tag:kzVOnpkExq9w+wPbzu7S8w==,type:comment]
 #ENC[AES256_GCM,data:RtBC/yEQxz1p6HLWWTYj5DcMplr2LaGEwnxM8GDE,iv:rVmVgTwBOi8t+egUefThNuZlTatavVabWXJETA3q3zw=,tag:Ten49P6ZHxmwcISk7L1RQQ==,type:comment]
@@ -17,7 +18,7 @@ sops:
             cmh4ckdBK1k3RHcrQ2ZmbE1OZUJFdUEKs/E/rG5/TZkrkPn4qNj0Zb1B9jLjI3JF
             Nxv0LRpdla8gCNt7t3l8pKMEPnaykKULYG6G1xgNM+/41WFHM8veDg==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-04-05T04:27:41Z"
-    mac: ENC[AES256_GCM,data:A6JyfvglKhnXmicGgsQRB8RcuJfVm8NBX8VQ2jhnK4AqyI84nM1m1nm9HnQwyqJoHh4URfr4kBR4+1mkNpceYsWXEDjTaOwBBsO6yJIHvULtsDup3eRVx4tRdF5DQW3fN6lC5O9H0a1YpyFM4KitV0s3W7bzVw1mf2Hecj5Gfp8=,iv:A6JKi5lGk8vltt/te9GzY6wgfnA8JdQnYnqW5jG8hmg=,tag:yAZnB7+mxZWHGsHfHEB/Ag==,type:str]
+    lastmodified: "2026-04-16T12:16:46Z"
+    mac: ENC[AES256_GCM,data:GjjRSIzlZCNoOrrTtul/9gc2bYQ9fPmjiwMhTlEyWi5bbMlTofmuwELyG1gisy1Je2nA7jdAeuKpUrVMOeVvxzWBlu1h8AQb4vhDlNrvX5jZyPAU6HamCwZlfXTwNX74lLs1z3OFUIFz0+eZcQqwuTMUzU9+FZnOCMxUoQfTpz0=,iv:zK/4DzkgQ2s/dkGztIQ2BhdYO9y/APWmQP6TwyUBKaA=,tag:IRPtm0fFCZLnSDcxzyKx9w==,type:str]
     unencrypted_suffix: _unencrypted
     version: 3.12.2

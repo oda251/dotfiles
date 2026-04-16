@@ -16,6 +16,7 @@ jobs:
   plan:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - uses: actions/checkout@v4
 
@@ -27,7 +28,7 @@ jobs:
           client-secret: ${{ secrets.INFISICAL_CLIENT_SECRET }}
           env-slug: "prod"
           project-slug: ${{ vars.INFISICAL_PROJECT_ID }}
-          secret-path: "/terraform"
+          secret-path: "/terraform/env"
 
       - name: Plan
         id: plan
@@ -50,6 +51,7 @@ jobs:
   apply-merge:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - uses: actions/checkout@v4
 
@@ -61,7 +63,7 @@ jobs:
           client-secret: ${{ secrets.INFISICAL_CLIENT_SECRET }}
           env-slug: "prod"
           project-slug: ${{ vars.INFISICAL_PROJECT_ID }}
-          secret-path: "/terraform"
+          secret-path: "/terraform/env"
 
       - uses: oda251/dotfiles/.github/actions/terraform-apply@main
         with:

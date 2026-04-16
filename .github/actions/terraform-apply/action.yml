@@ -30,4 +30,4 @@ runs:
         terragrunt apply --terragrunt-no-auto-init -auto-approve -no-color 2>&1 | tee "$APPLY_FILE"
       env:
         TF_TOKEN_app_terraform_io: ${{ env.TF_API_TOKEN }}
-        TF_CLOUD_ORGANIZATION: ${{ env.TF_CLOUD_ORG }}
+        TF_CLOUD_ORGANIZATION: ${{ env.TF_CLOUD_ORGANIZATION }}

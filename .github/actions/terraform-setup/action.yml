@@ -23,7 +23,7 @@ runs:
       run: terragrunt init -no-color
       env:
         TF_TOKEN_app_terraform_io: ${{ env.TF_API_TOKEN }}
-        TF_CLOUD_ORGANIZATION: ${{ env.TF_CLOUD_ORG }}
+        TF_CLOUD_ORGANIZATION: ${{ env.TF_CLOUD_ORGANIZATION }}
 
     - name: Set workspace to local execution
       shell: bash
@@ -38,4 +38,4 @@ runs:
           --data '{"data":{"type":"workspaces","attributes":{"execution-mode":"local"}}}'
       env:
         TF_TOKEN_app_terraform_io: ${{ env.TF_API_TOKEN }}
-        TF_CLOUD_ORGANIZATION: ${{ env.TF_CLOUD_ORG }}
+        TF_CLOUD_ORGANIZATION: ${{ env.TF_CLOUD_ORGANIZATION }}
