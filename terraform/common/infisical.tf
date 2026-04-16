@@ -68,17 +68,3 @@ resource "infisical_secret" "user_managed" {
     ignore_changes = [value]
   }
 }
-
-# Bootstrap secrets that were created manually before TF managed them.
-# Importing brings them under TF state on the next local apply.
-# After import succeeds these blocks become no-ops; safe to remove later.
-import {
-  for_each = toset([
-    "INFISICAL_PROJECT_SLUG",
-    "SOPS_AGE_KEY",
-    "TF_VAR_infisical_project_id",
-    "TF_VAR_environment_slug",
-  ])
-  to = infisical_secret.user_managed[each.key]
-  id = "${var.infisical_project_id}:${var.environment_slug}:${local.user_secrets[each.key].folder}:${each.key}"
-}

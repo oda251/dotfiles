@@ -36,15 +36,6 @@ resource "github_actions_environment_secret" "infisical_client_secret" {
   plaintext_value = data.infisical_secrets.terraform.secrets["INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET"].value
 }
 
-resource "github_actions_environment_variable" "infisical_project_id" {
-  for_each = github_repository_environment.production
-
-  repository    = each.value.repository
-  environment   = each.value.environment
-  variable_name = "INFISICAL_PROJECT_ID"
-  value         = var.infisical_project_id
-}
-
 resource "github_actions_environment_variable" "infisical_project_slug" {
   for_each = github_repository_environment.production
 
@@ -52,11 +43,4 @@ resource "github_actions_environment_variable" "infisical_project_slug" {
   environment   = each.value.environment
   variable_name = "INFISICAL_PROJECT_SLUG"
   value         = data.infisical_secrets.terraform.secrets["INFISICAL_PROJECT_SLUG"].value
-}
-
-# dotfiles env variable was created manually during CD bootstrap.
-# Import once to bring it under TF state; safe to remove after first apply.
-import {
-  to = github_actions_environment_variable.infisical_project_slug["dotfiles"]
-  id = "dotfiles:production:INFISICAL_PROJECT_SLUG"
 }
