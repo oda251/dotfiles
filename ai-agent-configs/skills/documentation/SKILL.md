@@ -85,26 +85,7 @@ useEffect は第2引数に依存配列を受け取る。
 
 ## ユーザー通知
 
-ドキュメント作成・更新後、アクセス用URIをユーザーに提示する:
-
-```
-obsidian://open?vault=obsidian-vault&file={path-without-.md}
-```
-
-例: `anthropic/research/2026-04-16-hono-auth.md` を作成した場合:
-
-```
-Created: anthropic/research/2026-04-16-hono-auth.md
-Open: obsidian://open?vault=obsidian-vault&file=anthropic/research/2026-04-16-hono-auth
-```
-
-Obsidianアプリが起動していればクリックで開く。
-
-複数ファイルを一度に書き出す場合（例: research/gather の中間ファイル群）は、個別URIではなく親ディレクトリURIを1つ提示する:
-
-```
-obsidian://open?vault=obsidian-vault&file={dir-path}
-```
+作成・更新したファイルごとに `obsidian://open?vault=obsidian-vault&file={path-without-.md}` 形式のURIを提示する。
 
 ## 管理ルール
 

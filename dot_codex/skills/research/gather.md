@@ -39,11 +39,3 @@ obsidian create vault=obsidian-vault \
   path="anthropic/.research/2026-04-16-hono-auth/hono-docs-middleware.md" \
   content="..."
 ```
-
-## ユーザー通知
-
-収集完了時、ディレクトリの Obsidian URI を1つ提示する（ファイル単位のURI列挙はしない）:
-
-```
-obsidian://open?vault=obsidian-vault&file={org}/.research/{date}-{topic}/
-```
