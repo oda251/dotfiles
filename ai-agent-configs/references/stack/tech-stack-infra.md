@@ -20,13 +20,6 @@ pulumi/
 └── esc/<env>.yaml           # ESC env のソース（secrets は --secret で別投入）
 ```
 
-## GitHub 管理: @pulumi/github プロバイダ
-
-- リポジトリ設定、RepositoryRuleset（ブランチ保護）、RepositoryFile（配布 workflow）、RepositoryEnvironment、Actions Secrets/Variables を Pulumi で管理
-- main 直プッシュ禁止、PR マージには CI status check 通過を必須にする
-- リポジトリ定義は ESC の構造化 config に置き、`src/lib/config.ts` で valibot 検証してから展開
-- リポジトリスキーマには boolean フラグを持たせ、リポごとに付与するリソース（環境作成・workflow 配布等）を切り替える。リポ追加時に YAML 1行で付随リソースが揃うようにする
-
 ## Pulumi CI/CD
 
 - `.github/workflows/pulumi.yml` 単一ワークフローで preview（PR）と up（main push）を担う
