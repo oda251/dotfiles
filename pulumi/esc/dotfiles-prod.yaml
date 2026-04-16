@@ -24,12 +24,11 @@ values:
     accountId: "7893158"
     region: US
 
-  # Re-enable AFTER first `pulumi up` (chicken-egg: stack outputs don't exist yet).
-  # stackRefs:
-  #   fn::open::pulumi-stacks:
-  #     stacks:
-  #       dotfilesProd:
-  #         stack: dotfiles/prod
+  stackRefs:
+    fn::open::pulumi-stacks:
+      stacks:
+        dotfilesProd:
+          stack: dotfiles/prod
 
   infisical:
     projectSlug: dotfiles-5-c-vy
@@ -84,6 +83,6 @@ values:
     NEW_RELIC_API_KEY: ${secrets.newrelicApiKey}
     NEW_RELIC_ACCOUNT_ID: ${newrelic.accountId}
     NEW_RELIC_REGION: ${newrelic.region}
-    # Uncomment after stackRefs is re-enabled (post first apply)
-    # NEWRELIC_LICENSE_KEY: ${stackRefs.dotfilesProd.newrelicLicenseKey}
-    # NEWRELIC_OTLP_ENDPOINT: ${stackRefs.dotfilesProd.otlpEndpoint}
+    # OTLP credentials sourced from stack outputs (consumers: chezmoi refresh-otlp-key script)
+    NEWRELIC_LICENSE_KEY: ${stackRefs.dotfilesProd.newrelicLicenseKey}
+    NEWRELIC_OTLP_ENDPOINT: ${stackRefs.dotfilesProd.otlpEndpoint}
