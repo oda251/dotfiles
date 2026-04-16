@@ -20,6 +20,7 @@ locals {
     INFISICAL_UNIVERSAL_AUTH_CLIENT_ID     = { folder = "/terraform/env", comment = "Infisical Universal Auth client ID" }
     INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET = { folder = "/terraform/env", comment = "Infisical Universal Auth client secret" }
     INFISICAL_PROJECT_SLUG                 = { folder = "/terraform/env", comment = "Infisical project slug (used by GHA secrets-action)" }
+    SOPS_AGE_KEY                           = { folder = "/terraform/env", comment = "SOPS age private key (for decrypting private-repos.enc.yaml in CI)" }
     # terraform category (Sync → HCP TF workspace terraform vars)
     infisical_project_id = { folder = "/terraform/vars", comment = "Infisical project ID" }
     environment_slug     = { folder = "/terraform/vars", comment = "Infisical environment slug" }
