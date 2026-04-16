@@ -1,7 +1,10 @@
 {
   "private": true,
   "dependencies": {
-    "@slidev/theme-default": "^0.25.0",
-    "mermaid": "latest"
+    "@slidev/cli": "latest",
+    "@slidev/theme-default": "latest"
+  },
+  "scripts": {
+    "slidev": "slidev"
   }
 }
