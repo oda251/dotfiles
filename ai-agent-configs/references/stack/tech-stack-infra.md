@@ -23,16 +23,9 @@ pulumi/
 ## GitHub 管理: @pulumi/github プロバイダ
 
 - リポジトリ設定、RepositoryRuleset（ブランチ保護）、RepositoryFile（配布 workflow）、RepositoryEnvironment、Actions Secrets/Variables を Pulumi で管理
-- main 直プッシュ禁止、`gate` status check を PR マージの必須条件にする
+- main 直プッシュ禁止、PR マージには CI status check 通過を必須にする
 - リポジトリ定義は ESC の構造化 config に置き、`src/lib/config.ts` で valibot 検証してから展開
-
-### リポジトリスキーマのフラグ
-
-`RepoSpec` にブール値フラグを立てて、リポジトリごとに追加リソースを配置する:
-
-- `hasESC`: Production environment（reviewer gate）を配置。CD で Pulumi を走らせるリポに付与する
-
-状態を boolean で持つことで、リポ追加時は YAML に1行足すだけで付随リソースが揃う。
+- リポジトリスキーマには boolean フラグを持たせ、リポごとに付与するリソース（環境作成・workflow 配布等）を切り替える。リポ追加時に YAML 1行で付随リソースが揃うようにする
 
 ## Pulumi CI/CD
 
@@ -41,14 +34,14 @@ pulumi/
   - `actions/checkout@v4`
   - `oven-sh/setup-bun@v2` で Bun ランタイム導入
   - `bun install --frozen-lockfile` で依存インストール
-  - `actions/cache@v4` で `~/.pulumi/plugins` をキャッシュ（`pulumi/bun.lock` ハッシュでキー生成）
+  - `actions/cache@v4` で `~/.pulumi/plugins` をキャッシュ（lockfile ハッシュでキー生成）
   - `pulumi/auth-actions@v1` で GitHub OIDC → 短命 Pulumi access token 交換
   - `pulumi/actions@v6` で `command: preview` / `command: up` を実行
 - 認証は OIDC trust（Pulumi Cloud の OIDC issuer 設定 + auth policy）。静的 `PULUMI_ACCESS_TOKEN` シークレットは持たない
-- Trust policy の `sub` クレームで `repo:<owner>/<repo>:environment:production` まで絞る
+- Trust policy の `sub` クレームで `repo:<owner>/<repo>:environment:<env>` まで絞る
 - workflow に `permissions: id-token: write` を必ず付ける
 - PR 作成時に自動 preview → PR にコメント投稿（`comment-on-pr: true`）
-- main マージ時に `up`、`environment: production` ジョブゲートで手動承認を挟んでから apply
+- main マージ時に `up`、`environment: <name>` ジョブゲートで手動承認を挟んでから apply
 
 ## Lint / Format: oxlint + oxfmt + tsc
 
