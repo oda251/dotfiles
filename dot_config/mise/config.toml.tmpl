@@ -14,6 +14,8 @@ awscli = "latest"
 terraform = "latest"
 terragrunt = "latest"
 tflint = "latest"
+pulumi = "latest"
+"aqua:pulumi/esc" = "latest"
 go = "latest"
 {{- end }}
 
@@ -45,7 +47,6 @@ zellij = "latest"
 {{- if ne .chezmoi.os "darwin" }}
 make = "latest"
 {{- end }}
-"github:anomalyco/opencode" = "latest"
 bottom = "latest"
 oxlint = "latest"
 "npm:oxfmt" = "latest"
