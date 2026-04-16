@@ -1,4 +1,4 @@
-import { registerGithub } from "./src/repos/index.ts";
+import { registerGithub } from "./src/github/index.ts";
 import { registerNewrelic } from "./src/newrelic/index.ts";
 
 const github = registerGithub();
