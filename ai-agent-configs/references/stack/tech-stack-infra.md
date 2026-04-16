@@ -1,31 +1,62 @@
 # 技術スタック: インフラ
 
-## IaC: Terraform + Terragrunt
+## IaC: Pulumi (TypeScript, Bun runtime) + Pulumi ESC
 
-- インフラは全て Terraform で管理する
-- 環境間の DRY には Terragrunt を使う
-- tfstate は Terraform Cloud（local 実行モード）で管理
+- インフラは全て Pulumi で管理する
+- ランタイムは Bun（`runtime: bun`）、言語は TypeScript
+- state は Pulumi Cloud（`oda251/dotfiles/prod` スタック）で管理
+- 機密値・設定値は Pulumi ESC（`oda251/dotfiles/prod` env）に集約し、`Pulumi.prod.yaml` の `environment: [dotfiles/prod]` で読み込む
+- 旧構成の Terraform + Terragrunt + Infisical + SOPS は全廃
 
-## GitHub 管理: Terraform GitHub Provider
+### ディレクトリ構成
 
-- リポジトリ設定、ブランチ保護、Actions Secrets を Terraform で管理する
-- main 直プッシュ禁止、CI 通過を PR マージの必須条件にする
-- Terraform コードは `terraform/github/` に配置
+```
+pulumi/
+├── Pulumi.yaml            # project 定義（name: dotfiles, runtime: bun）
+├── Pulumi.prod.yaml       # stack 設定、ESC env 参照
+├── index.ts               # エントリポイント（各サブモジュール登録）
+├── src/
+│   ├── lib/config.ts      # valibot で設定/スキーマ検証、型付き Config エクスポート
+│   ├── repos/             # GitHub リポジトリ・ruleset・environment・workflow file
+│   ├── newrelic/          # NewRelic dashboard、APIアクセスキー
+│   └── workflows/         # 配布する GHA workflow テンプレート（必要時）
+└── esc/dotfiles-prod.yaml # ESC env のソース (secrets は --secret で別投入)
+```
 
-## Terraform CI/CD
+## GitHub 管理: @pulumi/github プロバイダ
 
-- 共通 composite actions（`oda251/dotfiles/.github/actions/terraform-*`）をステップとして呼ぶ
-  - `terraform-setup`: Terraform/Terragrunt インストール、init、TFC local 実行モード設定
-  - `terraform-plan`: plan 実行、出力キャプチャ、変更検知
-  - `terraform-apply`: apply 実行、出力キャプチャ
-  - `terraform-comment`: PR に plan/apply 結果を投稿（diff ハイライト、切り詰め対応）
-- ワークフローは個別リポジトリで定義（パスフィルタ等はリポジトリ固有）
-- PR 作成時に自動 plan、`/apply` コメントで apply（OWNER のみ）、main マージ時に自動 apply
+- リポジトリ設定、RepositoryRuleset（ブランチ保護）、RepositoryFile（配布 workflow）、RepositoryEnvironment、Actions Secrets/Variables を Pulumi で管理
+- main 直プッシュ禁止、`gate` status check を PR マージの必須条件にする
+- リポジトリ定義は ESC の `repos.public` / `repos.private` に置き、`src/lib/config.ts` で valibot 検証した上で `src/repos/repository.ts` が展開
 
-## Lint / Format: terraform fmt
+### リポジトリスキーマのフラグ
 
-- `terraform fmt` をセットアップの pre-commit（Lefthook）に入れる
-- `stage_fixed: true` で自動修正をステージングする
+`RepoSpec` にブール値フラグを立てて、リポジトリごとに追加リソースを配置する:
+
+- `hasInfisical`: Production environment + Infisical 用 secrets/variables を配置（シークレット連携が必要なリポのみ）
+- `hasESC`: CD で Pulumi を走らせるリポに `PULUMI_ACCESS_TOKEN` を Environment Secret として配布（Pulumi Cloud への認証用）。`dotfiles` リポ自身の production env はこのフラグで管理する想定
+
+状態を boolean で持つことで、リポ追加時は YAML に1行足すだけで付随リソースが揃う。
+
+## Pulumi CI/CD
+
+- `.github/workflows/pulumi.yml` 単一ワークフローで preview（PR）と up（main push）を担う
+- 主要ステップ:
+  - `actions/checkout@v4`
+  - `oven-sh/setup-bun@v2` で Bun ランタイム導入
+  - `bun install --frozen-lockfile` で依存インストール
+  - `actions/cache@v4` で `~/.pulumi/plugins` をキャッシュ（`pulumi/bun.lock` ハッシュでキー生成）
+  - `pulumi/actions@v6` で `command: preview` / `command: up` を実行
+- 認証は `PULUMI_ACCESS_TOKEN` シークレット（Pulumi Cloud の個人 access token）のみ。Infisical/SOPS 経由のシークレット引き出しは不要（ESC が全てを解決）
+- PR 作成時に自動 preview → PR にコメント投稿（`comment-on-pr: true`）
+- main マージ時に `up`、`environment: production` ジョブゲートで手動承認（reviewers=oda251）を挟んでから apply
+
+## Lint / Format: oxlint + oxfmt + tsc
+
+- `oxlint --type-check --type-aware` で静的解析（`.oxlintrc.json` にルール）
+- `oxfmt` でフォーマット
+- `tsc --noEmit` は `tsconfig.json`（`noUncheckedIndexedAccess`, `strict`, `allowImportingTsExtensions`）で型チェックのみ
+- pre-commit（Lefthook）には AI agent configs 同期のみを登録（lint/typecheck は CD とエディタに寄せる）
 
 ## クラウド: Cloudflare 優先
 
