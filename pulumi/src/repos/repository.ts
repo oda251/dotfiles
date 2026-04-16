@@ -45,7 +45,7 @@ export const createRepository = (spec: RepoSpec): RepoBundle => {
     {},
   );
 
-  if (spec.visibility === "public") {
+  if (spec.visibility === "public" && !spec.isTemplate) {
     new github.RepositoryFile(
       `${spec.name}/gate`,
       {
