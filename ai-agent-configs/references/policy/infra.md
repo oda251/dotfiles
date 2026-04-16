@@ -13,5 +13,5 @@
 ## LLM の権限境界
 
 - **本番環境に影響する操作を LLM が実行することを禁止する**
-- 禁止例: `terraform apply`, `terraform import`, `terraform destroy`, デプロイ, DB マイグレーション, 本番データの変更
+- 禁止例: IaC の `apply` / `import` / `destroy`、デプロイ、DB マイグレーション、本番データの変更
 - コードの生成・plan の実行・差分の確認までは LLM が行ってよい。適用はユーザが行う

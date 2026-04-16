@@ -9,7 +9,6 @@ const RepoSpecSchema = v.object({
   isTemplate: v.optional(v.boolean(), false),
   template: v.optional(v.string()),
   hasESC: v.optional(v.boolean(), false),
-  hasTerraform: v.optional(v.boolean(), false),
   vulnerabilityAlerts: v.optional(v.boolean(), true),
 });
 

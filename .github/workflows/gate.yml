@@ -1,4 +1,4 @@
-# This file is managed by Terraform. Do not edit manually.
+# This file is managed by Pulumi. Do not edit manually.
 name: Gate
 
 on:

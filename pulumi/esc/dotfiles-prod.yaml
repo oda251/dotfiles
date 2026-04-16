@@ -26,7 +26,7 @@ values:
         dotfilesProd:
           stack: dotfiles/prod
 
-  # Repository definitions (replaces terraform/github/terragrunt.hcl + private-repos.enc.yaml)
+  # Repository definitions
   repos:
     public:
       - name: template
@@ -37,7 +37,6 @@ values:
         topics: [dotfiles, chezmoi]
         template: template
         hasESC: true
-        hasTerraform: false
       - name: garden
         template: template
         hasESC: true

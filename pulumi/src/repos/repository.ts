@@ -1,7 +1,7 @@
 import * as github from "@pulumi/github";
 import { Config, type RepoSpec } from "../lib/config.ts";
 import { createProductionEnvironment } from "./environment.ts";
-import { gateWorkflow, terraformWorkflow } from "./templates.ts";
+import { gateWorkflow } from "./templates.ts";
 
 export type RepoBundle = {
   spec: RepoSpec;
@@ -54,21 +54,6 @@ export const createRepository = (spec: RepoSpec): RepoBundle => {
         file: ".github/workflows/gate.yml",
         content: gateWorkflow,
         commitMessage: "chore: add gate workflow (managed by Pulumi)",
-        overwriteOnCreate: true,
-      },
-      { ignoreChanges: ["content"] },
-    );
-  }
-
-  if (spec.hasTerraform) {
-    new github.RepositoryFile(
-      `${spec.name}/terraform`,
-      {
-        repository: repo.name,
-        branch: "main",
-        file: ".github/workflows/terraform.yml",
-        content: terraformWorkflow,
-        commitMessage: "chore: update Terraform workflow (managed by Pulumi)",
         overwriteOnCreate: true,
       },
       { ignoreChanges: ["content"] },

@@ -1,4 +1,4 @@
 name: dotfiles
-description: Dotfiles infrastructure (GitHub repos, NewRelic dashboards) — replaces terraform/
+description: Dotfiles infrastructure (GitHub repos, NewRelic dashboards)
 runtime: bun
 main: index.ts

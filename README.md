@@ -42,7 +42,7 @@ concat|dot_config/opencode/AGENTS.md|ai-agent-configs/rules/base.md|ai-agent-con
 
 ### Mac/Linux のみ
 
-- node, npm, uv, bun, rust, terraform
+- node, npm, uv, bun, rust, pulumi
 - prettier, biome, java
 
 # プラットフォーム対応
