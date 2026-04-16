@@ -4,9 +4,9 @@ set -euo pipefail
 SETTINGS="$HOME/.claude/settings.json"
 CACHE="$HOME/.cache/otlp-credentials"
 
-# Fetch OTLP credentials from Infisical
-key=$(infisical secrets get NEWRELIC_LICENSE_KEY --plain --silent --env prod --path /generated 2>/dev/null) || exit 0
-endpoint=$(infisical secrets get NEWRELIC_OTLP_ENDPOINT --plain --silent --env prod --path /generated 2>/dev/null) || exit 0
+# Fetch OTLP credentials from Pulumi ESC
+key=$(esc env open oda251/dotfiles/prod environmentVariables.NEWRELIC_LICENSE_KEY 2>/dev/null | tr -d '"') || exit 0
+endpoint=$(esc env open oda251/dotfiles/prod environmentVariables.NEWRELIC_OTLP_ENDPOINT 2>/dev/null | tr -d '"') || exit 0
 
 [ -z "$key" ] && exit 0
 [ -z "$endpoint" ] && exit 0
