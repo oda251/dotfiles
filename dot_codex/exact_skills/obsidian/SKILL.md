@@ -43,6 +43,7 @@ obsidian tasks vault=obsidian-vault done        # 完了済み
 obsidian tasks vault=obsidian-vault format=json # 全タスク（JSON）
 ```
 
-## 注意
+## ルール
 
 - 作成・更新したファイルは `obsidian://open?vault=obsidian-vault&file={path-without-.md}` 形式の URI をユーザーに提示する
+- draft を作成したら、daily note に todo を追加する: `- [ ] draft: {topic} [[{path}]] ➕ {YYYY-MM-DD}`
