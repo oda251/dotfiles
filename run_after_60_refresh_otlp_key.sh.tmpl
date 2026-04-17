@@ -1,4 +1,4 @@
 #!/bin/bash
-{{- if lookPath "esc" }}
-bash "{{ .chezmoi.homeDir }}/.claude/hooks/refresh-otlp-key"
+{{ if lookPath "esc" -}}
+bash "{{ .chezmoi.homeDir }}/.claude/hooks/refresh-otlp-key" || true
 {{ end -}}
