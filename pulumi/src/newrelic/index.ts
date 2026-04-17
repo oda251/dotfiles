@@ -1,6 +1,6 @@
 import * as newrelic from "@pulumi/newrelic";
 import type * as pulumi from "@pulumi/pulumi";
-import { Config } from "../lib/config.ts";
+import { Config } from "@/lib/config.ts";
 import { claudeCodeOverview } from "./dashboards.ts";
 
 const ingestKey = new newrelic.ApiAccessKey("ingest", {

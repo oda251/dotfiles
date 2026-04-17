@@ -1,5 +1,5 @@
 import * as newrelic from "@pulumi/newrelic";
-import { Config } from "../lib/config.ts";
+import { Config } from "@/lib/config.ts";
 
 const { accountId } = Config.newrelic;
 

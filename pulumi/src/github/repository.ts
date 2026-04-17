@@ -1,5 +1,5 @@
 import * as github from "@pulumi/github";
-import { Config, type RepoSpec } from "../lib/config.ts";
+import { Config, type RepoSpec } from "@/lib/config.ts";
 import { gateWorkflow } from "./templates.ts";
 
 const REPO_ADMIN_ROLE_ID = 5;
@@ -85,7 +85,6 @@ export const createRepository = (spec: RepoSpec): RepoBundle => {
           },
         },
       },
-      {},
     );
   }
 
@@ -101,7 +100,6 @@ export const createRepository = (spec: RepoSpec): RepoBundle => {
           customBranchPolicies: false,
         },
       },
-      {},
     );
   }
 

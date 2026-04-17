@@ -41,4 +41,4 @@ export const Config = {
     accountId: cfgNewrelic.require("accountId"),
   },
   repos: parseRepos(cfgRepos.requireObject("all")),
-} as const;
+};
