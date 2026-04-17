@@ -1,7 +1,12 @@
 import * as github from "@pulumi/github";
 import { Config, type RepoSpec } from "../lib/config.ts";
-import { createProductionEnvironment } from "./environment.ts";
 import { gateWorkflow } from "./templates.ts";
+
+const REPO_ADMIN_ROLE_ID = 5;
+
+const ownerUserId = github
+  .getUserOutput({ username: Config.github.owner })
+  .id.apply(Number);
 
 export type RepoBundle = {
   spec: RepoSpec;
@@ -9,41 +14,32 @@ export type RepoBundle = {
 };
 
 export const createRepository = (spec: RepoSpec): RepoBundle => {
-  const repo = new github.Repository(
-    spec.name,
-    {
-      name: spec.name,
-      description: spec.description,
-      visibility: spec.visibility,
-      topics: spec.topics,
-      isTemplate: spec.isTemplate,
-      hasIssues: true,
-      hasProjects: false,
-      hasWiki: false,
-      vulnerabilityAlerts: spec.vulnerabilityAlerts,
-      deleteBranchOnMerge: true,
-      allowSquashMerge: true,
-      allowMergeCommit: false,
-      allowRebaseMerge: false,
-      ...(spec.visibility === "public"
-        ? {
-            securityAndAnalysis: {
-              secretScanning: { status: "enabled" },
-              secretScanningPushProtection: { status: "enabled" },
-            },
-          }
-        : {}),
-      ...(spec.template
-        ? {
-            template: {
-              owner: Config.github.owner,
-              repository: spec.template,
-            },
-          }
-        : {}),
-    },
-    {},
-  );
+  const repo = new github.Repository(spec.name, {
+    name: spec.name,
+    description: spec.description,
+    visibility: spec.visibility,
+    topics: spec.topics,
+    isTemplate: spec.isTemplate,
+    hasIssues: true,
+    hasProjects: false,
+    hasWiki: false,
+    vulnerabilityAlerts: spec.vulnerabilityAlerts,
+    deleteBranchOnMerge: true,
+    allowSquashMerge: true,
+    allowMergeCommit: false,
+    allowRebaseMerge: false,
+    ...(spec.visibility === "public"
+      ? {
+          securityAndAnalysis: {
+            secretScanning: { status: "enabled" },
+            secretScanningPushProtection: { status: "enabled" },
+          },
+        }
+      : {}),
+    ...(spec.template
+      ? { template: { owner: Config.github.owner, repository: spec.template } }
+      : {}),
+  });
 
   if (spec.visibility === "public" && !spec.isTemplate) {
     new github.RepositoryFile(
@@ -69,7 +65,11 @@ export const createRepository = (spec: RepoSpec): RepoBundle => {
         target: "branch",
         enforcement: "active",
         bypassActors: [
-          { actorId: 5, actorType: "RepositoryRole", bypassMode: "always" },
+          {
+            actorId: REPO_ADMIN_ROLE_ID,
+            actorType: "RepositoryRole",
+            bypassMode: "always",
+          },
         ],
         conditions: {
           refName: { includes: ["~DEFAULT_BRANCH"], excludes: [] },
@@ -90,7 +90,19 @@ export const createRepository = (spec: RepoSpec): RepoBundle => {
   }
 
   if (spec.hasESC) {
-    createProductionEnvironment(spec.name, repo);
+    new github.RepositoryEnvironment(
+      `${spec.name}/production`,
+      {
+        repository: repo.name,
+        environment: "production",
+        reviewers: [{ users: [ownerUserId] }],
+        deploymentBranchPolicy: {
+          protectedBranches: true,
+          customBranchPolicies: false,
+        },
+      },
+      {},
+    );
   }
 
   return { spec, repo };

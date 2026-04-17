@@ -1,5 +1,2 @@
 environment:
   - dotfiles/prod
-config:
-  github:owner: oda251
-  newrelic:region: US

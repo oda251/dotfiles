@@ -1,15 +1,8 @@
-# Pulumi ESC environment definition for dotfiles/prod.
-#
-# This file is the source-of-truth content for the ESC environment
-# `oda251/dotfiles/prod`. Apply via:
-#   esc env edit oda251/dotfiles/prod
-# Or initial create:
-#   esc env init oda251/dotfiles/prod < this-file
-#
-# Replace PLACEHOLDER values via `esc env set --secret` or the UI.
+# Pulumi ESC environment: oda251/dotfiles/prod
+# Apply: esc env edit oda251/dotfiles/prod -f this-file
+# Then re-inject secrets: esc env set ... --secret --string
 
 values:
-  # Encrypted secrets (set via `esc env set --secret`)
   secrets:
     githubToken:
       fn::secret: PLACEHOLDER_GITHUB_PAT
@@ -26,9 +19,8 @@ values:
         dotfilesProd:
           stack: dotfiles/prod
 
-  # Repository definitions
   repos:
-    public:
+    all:
       - name: template
         description: Template repository with CI boilerplate
         isTemplate: true
@@ -43,31 +35,24 @@ values:
       - name: onegai
         template: template
         hasESC: true
-    # Note: ESC env access already controls who can see these names.
-    # If extra secrecy is needed, mark each entry's `name` as fn::secret.
-    private:
       - name: career
-        description: ""
+        visibility: private
       - name: obsidian-vault
+        visibility: private
         vulnerabilityAlerts: false
 
-  # Pulumi config (consumed by `new pulumi.Config(...)` in TS code)
   pulumiConfig:
     github:owner: oda251
     github:token: ${secrets.githubToken}
     newrelic:apiKey: ${secrets.newrelicApiKey}
     newrelic:accountId: ${newrelic.accountId}
     newrelic:region: ${newrelic.region}
-    repos:public: ${repos.public}
-    repos:private: ${repos.private}
+    repos:all: ${repos.all}
 
-  # Env vars exported when wrapping commands with `esc run`
-  # (Pulumi providers auto-discover these — also useful for ad-hoc CLI work)
   environmentVariables:
     GITHUB_TOKEN: ${secrets.githubToken}
     NEW_RELIC_API_KEY: ${secrets.newrelicApiKey}
     NEW_RELIC_ACCOUNT_ID: ${newrelic.accountId}
     NEW_RELIC_REGION: ${newrelic.region}
-    # OTLP credentials sourced from stack outputs (consumers: chezmoi refresh-otlp-key script)
     NEWRELIC_LICENSE_KEY: ${stackRefs.dotfilesProd.newrelicLicenseKey}
     NEWRELIC_OTLP_ENDPOINT: ${stackRefs.dotfilesProd.otlpEndpoint}

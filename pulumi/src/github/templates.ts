@@ -1,6 +1,3 @@
-// Embedded workflow templates deployed to managed repos via github.RepositoryFile.
-// `lifecycle.ignoreChanges = ["content"]` keeps subsequent edits out of drift.
-
 export const gateWorkflow = `# This file is managed by Pulumi. Do not edit manually.
 name: Gate
 

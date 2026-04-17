@@ -16,11 +16,11 @@ export type RepoSpec = v.InferOutput<typeof RepoSpecSchema>;
 
 const ReposSchema = v.array(RepoSpecSchema);
 
-const parseRepos = (raw: unknown, source: string): RepoSpec[] => {
+const parseRepos = (raw: unknown): RepoSpec[] => {
   const result = v.safeParse(ReposSchema, raw);
   if (!result.success) {
     throw new Error(
-      `Invalid ${source} repos config: ${JSON.stringify(result.issues, null, 2)}`,
+      `Invalid repos config: ${JSON.stringify(result.issues, null, 2)}`,
     );
   }
   return result.output;
@@ -36,12 +36,9 @@ export const Config = {
     token: cfgGithub.requireSecret("token"),
   },
   newrelic: {
-    region: cfgNewrelic.get("region") ?? "US",
+    region: v.parse(v.picklist(["US", "EU"]), cfgNewrelic.get("region") ?? "US"),
     apiKey: cfgNewrelic.requireSecret("apiKey"),
     accountId: cfgNewrelic.require("accountId"),
   },
-  repos: {
-    public: parseRepos(cfgRepos.requireObject("public"), "public"),
-    private: parseRepos(cfgRepos.requireObject("private"), "private"),
-  },
+  repos: parseRepos(cfgRepos.requireObject("all")),
 } as const;
