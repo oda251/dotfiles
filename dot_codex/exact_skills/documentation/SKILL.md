@@ -5,15 +5,7 @@ description: 調査・検討・意思決定のドキュメントフォーマッ�
 
 ## 永続化先
 
-すべての書き込みは Obsidian CLI 経由で vault `obsidian-vault` に行う。ファイルシステムへの直書き（Write tool等）は禁止。
-
-```bash
-obsidian create vault=obsidian-vault path="{path}" content="{body}"
-obsidian append vault=obsidian-vault path="{path}" content="{additional}"
-obsidian property:set vault=obsidian-vault path="{path}" name="{key}" value="{val}" type=list
-```
-
-既存ドキュメントの更新は `obsidian append` / `obsidian property:set` を使う。全面書き換えの場合は `obsidian create ... overwrite` で上書きする。
+すべての書き込みは obsidian スキルの CLI 規約に従う。ファイルシステムへの直書き（Write tool等）は禁止。
 
 ## ドキュメントの種類
 
@@ -83,21 +75,17 @@ useEffect は第2引数に依存配列を受け取る。
 - バージョン固有の挙動にはバージョンを明記する
 - WebSearch のスニペットは出典にしない。WebFetch で本文を確認した上で引用する
 
-## ユーザー通知
-
-作成・更新したファイルごとに `obsidian://open?vault=obsidian-vault&file={path-without-.md}` 形式のURIを提示する。
-
 ## 管理ルール
 
-- 既存ドキュメントがあれば `obsidian read` で差分を確認し、`obsidian append` / `obsidian property:set` で更新する。大きく変わった場合は新規作成し旧doc に `depends-on` で繋ぐ
-- 500行を超えるファイルは分割する（`obsidian wordcount` や `outline` で確認）
+- 既存ドキュメントがあれば差分を確認し、追記または更新する。大きく変わった場合は新規作成し旧doc に `depends-on` で繋ぐ
+- 500行を超えるファイルは分割する
 - 図は mermaid で表現する
 - vault 外（ローカル `docs/` 等）への書き込みはしない
 
 ## セルフチェック
 
 ```
-□ obsidian CLI 経由で書き込んだか？ファイル直書きしていないか？
+□ obsidian スキルの CLI 規約に従って書き込んだか？ファイル直書きしていないか？
 □ パスは {org}/{prefix}/{date}-{topic}.md 規約に従っているか？
 □ 各情報にインラインで出典を付けたか？
 □ 出典なしの情報に（未検証）を付けたか？

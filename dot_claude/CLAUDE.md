@@ -1,5 +1,9 @@
 # 常時適用
 
+## Obsidian
+
+* タスク・ジャーナル・ドキュメント管理は Obsidian で行っている。関連作業を行う際は obsidian スキルを使うこと
+
 ## Documentation
 
 * ドキュメントを書く場面では documentation スキルに従うこと
