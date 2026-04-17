@@ -20,9 +20,6 @@ sync|ai-agent-configs/contexts|dot_claude/exact_contexts
 # Hooks (Claude Code only)
 sync|ai-agent-configs/hooks|dot_claude/exact_hooks
 
-# References (shared across skills)
-sync|ai-agent-configs/references|dot_claude/exact_references
-
 # Skills
 sync|ai-agent-configs/skills|dot_claude/exact_skills
 sync|ai-agent-configs/skills|dot_codex/exact_skills

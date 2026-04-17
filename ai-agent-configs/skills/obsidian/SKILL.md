@@ -30,7 +30,7 @@ obsidian daily:append vault=obsidian-vault content="- [ ] {content} ➕ $(date +
 
 ## ドキュメント作成
 
-ドキュメントの内容については `~/.claude/references/policy/documentation.md` に必ず従うこと。
+ドキュメントの内容については `~/.references/policy/documentation.md` に必ず従うこと。
 
 ### 種類
 
