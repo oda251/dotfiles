@@ -1,31 +1,20 @@
 ---
-name: obsidian
-description: Obsidian vault 操作
+name: journal
+description: "Obsidian ジャーナル・ドキュメント記録。調査、コーディング等あらゆるタスクで細かく記録を残す。例: タスクの区切り / 手戻りや想定外の事象 / 本筋からそれる思考 / 非自明な判断 / 再利用できそうな知見"
 inputs:
-  purpose: 何をしたいか（ジャーナル追記 / タスク追加 / タスク確認 / ドキュメント作成 など）
-  content: 書き込む内容（追記・追加時）
+  content: 書き込む内容
 ---
 
 対象 vault: `obsidian-vault`
 
-## CLI
-
-すべての vault 操作は `obsidian` コマンドで行う。ファイルシステムへの直書き（Write tool等）は禁止。
-
-### コマンド一覧
+すべての vault 操作は `obsidian` コマンドで行う。ファイルシステムへの直書き禁止。
 
 !`obsidian --help`
 
-## journal — daily note にジャーナル追記
+## ジャーナル追記
 
 ```bash
 obsidian daily:append vault=obsidian-vault content="- $(date +%H:%M) {content}"
-```
-
-## tasks — daily note にタスク追加
-
-```bash
-obsidian daily:append vault=obsidian-vault content="- [ ] {content} ➕ $(date +%Y-%m-%d)"
 ```
 
 ## ドキュメント作成
