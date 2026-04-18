@@ -19,6 +19,15 @@ elif command -v xsel &> /dev/null; then
     alias paste='xsel --clipboard --output'
     alias pwb="git rev-parse --abbrev-ref HEAD | xsel --clipboard --input"
 fi
+
+obsidian() {
+  local socket="${XDG_RUNTIME_DIR:-$HOME}/.obsidian-cli.sock"
+  if [[ -S "$socket" ]]; then
+    command obsidian "$@"
+  else
+    nohup /opt/Obsidian/obsidian "$@" >/dev/null 2>&1 & disown
+  fi
+}
 {{- end }}
 
 alias ls='eza --icons=auto'
