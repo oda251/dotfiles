@@ -9,6 +9,20 @@ if ! command -v systemctl &>/dev/null; then
   exit 0
 fi
 
+# Linger lets the user's systemd instance keep running without an active
+# shell (required on WSL so the timer fires in the background). Skips if
+# sudo is non-interactive; print a one-line warning so the user can run
+# `sudo loginctl enable-linger $USER` manually.
+if command -v loginctl &>/dev/null; then
+  if ! loginctl show-user "$USER" 2>/dev/null | grep -q "^Linger=yes"; then
+    if sudo -n true 2>/dev/null; then
+      sudo loginctl enable-linger "$USER"
+    else
+      echo "obsidian-vault-sync: linger not enabled — run 'sudo loginctl enable-linger $USER' manually so the timer fires without an open shell" >&2
+    fi
+  fi
+fi
+
 systemctl --user daemon-reload
 systemctl --user enable --now obsidian-vault-sync.timer
 {{- end }}

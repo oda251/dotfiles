@@ -1,9 +1,11 @@
 [Unit]
 Description=Sync obsidian-vault via git (pull, auto-commit, push)
-After=network-online.target
-Wants=network-online.target
+ConditionPathExists=%h/obsidian-vault/.git
 
 [Service]
 Type=oneshot
 Environment=PATH=%h/.local/share/mise/shims:%h/.local/bin:/usr/local/bin:/usr/bin:/bin
 ExecStart=%h/.local/bin/obsidian-vault-sync
+TimeoutStartSec=120
+Nice=10
+IOSchedulingClass=idle
