@@ -5,6 +5,7 @@
     "": {
       "name": "dotfiles-pulumi",
       "dependencies": {
+        "@pulumi/cloudflare": "^6.0.0",
         "@pulumi/github": "^6.12.0",
         "@pulumi/newrelic": "^5.64.0",
         "@pulumi/pulumi": "^3.180.0",
@@ -126,6 +127,8 @@
     "@protobufjs/pool": ["@protobufjs/pool@1.1.0", "", {}, "sha512-0kELaGSIDBKvcgS4zkjz1PeddatrjYcmMWOlAuAPwAeccUrPHdUqo/J6LiymHHEiJT5NrF1UVwxY14f+fy4WQw=="],
 
     "@protobufjs/utf8": ["@protobufjs/utf8@1.1.0", "", {}, "sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw=="],
+
+    "@pulumi/cloudflare": ["@pulumi/cloudflare@6.14.0", "", { "dependencies": { "@pulumi/pulumi": "^3.142.0" } }, "sha512-YKH9x7UsNg5iI92g9hVL893MzF8VS4W7nANFvr1TN99mQczPKNi0Z1abTBxyZ4DcB/JWi5zq+va7rJuKkuVr6Q=="],
 
     "@pulumi/github": ["@pulumi/github@6.12.2", "", { "dependencies": { "@pulumi/pulumi": "^3.142.0" } }, "sha512-FMCl41c6Q6M0C9HsN7abOF7Ldfn2iVNli8g1ryUP0UpY23hmybJq40+yq8OWHvj3+sXJ4lnc+vHyCaSikLwtig=="],
 

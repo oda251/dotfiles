@@ -29,6 +29,8 @@ const parseRepos = (raw: unknown): RepoSpec[] => {
 const cfgGithub = new pulumi.Config("github");
 const cfgNewrelic = new pulumi.Config("newrelic");
 const cfgRepos = new pulumi.Config("repos");
+const cfgCloudflare = new pulumi.Config("cloudflare");
+const cfgMemoBot = new pulumi.Config("memoBot");
 
 export const Config = {
   github: {
@@ -41,4 +43,15 @@ export const Config = {
     accountId: cfgNewrelic.require("accountId"),
   },
   repos: parseRepos(cfgRepos.requireObject("all")),
+  cloudflare: {
+    accountId: cfgCloudflare.require("accountId"),
+  },
+  memoBot: {
+    discordBotToken: cfgMemoBot.requireSecret("discordBotToken"),
+    githubPat: cfgMemoBot.requireSecret("githubPat"),
+    allowedDiscordUserId: cfgMemoBot.require("allowedDiscordUserId"),
+    githubOwner: cfgMemoBot.get("githubOwner") ?? "oda251",
+    githubRepo: cfgMemoBot.get("githubRepo") ?? "obsidian-vault",
+    dailyNoteDir: cfgMemoBot.get("dailyNoteDir") ?? "Daily",
+  },
 };

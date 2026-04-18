@@ -1,25 +1,24 @@
 {
-  "name": "dotfiles-pulumi",
+  "name": "memo-bot",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "preview": "pulumi preview",
+    "build": "bun build src/worker.ts --outdir dist --target browser --minify --format esm",
+    "dev": "wrangler dev",
     "lint": "oxlint --type-check --type-aware",
     "format": "oxfmt",
     "test": "bun test"
   },
   "dependencies": {
-    "@pulumi/pulumi": "^3.180.0",
-    "@pulumi/cloudflare": "^6.0.0",
-    "@pulumi/github": "^6.12.0",
-    "@pulumi/newrelic": "^5.64.0",
     "neverthrow": "^8.2.0",
     "valibot": "^1.0.0"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250101.0",
     "@types/bun": "latest",
-    "@types/node": "^22.0.0",
-    "typescript": "^5.6.0"
+    "oxlint": "^0.15.0",
+    "typescript": "^5.6.0",
+    "wrangler": "^3.90.0"
   }
 }

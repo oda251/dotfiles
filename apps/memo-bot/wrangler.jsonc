@@ -1,0 +1,21 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "memo-bot",
+  "main": "src/worker.ts",
+  "compatibility_date": "2025-01-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "triggers": {
+    "crons": ["*/15 * * * *"]
+  },
+  "kv_namespaces": [
+    {
+      "binding": "MEMO_BOT_KV",
+      "id": "__replaced_by_pulumi__"
+    }
+  ],
+  "vars": {
+    "GITHUB_OWNER": "oda251",
+    "GITHUB_REPO": "obsidian-vault",
+    "DAILY_NOTE_DIR": "Daily"
+  }
+}
