@@ -25,7 +25,7 @@ obsidian() {
   if [[ -S "$socket" ]]; then
     command obsidian "$@"
   else
-    nohup /opt/Obsidian/obsidian "$@" >/dev/null 2>&1 & disown
+    (nohup /opt/Obsidian/obsidian "$@" >/dev/null 2>&1 &)
   fi
 }
 {{- end }}
