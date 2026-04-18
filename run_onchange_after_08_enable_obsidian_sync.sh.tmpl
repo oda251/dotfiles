@@ -1,0 +1,14 @@
+{{- if eq .chezmoi.os "linux" -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+# service/timer hash: {{ include "dot_config/systemd/user/obsidian-vault-sync.service" | sha256sum }}{{ include "dot_config/systemd/user/obsidian-vault-sync.timer" | sha256sum }}
+
+if ! command -v systemctl &>/dev/null; then
+  echo "systemctl not available, skipping obsidian-vault-sync timer setup" >&2
+  exit 0
+fi
+
+systemctl --user daemon-reload
+systemctl --user enable --now obsidian-vault-sync.timer
+{{- end }}

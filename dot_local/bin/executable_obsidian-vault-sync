@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+VAULT="${OBSIDIAN_VAULT_DIR:-$HOME/obsidian-vault}"
+
+if [[ ! -d "$VAULT/.git" ]]; then
+  echo "obsidian-vault-sync: $VAULT is not a git repo, skipping" >&2
+  exit 0
+fi
+
+cd "$VAULT"
+
+if ! git pull --rebase --autostash 2>&1; then
+  echo "obsidian-vault-sync: pull failed (likely offline or conflict), will retry" >&2
+  exit 0
+fi
+
+if [[ -n "$(git status --porcelain)" ]]; then
+  git add -A
+  git commit -m "auto: $(date -Iseconds)"
+fi
+
+git push 2>&1 || echo "obsidian-vault-sync: push failed, will retry" >&2

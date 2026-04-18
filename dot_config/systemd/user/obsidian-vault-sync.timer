@@ -1,0 +1,11 @@
+[Unit]
+Description=Periodic sync of obsidian-vault
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+Persistent=true
+Unit=obsidian-vault-sync.service
+
+[Install]
+WantedBy=timers.target
