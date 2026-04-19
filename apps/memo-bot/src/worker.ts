@@ -81,7 +81,7 @@ const processChannel = async (
   const writes = await Promise.allSettled(
     Array.from(byDate, ([date, lines]) =>
       appendLines(
-        { ...base, path: `${env.DAILY_NOTE_DIR}/${date}.md` },
+        { ...base, path: `${env.INBOX_DIR}/${date}.md` },
         lines,
       ),
     ),

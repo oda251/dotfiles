@@ -20,7 +20,7 @@ const EnvSchema = v.object({
   ALLOWED_DISCORD_USER_ID: v.pipe(v.string(), v.regex(/^\d+$/)),
   GITHUB_OWNER: v.pipe(v.string(), v.minLength(1)),
   GITHUB_REPO: v.pipe(v.string(), v.minLength(1)),
-  DAILY_NOTE_DIR: v.pipe(v.string(), v.minLength(1)),
+  INBOX_DIR: v.pipe(v.string(), v.minLength(1)),
   MEMO_BOT_KV: KVNamespaceSchema,
 });
 

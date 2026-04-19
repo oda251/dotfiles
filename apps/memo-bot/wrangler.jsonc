@@ -16,6 +16,6 @@
   "vars": {
     "GITHUB_OWNER": "oda251",
     "GITHUB_REPO": "obsidian-vault",
-    "DAILY_NOTE_DIR": "Daily"
+    "INBOX_DIR": "Inbox"
   }
 }

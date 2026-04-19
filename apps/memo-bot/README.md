@@ -1,6 +1,6 @@
 # memo-bot
 
-Discord DM → Cloudflare Workers (cron) → GitHub (obsidian-vault daily note) のパイプライン。
+Discord DM → Cloudflare Workers (cron) → GitHub (obsidian-vault Inbox) のパイプライン。
 
 ## アーキテクチャ
 
@@ -10,7 +10,7 @@ iPhone Discord → Bot に DM
 Cloudflare Workers Cron (15min)
   ↓ Discord REST API で新着DM取得 (polling)
   ↓ GitHub API で vault に append
-obsidian-vault/Daily/YYYY-MM-DD.md (JST)
+obsidian-vault/Inbox/YYYY-MM-DD.md (JST)
 ```
 
 - Bot は常駐不要（DMはDiscord側に保管される）
@@ -73,7 +73,7 @@ pulumi up
 ## 動作確認
 
 1. Discord で Bot に DM を送る
-2. 最大15分で `obsidian-vault/Daily/YYYY-MM-DD.md` に `- HH:MM 💬 <内容>` が追加される（存在しない日付は新規作成）
+2. 最大15分で `obsidian-vault/Inbox/YYYY-MM-DD.md` に `- HH:MM 💬 <内容>` が追加される（Daily note から transclusion で表示される）
 3. PC で `cd ~/obsidian-vault && git pull` するとメモが反映される
 
 ## トラブルシューティング

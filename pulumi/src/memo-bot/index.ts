@@ -66,9 +66,9 @@ export const registerMemoBot = (): {
         text: Config.memoBot.githubRepo,
       },
       {
-        name: "DAILY_NOTE_DIR",
+        name: "INBOX_DIR",
         type: "plain_text",
-        text: Config.memoBot.dailyNoteDir,
+        text: Config.memoBot.inboxDir,
       },
     ],
   });

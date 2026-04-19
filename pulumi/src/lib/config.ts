@@ -52,6 +52,6 @@ export const Config = {
     allowedDiscordUserId: cfgMemoBot.require("allowedDiscordUserId"),
     githubOwner: cfgMemoBot.get("githubOwner") ?? "oda251",
     githubRepo: cfgMemoBot.get("githubRepo") ?? "obsidian-vault",
-    dailyNoteDir: cfgMemoBot.get("dailyNoteDir") ?? "Daily",
+    inboxDir: cfgMemoBot.get("inboxDir") ?? "Inbox",
   },
 };
