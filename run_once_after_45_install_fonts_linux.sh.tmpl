@@ -1,55 +1,46 @@
 #!/bin/bash
 
 # ==============================================================================
-# Linux用 PlemolJP フォントインストールスクリプト
+# Linux用 PlemolJP (Nerd Font) フォントインストールスクリプト
 # GitHubの最新リリースからフォントをダウンロードし、~/.local/share/fonts に配置します。
 # ==============================================================================
 
 {{ if eq .chezmoi.os "linux" -}}
 set -e
 
-FONT_NAME="PlemolJP"
-FONT_DIR="$HOME/.local/share/fonts/$FONT_NAME"
+FONT_DIR="$HOME/.local/share/fonts/PlemolJP_NF"
 
-# すでにフォントディレクトリが存在する場合はスキップ
-if [ ! -d "$FONT_DIR" ]; then
-    echo "🚀 $FONT_NAME フォントをインストールしています..."
-    
-    # GitHub APIから最新のタグ名を取得
-    LATEST_TAG=$(curl -s https://api.github.com/repos/yuru7/PlemolJP/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-    
-    if [ -z "$LATEST_TAG" ]; then
-        echo "⚠️ 最新バージョンの取得に失敗しました。インストールをスキップします。"
-        exit 0
-    fi
-
-    TEMP_DIR=$(mktemp -d)
-    DOWNLOAD_URL="https://github.com/yuru7/PlemolJP/releases/download/${LATEST_TAG}/PlemolJP_${LATEST_TAG}.zip"
-    
-    echo "📥 ダウンロード中: $LATEST_TAG"
-    if ! curl -L -f -o "$TEMP_DIR/plemol.zip" "$DOWNLOAD_URL"; then
-        echo "⚠️ ファイルのダウンロードに失敗しました。URLを確認してください: $DOWNLOAD_URL"
-        rm -rf "$TEMP_DIR"
-        exit 1
-    fi
-    
-    echo "📦 展開中..."
-    unzip -q "$TEMP_DIR/plemol.zip" -d "$TEMP_DIR"
-    
-    mkdir -p "$FONT_DIR"
-    # すべての .ttf ファイルを検索してコピー
-    find "$TEMP_DIR" -name "*.ttf" -exec cp {} "$FONT_DIR/" \;
-    
-    echo "🔄 フォントキャッシュを更新中..."
-    if command -v fc-cache &> /dev/null; then
-        fc-cache -f
-    else
-        echo "⚠️ fc-cache コマンドが見つかりません。fontconfigをインストールすることをお勧めします。"
-    fi
-    
-    rm -rf "$TEMP_DIR"
-    echo "✨ $FONT_NAME フォントのインストールが完了しました！"
-else
-    echo "✅ $FONT_NAME フォントはすでにインストールされています。"
+if [ -d "$FONT_DIR" ]; then
+    echo "✅ PlemolJP_NF はインストール済み"
+    exit 0
 fi
+
+LATEST_TAG=$(curl -s https://api.github.com/repos/yuru7/PlemolJP/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+
+if [ -z "$LATEST_TAG" ]; then
+    echo "⚠️ 最新バージョンの取得に失敗しました。インストールをスキップします。"
+    exit 0
+fi
+
+TEMP_DIR=$(mktemp -d)
+URL="https://github.com/yuru7/PlemolJP/releases/download/${LATEST_TAG}/PlemolJP_NF_${LATEST_TAG}.zip"
+
+echo "🚀 PlemolJP_NF ($LATEST_TAG) をインストール中"
+if ! curl -L -f -o "$TEMP_DIR/font.zip" "$URL"; then
+    echo "⚠️ ダウンロード失敗: $URL"
+    rm -rf "$TEMP_DIR"
+    exit 1
+fi
+
+unzip -q "$TEMP_DIR/font.zip" -d "$TEMP_DIR"
+mkdir -p "$FONT_DIR"
+find "$TEMP_DIR" -name "*.ttf" -exec cp {} "$FONT_DIR/" \;
+rm -rf "$TEMP_DIR"
+
+if command -v fc-cache &> /dev/null; then
+    fc-cache -f
+else
+    echo "⚠️ fc-cache が見つかりません"
+fi
+echo "✨ インストール完了"
 {{ end -}}
