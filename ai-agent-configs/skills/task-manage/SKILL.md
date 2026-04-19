@@ -12,6 +12,8 @@ inputs:
 
 !`obsidian --help`
 
+## 書き込み先
+
 ```bash
 obsidian append vault=obsidian-vault path="AgentLog/$(date +%Y-%m-%d).md" content="- [ ] {task}"
 ```
