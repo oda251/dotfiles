@@ -10,5 +10,4 @@ export const repositoryUrls = github.repositoryUrls;
 export const otlpEndpoint = newrelic.otlpEndpoint;
 export const newrelicLicenseKey = newrelic.newrelicLicenseKey;
 export const dashboardGuid = newrelic.dashboardGuid;
-export const memoBotWorkerName = memoBot.workerName;
-export const memoBotKvNamespaceId = memoBot.kvNamespaceId;
+export const memoBotSecretIds = memoBot.secretIds;

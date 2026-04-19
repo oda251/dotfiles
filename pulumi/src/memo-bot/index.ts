@@ -1,86 +1,57 @@
-import * as fs from "node:fs";
-import * as path from "node:path";
-import * as cloudflare from "@pulumi/cloudflare";
+import * as gcp from "@pulumi/gcp";
 import type * as pulumi from "@pulumi/pulumi";
 import { Config } from "@/lib/config.ts";
 
-const WORKER_BUNDLE = path.resolve(
-  import.meta.dirname,
-  "../../../apps/memo-bot/dist/worker.js",
-);
-
-const readBundle = (): string => {
-  if (!fs.existsSync(WORKER_BUNDLE)) {
-    throw new Error(
-      `Worker bundle not found at ${WORKER_BUNDLE}. Run 'bun run build' in apps/memo-bot/ first.`,
-    );
-  }
-  return fs.readFileSync(WORKER_BUNDLE, "utf-8");
-};
+interface SecretSpec {
+  id: string;
+  value: pulumi.Input<string>;
+}
 
 export const registerMemoBot = (): {
-  workerName: pulumi.Output<string>;
-  kvNamespaceId: pulumi.Output<string>;
+  secretIds: pulumi.Output<string>[];
 } => {
-  const accountId = Config.cloudflare.accountId;
+  const projectId = Config.gcp.projectId;
+  const userMember = `user:${Config.gcp.userEmail}`;
 
-  const kv = new cloudflare.WorkersKvNamespace("memo-bot-kv", {
-    accountId,
-    title: "memo-bot",
+  const smApi = new gcp.projects.Service("memo-bot-sm-api", {
+    project: projectId,
+    service: "secretmanager.googleapis.com",
+    disableOnDestroy: false,
   });
 
-  const script = new cloudflare.WorkersScript("memo-bot", {
-    accountId,
-    scriptName: "memo-bot",
-    content: readBundle(),
-    mainModule: "worker.js",
-    bindings: [
-      {
-        name: "MEMO_BOT_KV",
-        type: "kv_namespace",
-        namespaceId: kv.id,
-      },
-      {
-        name: "DISCORD_BOT_TOKEN",
-        type: "secret_text",
-        text: Config.memoBot.discordBotToken,
-      },
-      {
-        name: "GITHUB_PAT",
-        type: "secret_text",
-        text: Config.memoBot.githubPat,
-      },
-      {
-        name: "ALLOWED_DISCORD_USER_ID",
-        type: "plain_text",
-        text: Config.memoBot.allowedDiscordUserId,
-      },
-      {
-        name: "GITHUB_OWNER",
-        type: "plain_text",
-        text: Config.memoBot.githubOwner,
-      },
-      {
-        name: "GITHUB_REPO",
-        type: "plain_text",
-        text: Config.memoBot.githubRepo,
-      },
-      {
-        name: "INBOX_DIR",
-        type: "plain_text",
-        text: Config.memoBot.inboxDir,
-      },
-    ],
-  });
+  const specs: SecretSpec[] = [
+    { id: "memo-bot-discord-token", value: Config.memoBot.discordBotToken },
+    { id: "memo-bot-github-pat", value: Config.memoBot.githubPat },
+    { id: "memo-bot-allowed-user-id", value: Config.memoBot.allowedDiscordUserId },
+  ];
 
-  new cloudflare.WorkersCronTrigger("memo-bot-cron", {
-    accountId,
-    scriptName: script.scriptName,
-    schedules: [{ cron: "*/15 * * * *" }],
+  const secrets = specs.map(({ id, value }) => {
+    const secret = new gcp.secretmanager.Secret(
+      id,
+      {
+        project: projectId,
+        secretId: id,
+        replication: { auto: {} },
+      },
+      { dependsOn: [smApi] },
+    );
+
+    new gcp.secretmanager.SecretVersion(`${id}-version`, {
+      secret: secret.id,
+      secretData: value,
+    });
+
+    new gcp.secretmanager.SecretIamMember(`${id}-accessor`, {
+      project: projectId,
+      secretId: secret.secretId,
+      role: "roles/secretmanager.secretAccessor",
+      member: userMember,
+    });
+
+    return secret;
   });
 
   return {
-    workerName: script.scriptName,
-    kvNamespaceId: kv.id,
+    secretIds: secrets.map((s) => s.id),
   };
 };

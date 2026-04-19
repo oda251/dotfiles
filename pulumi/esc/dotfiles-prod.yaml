@@ -8,22 +8,23 @@ values:
       fn::secret: PLACEHOLDER_GITHUB_PAT
     newrelicApiKey:
       fn::secret: PLACEHOLDER_NEWRELIC_API_KEY
-    cloudflareApiToken:
-      fn::secret: PLACEHOLDER_CLOUDFLARE_API_TOKEN
     memoBotDiscordToken:
       fn::secret: PLACEHOLDER_DISCORD_BOT_TOKEN
     memoBotGithubPat:
       fn::secret: PLACEHOLDER_GITHUB_PAT_VAULT_WRITE
+    memoBotAllowedUserId:
+      fn::secret: PLACEHOLDER_DISCORD_USER_ID
 
   newrelic:
     accountId: "7893158"
     region: US
 
-  cloudflare:
-    accountId: PLACEHOLDER_CLOUDFLARE_ACCOUNT_ID
+  gcp:
+    projectId: dotfiles-oda251
+    userEmail: PLACEHOLDER_USER_EMAIL
 
   memoBot:
-    allowedDiscordUserId: PLACEHOLDER_DISCORD_USER_ID
+    gasScriptId: PLACEHOLDER_GAS_SCRIPT_ID
 
   stackRefs:
     fn::open::pulumi-stacks:
@@ -60,11 +61,11 @@ values:
     newrelic:accountId: ${newrelic.accountId}
     newrelic:region: ${newrelic.region}
     repos:all: ${repos.all}
-    cloudflare:accountId: ${cloudflare.accountId}
-    cloudflare:apiToken: ${secrets.cloudflareApiToken}
+    gcp:projectId: ${gcp.projectId}
+    gcp:userEmail: ${gcp.userEmail}
     memoBot:discordBotToken: ${secrets.memoBotDiscordToken}
     memoBot:githubPat: ${secrets.memoBotGithubPat}
-    memoBot:allowedDiscordUserId: ${memoBot.allowedDiscordUserId}
+    memoBot:allowedDiscordUserId: ${secrets.memoBotAllowedUserId}
 
   environmentVariables:
     GITHUB_TOKEN: ${secrets.githubToken}
@@ -73,5 +74,6 @@ values:
     NEW_RELIC_REGION: ${newrelic.region}
     NEWRELIC_LICENSE_KEY: ${stackRefs.dotfilesProd.newrelicLicenseKey}
     NEWRELIC_OTLP_ENDPOINT: ${stackRefs.dotfilesProd.otlpEndpoint}
-    CLOUDFLARE_API_TOKEN: ${secrets.cloudflareApiToken}
-    CLOUDFLARE_ACCOUNT_ID: ${cloudflare.accountId}
+    GOOGLE_PROJECT: ${gcp.projectId}
+    GCP_PROJECT_ID: ${gcp.projectId}
+    MEMO_BOT_GAS_SCRIPT_ID: ${memoBot.gasScriptId}
