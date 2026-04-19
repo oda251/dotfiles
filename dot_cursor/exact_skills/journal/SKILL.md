@@ -11,12 +11,6 @@ inputs:
 
 !`obsidian --help`
 
-## vault レイアウト
-
-- `AgentLog/YYYY-MM-DD.md` — **agent が書き込むログ**（このskillの出力先）
-- `Inbox/YYYY-MM-DD.md` — Discord memo-bot 等の外部入力（agent は読むだけ）
-- `Daily/YYYY-MM-DD.md` — ダッシュボード。AgentLog と Inbox を時系列マージして表示するだけ（agent は通常触らない）
-
 ## ジャーナル追記 vs ドキュメント作成
 
 | | ジャーナル追記 | ドキュメント作成 |

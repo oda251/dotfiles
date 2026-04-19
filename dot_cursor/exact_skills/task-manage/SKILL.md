@@ -14,8 +14,6 @@ inputs:
 
 ## 書き込み先
 
-タスクは `AgentLog/YYYY-MM-DD.md` に追記する。Daily note はダッシュボード専用で、Obsidian Tasks プラグインが AgentLog / Inbox 等から横断的に `- [ ]` を拾う。
-
 ```bash
 obsidian append vault=obsidian-vault path="AgentLog/$(date +%Y-%m-%d).md" content="- [ ] {task}"
 ```
