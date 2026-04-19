@@ -11,13 +11,19 @@ inputs:
 
 !`obsidian --help`
 
+## vault レイアウト
+
+- `AgentLog/YYYY-MM-DD.md` — **agent が書き込むログ**（このskillの出力先）
+- `Inbox/YYYY-MM-DD.md` — Discord memo-bot 等の外部入力（agent は読むだけ）
+- `Daily/YYYY-MM-DD.md` — ダッシュボード。AgentLog と Inbox を時系列マージして表示するだけ（agent は通常触らない）
+
 ## ジャーナル追記 vs ドキュメント作成
 
 | | ジャーナル追記 | ドキュメント作成 |
 |---|---|---|
 | いつ | コーディング・PR作成など成果物がある作業の記録。短い気づき・メモ | 調査・比較検討など、ドキュメント自体が成果物になる作業 |
 | 目安 | 200字以内に収まる | 200字を超える、または構造化が必要 |
-| 方法 | daily note に一行追記 | 独立ファイルとして作成 |
+| 方法 | AgentLog に一行追記 | 独立ファイルとして作成 |
 
 - ドキュメントを作成・更新した場合も、ジャーナルに一行残す（リンク付き）
 - 書き始めて膨らんだ場合はドキュメントに切り出し、ジャーナルからリンクする
@@ -25,7 +31,7 @@ inputs:
 ## ジャーナル追記
 
 ```bash
-obsidian daily:append vault=obsidian-vault content="- $(date +%H:%M) {content}"
+obsidian append vault=obsidian-vault path="AgentLog/$(date +%Y-%m-%d).md" content="- $(date +%H:%M) {content}"
 ```
 
 成果物（PR、issue、ドキュメント等）や根拠・参照文献がある場合は URI or wikilink を含める。
@@ -77,7 +83,7 @@ nested tag を活用する。ルートは以下から選ぶ。子要素は自由
 
 ### draft 作成時
 
-daily note に todo を追加する: `- [ ] draft: {title} [[{path}]] ➕ {YYYY-MM-DD}`
+AgentLog にタスクを追加する: `- [ ] draft: {title} [[{path}]] ➕ {YYYY-MM-DD}`
 
 ## ルール
 

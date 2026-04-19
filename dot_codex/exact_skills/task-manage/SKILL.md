@@ -12,6 +12,14 @@ inputs:
 
 !`obsidian --help`
 
+## 書き込み先
+
+タスクは `AgentLog/YYYY-MM-DD.md` に追記する。Daily note はダッシュボード専用で、Obsidian Tasks プラグインが AgentLog / Inbox 等から横断的に `- [ ]` を拾う。
+
+```bash
+obsidian append vault=obsidian-vault path="AgentLog/$(date +%Y-%m-%d).md" content="- [ ] {task}"
+```
+
 ## タスクフォーマット
 
 Obsidian Tasks プラグインを利用している。タスクは Markdown チェックボックスで管理し、以下の絵文字アノテーションが使える:
@@ -24,4 +32,4 @@ Obsidian Tasks プラグインを利用している。タスクは Markdown チ�
 
 タスク内容は第三者が読んでも何をすべきかわかる粒度で書く。関連リソースがあればインラインリンクを含める。
 
-例: `- [ ] [oda251/dotfiles#42](https://github.com/oda251/dotfiles/issues/42) Terraform CD の environment: production 欠落を修正する ➕ 2026-04-18 📅 2026-04-20`
+例: `- [ ] [oda251/dotfiles#42](https://github.com/oda251/dotfiles/issues/42) Terraform CD の environment: production 欠落を修正する ➕ 2026-04-19 📅 2026-04-20`
