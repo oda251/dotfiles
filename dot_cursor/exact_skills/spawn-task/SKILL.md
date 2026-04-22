@@ -1,7 +1,6 @@
 ---
 name: spawn-task
-description: 実装・ファイル変更を伴うタスク（新機能・バグ修正・リファクタ・issue 対応等）が渡された時に毎回候補として起動。別セッション（新 worktree + zellij 新タブ）で処理するかを confirm-before-run で都度ユーザに打診する。ユーザが「このタブで進める」「スキップ」を選んだら発動しない。純粋な質問・調査・閲覧のみのタスクは対象外。
-confirm-before-run: true
+description: 実装・ファイル変更を伴うタスク（新機能・バグ修正・リファクタ・issue 対応等）が渡された時に毎回候補として起動。**起動直後にユーザへ「別セッション化するか？」を 1 度だけ問う**のが責務で、yes なら新 worktree + zellij 新タブで claude を立ち上げ、no なら即 skill を抜けて現セッションで作業継続。ブランチ名や permission mode は skill 側で自動決定し、追加の確認はしない。純粋な質問・調査・閲覧のみのタスクは対象外。
 ---
 
 ## 目的
@@ -22,13 +21,11 @@ worktree/タブ管理は PATH 上の `workspace` コマンド（`~/.local/bin/wo
 
 ## フロー
 
-`confirm-before-run: true` により **skill 本体が走る前にユーザが yes/no を選ぶ**。yes でここから下が実行される想定。
-
-1. タスク情報収集
-2. ブランチ名/issue 引数の決定
-3. 細部確認（ブランチ名の妥当性 + permission mode）を `AskUserQuestion` で 1 回だけ
+1. **最初に** `AskUserQuestion` で「このタスクを別セッションで実行する？」を 1 回だけ聞く。no / スキップを選ばれたら即終了
+2. タスク情報収集（issue URL なら `gh issue view` で本文取得、それ以外は指示テキストを整理）
+3. ブランチ名を自動決定（issue→`feat/<num>-<slug>` は `workspace add` 任せ、自由テキストは skill 側で `feat/<slug>` 生成）
 4. `.task-prompt.md` を `/tmp/` に書き出す
-5. `setup-zellij.sh <branch-arg> <prompt-file> <mode>` を実行
+5. `setup-zellij.sh <branch-arg> <prompt-file> auto` を実行（permission mode は auto 固定）
 6. 完了報告して本セッション側は終了
 
 ---
@@ -49,14 +46,16 @@ skill 側では `gh issue view --json number,title,body,labels,url` で **本文
 
 ユーザの指示テキストからブランチ名を `feat/<slug>` 形式で生成して `workspace add <slug>` に渡す。slug は英語 3〜6単語、kebab-case。
 
-## 2. 細部確認（`AskUserQuestion` 1 回）
+## 2. 起動可否確認（`AskUserQuestion` 1 回・必須）
 
-skill 起動の可否は `confirm-before-run` で既に済んでいる。ここでは **実行ディテールのみ** を確認する：
+skill が発動した直後、**何よりも先に**以下を聞く：
 
-* 生成したブランチ名で問題ないか（編集可能なよう候補提示）
-* permission mode（デフォルト `auto`、他 `plan` / `acceptEdits` / `default`）
+* 「このタスクを別セッション（新 worktree + 新 zellij タブ）で実行する？」
+* 選択肢：`はい（別セッション）` / `このタブで続ける` / `スキップ（何もしない）`
 
-ここで追加の「本当に spawn する？」を二重に聞かない。ユーザが編集したいのは枝葉の値だけ。
+`このタブで続ける` または `スキップ` を選ばれたら **即 skill を抜ける**。本セッションの claude が通常通り作業を再開する。
+
+ブランチ名・permission mode は ここで一緒に聞かない。自動決定で進める。
 
 ## 3. `.task-prompt.md` の中身
 
@@ -135,9 +134,10 @@ skill 内から直接使う箇所だけ：
 ```
 □ zellij セッション内か？
 □ 実装/ファイル変更を伴うタスクか？（調査・閲覧のみなら skill 自体を呼ばない）
+□ 最初に AskUserQuestion で別セッション化の可否を 1 回聞いたか？
+□ no/スキップを選ばれたら即終了したか？
+□ ブランチ名・permission mode を追加で聞いていないか？（自動決定・auto 固定）
 □ タスクソース（issue / テキスト）を正しく識別したか？
 □ issue の場合 issue 本文・ラベルを .task-prompt.md に含めたか？
-□ ブランチ名と permission mode を AskUserQuestion で確認したか？
-□ permission mode の既定は auto か？
 □ 本セッション側で完了報告したか？
 ```
