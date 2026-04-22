@@ -29,8 +29,6 @@ const parseRepos = (raw: unknown): RepoSpec[] => {
 const cfgGithub = new pulumi.Config("github");
 const cfgNewrelic = new pulumi.Config("newrelic");
 const cfgRepos = new pulumi.Config("repos");
-const cfgGcp = new pulumi.Config("gcp");
-const cfgMemoBot = new pulumi.Config("memoBot");
 
 export const Config = {
   github: {
@@ -43,13 +41,4 @@ export const Config = {
     accountId: cfgNewrelic.require("accountId"),
   },
   repos: parseRepos(cfgRepos.requireObject("all")),
-  gcp: {
-    projectId: cfgGcp.require("projectId"),
-    userEmail: cfgGcp.require("userEmail"),
-  },
-  memoBot: {
-    discordBotToken: cfgMemoBot.requireSecret("discordBotToken"),
-    githubPat: cfgMemoBot.requireSecret("githubPat"),
-    allowedDiscordUserId: cfgMemoBot.requireSecret("allowedDiscordUserId"),
-  },
 };

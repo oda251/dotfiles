@@ -8,23 +8,10 @@ values:
       fn::secret: PLACEHOLDER_GITHUB_PAT
     newrelicApiKey:
       fn::secret: PLACEHOLDER_NEWRELIC_API_KEY
-    memoBotDiscordToken:
-      fn::secret: PLACEHOLDER_DISCORD_BOT_TOKEN
-    memoBotGithubPat:
-      fn::secret: PLACEHOLDER_GITHUB_PAT_VAULT_WRITE
-    memoBotAllowedUserId:
-      fn::secret: PLACEHOLDER_DISCORD_USER_ID
 
   newrelic:
     accountId: "7893158"
     region: US
-
-  gcp:
-    projectId: dotfiles-oda251
-    userEmail: PLACEHOLDER_USER_EMAIL
-
-  memoBot:
-    gasScriptId: PLACEHOLDER_GAS_SCRIPT_ID
 
   stackRefs:
     fn::open::pulumi-stacks:
@@ -53,6 +40,8 @@ values:
       - name: obsidian-vault
         visibility: private
         vulnerabilityAlerts: false
+      - name: reactive-sound
+        template: template
 
   pulumiConfig:
     github:owner: oda251
@@ -61,11 +50,6 @@ values:
     newrelic:accountId: ${newrelic.accountId}
     newrelic:region: ${newrelic.region}
     repos:all: ${repos.all}
-    gcp:projectId: ${gcp.projectId}
-    gcp:userEmail: ${gcp.userEmail}
-    memoBot:discordBotToken: ${secrets.memoBotDiscordToken}
-    memoBot:githubPat: ${secrets.memoBotGithubPat}
-    memoBot:allowedDiscordUserId: ${secrets.memoBotAllowedUserId}
 
   environmentVariables:
     GITHUB_TOKEN: ${secrets.githubToken}
@@ -74,6 +58,3 @@ values:
     NEW_RELIC_REGION: ${newrelic.region}
     NEWRELIC_LICENSE_KEY: ${stackRefs.dotfilesProd.newrelicLicenseKey}
     NEWRELIC_OTLP_ENDPOINT: ${stackRefs.dotfilesProd.otlpEndpoint}
-    GOOGLE_PROJECT: ${gcp.projectId}
-    GCP_PROJECT_ID: ${gcp.projectId}
-    MEMO_BOT_GAS_SCRIPT_ID: ${memoBot.gasScriptId}
