@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# Notify on Claude Code idle / waiting events.
+# Fires for Notification (permission prompts, idle, etc.) and Stop (turn end).
+set -euo pipefail
+
+input="$(cat)"
+
+event=""
+message=""
+title=""
+cwd=""
+notification_type=""
+if command -v jq >/dev/null 2>&1; then
+  event=$(printf '%s' "$input"        | jq -r '.hook_event_name    // empty')
+  message=$(printf '%s' "$input"      | jq -r '.message            // empty')
+  title=$(printf '%s' "$input"        | jq -r '.title              // empty')
+  cwd=$(printf '%s' "$input"          | jq -r '.cwd                // empty')
+  notification_type=$(printf '%s' "$input" | jq -r '.notification_type // empty')
+fi
+
+scope=""
+if [[ -n "$cwd" ]]; then
+  scope="$(basename "$cwd")"
+fi
+if [[ -n "${ZELLIJ_SESSION_NAME:-}" ]]; then
+  tab=$(zellij action query-tab-names 2>/dev/null | head -1 || true)
+  [[ -n "$tab" ]] && scope="${scope:+$scope · }$tab"
+fi
+
+case "$event" in
+  Notification)
+    heading="${title:-Claude Code}"
+    body="${message:-waiting}"
+    sound="Ping"
+    ;;
+  Stop)
+    heading="Claude Code"
+    body="turn finished"
+    sound=""
+    ;;
+  *)
+    heading="Claude Code"
+    body="${message:-$event}"
+    sound=""
+    ;;
+esac
+
+[[ -n "$scope" ]] && body="[$scope] $body"
+
+if [[ "$(uname)" == "Darwin" ]]; then
+  if [[ -n "$sound" ]]; then
+    /usr/bin/osascript \
+      -e 'on run argv
+display notification item 1 of argv with title item 2 of argv sound name item 3 of argv
+end run' \
+      "$body" "$heading" "$sound" >/dev/null 2>&1 || true
+  else
+    /usr/bin/osascript \
+      -e 'on run argv
+display notification item 1 of argv with title item 2 of argv
+end run' \
+      "$body" "$heading" >/dev/null 2>&1 || true
+  fi
+fi
+
+exit 0
