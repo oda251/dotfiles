@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
-# wt — worktree manager
+# workspace — worktree manager
 #   Layout: $HOME/.worktree/<repo>/<branch>/
 #     e.g. ~/.worktree/chezmoi/feat/123-fix-css/
 #
 # Subcommands:
-#   wt add   <branch | issue-number | issue-url> [--base <ref>]
-#   wt ls    [--repo <name>]
-#   wt rm    [--force] [<repo>/<branch> | <path>]
-#   (other)  git worktree <args...>  # passthrough
+#   workspace add   <branch | issue-number | issue-url> [--base <ref>]
+#   workspace ls    [--repo <name>]
+#   workspace rm    [--force] [<repo>/<branch> | <path>]
+#   (other)         git worktree <args...>  # passthrough
 #
 # ls/rm walk $HOME/.worktree cross-repo, not cwd's repo.
 
 set -euo pipefail
 
-WT_ROOT="${WT_ROOT:-$HOME/.worktree}"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$HOME/.worktree}"
 
-die() { echo "wt: $*" >&2; exit 1; }
+die() { echo "workspace: $*" >&2; exit 1; }
 
 require_git_repo() {
   git rev-parse --show-toplevel >/dev/null 2>&1 \
@@ -92,7 +92,7 @@ open_in_tab() {
   local tab_name="$2"
 
   if ! command -v zellij >/dev/null 2>&1 || [[ -z "${ZELLIJ:-}" ]]; then
-    echo "wt: zellij not active; cd manually: $worktree_dir"
+    echo "workspace: zellij not active; cd manually: $worktree_dir"
     return 0
   fi
 
@@ -118,14 +118,14 @@ cmd_add() {
       *)  arg="$1"; shift;;
     esac
   done
-  [[ -n "$arg" ]] || die "usage: wt add <branch|issue-number|issue-url> [--base <ref>]"
+  [[ -n "$arg" ]] || die "usage: workspace add <branch|issue-number|issue-url> [--base <ref>]"
 
   require_git_repo
   local repo_root repo branch worktree_dir
   repo_root="$(git rev-parse --show-toplevel)"
   repo="$(repo_name_of "$repo_root")"
   branch="$(resolve_branch "$arg")"
-  worktree_dir="$WT_ROOT/$repo/$branch"
+  worktree_dir="$WORKSPACE_ROOT/$repo/$branch"
 
   # Reuse existing worktree if the branch already has one anywhere.
   local existing
@@ -139,9 +139,9 @@ cmd_add() {
 
   if [[ -n "$existing" ]]; then
     worktree_dir="$existing"
-    echo "wt: reusing existing worktree at $worktree_dir"
+    echo "workspace: reusing existing worktree at $worktree_dir"
   elif [[ -d "$worktree_dir" ]]; then
-    echo "wt: worktree dir already exists at $worktree_dir (assuming valid)"
+    echo "workspace: worktree dir already exists at $worktree_dir (assuming valid)"
   else
     mkdir -p "$(dirname "$worktree_dir")"
     if git -C "$repo_root" show-ref --verify --quiet "refs/heads/$branch"; then
@@ -157,17 +157,17 @@ cmd_add() {
 }
 
 # Emit tab-separated rows: <repo>\t<branch>\t<path>
-_wt_walk() {
-  [[ -d "$WT_ROOT" ]] || return 0
+_ws_walk() {
+  [[ -d "$WORKSPACE_ROOT" ]] || return 0
   local gitfile wt_dir rel repo branch
   while IFS= read -r -d '' gitfile; do
     wt_dir="$(dirname "$gitfile")"
-    rel="${wt_dir#"$WT_ROOT/"}"
+    rel="${wt_dir#"$WORKSPACE_ROOT/"}"
     repo="${rel%%/*}"
     branch="${rel#*/}"
     [[ "$repo" == "$rel" ]] && continue  # top-level only, no branch
     printf '%s\t%s\t%s\0' "$repo" "$branch" "$wt_dir"
-  done < <(find "$WT_ROOT" -mindepth 2 -type f -name ".git" -print0 2>/dev/null)
+  done < <(find "$WORKSPACE_ROOT" -mindepth 2 -type f -name ".git" -print0 2>/dev/null)
 }
 
 cmd_ls() {
@@ -187,8 +187,8 @@ cmd_ls() {
     [[ -n "$filter_repo" && "$repo" != "$filter_repo" ]] && continue
     printf '%s/%s\t%s\n' "$repo" "$branch" "$path"
     found=1
-  done < <(_wt_walk)
-  [[ "$found" -eq 1 ]] || echo "wt: no worktrees under $WT_ROOT" >&2
+  done < <(_ws_walk)
+  [[ "$found" -eq 1 ]] || echo "workspace: no worktrees under $WORKSPACE_ROOT" >&2
 }
 
 cmd_rm() {
@@ -205,21 +205,21 @@ cmd_rm() {
   local worktree_dir=""
   if [[ -z "$target" ]]; then
     local rows
-    rows="$(_wt_walk | awk 'BEGIN{RS="\0"; FS="\t"} NF==3 {printf "%s/%s\t%s\n", $1, $2, $3}')"
-    [[ -n "$rows" ]] || die "no worktrees under $WT_ROOT"
+    rows="$(_ws_walk | awk 'BEGIN{RS="\0"; FS="\t"} NF==3 {printf "%s/%s\t%s\n", $1, $2, $3}')"
+    [[ -n "$rows" ]] || die "no worktrees under $WORKSPACE_ROOT"
     if command -v fzf >/dev/null 2>&1; then
       local picked
-      picked="$(printf '%s\n' "$rows" | fzf --delimiter=$'\t' --with-nth=1 --prompt='WT RM> ' --height=40% --reverse)" \
+      picked="$(printf '%s\n' "$rows" | fzf --delimiter=$'\t' --with-nth=1 --prompt='WORKSPACE RM> ' --height=40% --reverse)" \
         || return 1
       worktree_dir="${picked##*$'\t'}"
     else
-      die "fzf not found; pass a target: wt rm <repo>/<branch> | <path>"
+      die "fzf not found; pass a target: workspace rm <repo>/<branch> | <path>"
     fi
   elif [[ -d "$target" ]]; then
     worktree_dir="$(cd "$target" && pwd -P)"
   else
     # <repo>/<branch> form
-    worktree_dir="$WT_ROOT/$target"
+    worktree_dir="$WORKSPACE_ROOT/$target"
     [[ -d "$worktree_dir" ]] || die "worktree not found: $target"
   fi
 
@@ -229,10 +229,10 @@ cmd_rm() {
 
   git -C "$main_repo" worktree remove ${force_opts[@]+"${force_opts[@]}"} "$worktree_dir"
 
-  # Clean empty parent dir under WT_ROOT.
+  # Clean empty parent dir under WORKSPACE_ROOT.
   local parent
   parent="$(dirname "$worktree_dir")"
-  while [[ "$parent" != "$WT_ROOT" && "$parent" != "/" && -d "$parent" ]]; do
+  while [[ "$parent" != "$WORKSPACE_ROOT" && "$parent" != "/" && -d "$parent" ]]; do
     rmdir "$parent" 2>/dev/null || break
     parent="$(dirname "$parent")"
   done
@@ -240,13 +240,13 @@ cmd_rm() {
 
 usage() {
   cat <<'EOF'
-wt — worktree manager (layout: $HOME/.worktree/<repo>/<branch>/)
+workspace — worktree manager (layout: $HOME/.worktree/<repo>/<branch>/)
 
 Usage:
-  wt add <branch | issue-number | issue-url> [--base <ref>]
-  wt ls  [--repo <name>]
-  wt rm  [--force] [<repo>/<branch> | <path>]
-  wt <other>    # passthrough to `git worktree <other>`
+  workspace add <branch | issue-number | issue-url> [--base <ref>]
+  workspace ls  [--repo <name>]
+  workspace rm  [--force] [<repo>/<branch> | <path>]
+  workspace <other>    # passthrough to `git worktree <other>`
 EOF
 }
 
