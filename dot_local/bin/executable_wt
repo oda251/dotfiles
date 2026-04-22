@@ -1,0 +1,265 @@
+#!/usr/bin/env bash
+# wt — worktree manager
+#   Layout: $HOME/.worktree/<repo>/<branch>/
+#     e.g. ~/.worktree/chezmoi/feat/123-fix-css/
+#
+# Subcommands:
+#   wt add   <branch | issue-number | issue-url> [--base <ref>]
+#   wt ls    [--repo <name>]
+#   wt rm    [--force] [<repo>/<branch> | <path>]
+#   (other)  git worktree <args...>  # passthrough
+#
+# ls/rm walk $HOME/.worktree cross-repo, not cwd's repo.
+
+set -euo pipefail
+
+WT_ROOT="${WT_ROOT:-$HOME/.worktree}"
+
+die() { echo "wt: $*" >&2; exit 1; }
+
+require_git_repo() {
+  git rev-parse --show-toplevel >/dev/null 2>&1 \
+    || die "not inside a git repository"
+}
+
+repo_name_of() {
+  local root="$1"
+  local name
+  name="$(basename "$root")"
+  printf '%s' "${name%%@*}"
+}
+
+# Resolve the branch argument. If it looks like an issue, fetch title and
+# build feat/<num>-<slug>. Otherwise return as-is.
+resolve_branch() {
+  local arg="$1"
+  if [[ "$arg" =~ ^[0-9]+$ || "$arg" =~ ^https?:// ]]; then
+    command -v gh >/dev/null 2>&1 || die "gh CLI required to resolve issue"
+    command -v jq >/dev/null 2>&1 || die "jq required to resolve issue"
+    local json number title slug
+    json="$(gh issue view "$arg" --json number,title 2>/dev/null)" \
+      || die "failed to fetch issue '$arg'"
+    number="$(printf '%s' "$json" | jq -r '.number')"
+    title="$(printf '%s' "$json" | jq -r '.title')"
+    slug="$(printf '%s' "$title" \
+      | tr '[:upper:]' '[:lower:]' \
+      | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//')"
+    if [[ -n "$slug" ]]; then
+      printf 'feat/%s-%s' "$number" "$slug"
+    else
+      printf 'feat/%s' "$number"
+    fi
+    return 0
+  fi
+  printf '%s' "$arg"
+}
+
+main_branch_of() {
+  local root="$1"
+  local main
+  main="$(git -C "$root" symbolic-ref refs/remotes/origin/HEAD 2>/dev/null \
+    | sed 's|refs/remotes/origin/||')"
+  if [[ -z "$main" ]]; then
+    local cand
+    for cand in main master; do
+      if git -C "$root" show-ref --verify --quiet "refs/heads/$cand"; then
+        main="$cand"; break
+      fi
+    done
+  fi
+  [[ -n "$main" ]] || die "could not determine main branch"
+  printf '%s' "$main"
+}
+
+# Given a worktree dir, return the path of its containing main repo by
+# parsing the `.git` file (which points to <main>/.git/worktrees/<name>).
+main_repo_from_worktree() {
+  local wt="$1"
+  local gitfile="$wt/.git"
+  [[ -f "$gitfile" ]] || return 1
+  local gitdir
+  gitdir="$(sed -n 's|^gitdir: ||p' "$gitfile")"
+  [[ -n "$gitdir" ]] || return 1
+  # gitdir = /path/to/main/.git/worktrees/<name>
+  # main repo root = dirname x3
+  local main_git
+  main_git="$(dirname "$(dirname "$gitdir")")"  # .../.git
+  dirname "$main_git"
+}
+
+open_in_tab() {
+  local worktree_dir="$1"
+  local tab_name="$2"
+
+  if ! command -v zellij >/dev/null 2>&1 || [[ -z "${ZELLIJ:-}" ]]; then
+    echo "wt: zellij not active; cd manually: $worktree_dir"
+    return 0
+  fi
+
+  local os
+  os="$(uname)"
+  if [[ "$os" == "Darwin" ]]; then
+    # zellij's --cwd is unreliable on macOS. Send cd via write-chars instead.
+    zellij action new-tab --name "$tab_name"
+    zellij action write-chars " builtin cd -- $(printf '%q' "$worktree_dir") && clear"
+    zellij action write 13  # Enter
+  else
+    zellij action new-tab --name "$tab_name" --cwd "$worktree_dir"
+  fi
+}
+
+cmd_add() {
+  local arg="" base=""
+  while (( $# )); do
+    case "$1" in
+      --base) base="$2"; shift 2;;
+      --) shift; break;;
+      -*) die "unknown option: $1";;
+      *)  arg="$1"; shift;;
+    esac
+  done
+  [[ -n "$arg" ]] || die "usage: wt add <branch|issue-number|issue-url> [--base <ref>]"
+
+  require_git_repo
+  local repo_root repo branch worktree_dir
+  repo_root="$(git rev-parse --show-toplevel)"
+  repo="$(repo_name_of "$repo_root")"
+  branch="$(resolve_branch "$arg")"
+  worktree_dir="$WT_ROOT/$repo/$branch"
+
+  # Reuse existing worktree if the branch already has one anywhere.
+  local existing
+  existing="$(
+    git -C "$repo_root" worktree list --porcelain \
+      | awk -v b="refs/heads/$branch" '
+          $1 == "worktree" { p = $2 }
+          $1 == "branch" && $2 == b { print p; exit }
+        '
+  )"
+
+  if [[ -n "$existing" ]]; then
+    worktree_dir="$existing"
+    echo "wt: reusing existing worktree at $worktree_dir"
+  elif [[ -d "$worktree_dir" ]]; then
+    echo "wt: worktree dir already exists at $worktree_dir (assuming valid)"
+  else
+    mkdir -p "$(dirname "$worktree_dir")"
+    if git -C "$repo_root" show-ref --verify --quiet "refs/heads/$branch"; then
+      git -C "$repo_root" worktree add "$worktree_dir" "$branch"
+    else
+      local base_ref="${base:-$(main_branch_of "$repo_root")}"
+      git -C "$repo_root" worktree add -b "$branch" "$worktree_dir" "$base_ref"
+    fi
+  fi
+
+  open_in_tab "$worktree_dir" "$branch"
+  printf '%s\n' "$worktree_dir"  # last line = path (consumers can capture)
+}
+
+# Emit tab-separated rows: <repo>\t<branch>\t<path>
+_wt_walk() {
+  [[ -d "$WT_ROOT" ]] || return 0
+  local gitfile wt_dir rel repo branch
+  while IFS= read -r -d '' gitfile; do
+    wt_dir="$(dirname "$gitfile")"
+    rel="${wt_dir#"$WT_ROOT/"}"
+    repo="${rel%%/*}"
+    branch="${rel#*/}"
+    [[ "$repo" == "$rel" ]] && continue  # top-level only, no branch
+    printf '%s\t%s\t%s\0' "$repo" "$branch" "$wt_dir"
+  done < <(find "$WT_ROOT" -mindepth 2 -type f -name ".git" -print0 2>/dev/null)
+}
+
+cmd_ls() {
+  local filter_repo=""
+  while (( $# )); do
+    case "$1" in
+      --repo) filter_repo="$2"; shift 2;;
+      --) shift; break;;
+      -*) die "unknown option: $1";;
+      *) die "unknown argument: $1";;
+    esac
+  done
+
+  local found=0
+  local repo branch path
+  while IFS=$'\t' read -r -d '' repo branch path; do
+    [[ -n "$filter_repo" && "$repo" != "$filter_repo" ]] && continue
+    printf '%s/%s\t%s\n' "$repo" "$branch" "$path"
+    found=1
+  done < <(_wt_walk)
+  [[ "$found" -eq 1 ]] || echo "wt: no worktrees under $WT_ROOT" >&2
+}
+
+cmd_rm() {
+  local force_opts=() target=""
+  while (( $# )); do
+    case "$1" in
+      --force|-f) force_opts+=("--force"); shift;;
+      --) shift; break;;
+      -*) force_opts+=("$1"); shift;;
+      *) target="$1"; shift;;
+    esac
+  done
+
+  local worktree_dir=""
+  if [[ -z "$target" ]]; then
+    local rows
+    rows="$(_wt_walk | awk 'BEGIN{RS="\0"; FS="\t"} NF==3 {printf "%s/%s\t%s\n", $1, $2, $3}')"
+    [[ -n "$rows" ]] || die "no worktrees under $WT_ROOT"
+    if command -v fzf >/dev/null 2>&1; then
+      local picked
+      picked="$(printf '%s\n' "$rows" | fzf --delimiter=$'\t' --with-nth=1 --prompt='WT RM> ' --height=40% --reverse)" \
+        || return 1
+      worktree_dir="${picked##*$'\t'}"
+    else
+      die "fzf not found; pass a target: wt rm <repo>/<branch> | <path>"
+    fi
+  elif [[ -d "$target" ]]; then
+    worktree_dir="$(cd "$target" && pwd -P)"
+  else
+    # <repo>/<branch> form
+    worktree_dir="$WT_ROOT/$target"
+    [[ -d "$worktree_dir" ]] || die "worktree not found: $target"
+  fi
+
+  local main_repo
+  main_repo="$(main_repo_from_worktree "$worktree_dir")" \
+    || die "could not resolve main repo for $worktree_dir"
+
+  git -C "$main_repo" worktree remove ${force_opts[@]+"${force_opts[@]}"} "$worktree_dir"
+
+  # Clean empty parent dir under WT_ROOT.
+  local parent
+  parent="$(dirname "$worktree_dir")"
+  while [[ "$parent" != "$WT_ROOT" && "$parent" != "/" && -d "$parent" ]]; do
+    rmdir "$parent" 2>/dev/null || break
+    parent="$(dirname "$parent")"
+  done
+}
+
+usage() {
+  cat <<'EOF'
+wt — worktree manager (layout: $HOME/.worktree/<repo>/<branch>/)
+
+Usage:
+  wt add <branch | issue-number | issue-url> [--base <ref>]
+  wt ls  [--repo <name>]
+  wt rm  [--force] [<repo>/<branch> | <path>]
+  wt <other>    # passthrough to `git worktree <other>`
+EOF
+}
+
+main() {
+  [[ $# -gt 0 ]] || { usage; exit 1; }
+  local sub="$1"; shift
+  case "$sub" in
+    add) cmd_add "$@";;
+    ls)  cmd_ls  "$@";;
+    rm)  cmd_rm  "$@";;
+    -h|--help|help) usage;;
+    *)   git worktree "$sub" "$@";;
+  esac
+}
+
+main "$@"
