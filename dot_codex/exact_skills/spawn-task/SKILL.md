@@ -1,12 +1,14 @@
 ---
 name: spawn-task
-description: GitHub issue URL・実装タスク指示・バグ修正依頼等、別セッションで独立並行作業すべき規模のタスクが渡された時に起動。workspace add を介して worktree と zellij タブを用意し、新規 claude を起動してタスクをキャッチアップさせる。小さな質問や会話中の継続タスクは対象外。
+description: 実装・ファイル変更を伴うタスク（新機能・バグ修正・リファクタ・issue 対応等）が渡された時に毎回候補として起動。別セッション（新 worktree + zellij 新タブ）で処理するかを confirm-before-run で都度ユーザに打診する。ユーザが「このタブで進める」「スキップ」を選んだら発動しない。純粋な質問・調査・閲覧のみのタスクは対象外。
 confirm-before-run: true
 ---
 
 ## 目的
 
-まとまった単位のタスクが渡されたとき、本セッションの文脈を汚さず別 zellij タブ・別 worktree で新たな claude を起動して作業させる。worktree/タブ管理は PATH 上の `workspace` コマンド（`~/.local/bin/workspace`）に委譲し、skill 本体はタスクプロンプトの準備と claude 起動だけを担う。
+実装/編集を伴うタスクが来たら、**本セッションで即着手する前に「別セッション化するか？」をユーザに問い直す**。yes なら新 worktree + 新 zellij タブで claude を立ち上げ、no なら skill を抜けて呼び出し側で従来通り作業する。
+
+worktree/タブ管理は PATH 上の `workspace` コマンド（`~/.local/bin/workspace`）に委譲し、skill 本体はタスクプロンプトの準備と claude 起動だけを担う。
 
 ## 前提条件
 
@@ -20,10 +22,12 @@ confirm-before-run: true
 
 ## フロー
 
+`confirm-before-run: true` により **skill 本体が走る前にユーザが yes/no を選ぶ**。yes でここから下が実行される想定。
+
 1. タスク情報収集
-2. ブランチ名/issue引数の決定
-3. **ユーザ確認**（worktree + zellij 新タブを作ってよいか、permission mode は何か）
-4. `.task-prompt.md` を書き出す（cwd の `/tmp` など一時場所でよい）
+2. ブランチ名/issue 引数の決定
+3. 細部確認（ブランチ名の妥当性 + permission mode）を `AskUserQuestion` で 1 回だけ
+4. `.task-prompt.md` を `/tmp/` に書き出す
 5. `setup-zellij.sh <branch-arg> <prompt-file> <mode>` を実行
 6. 完了報告して本セッション側は終了
 
@@ -45,15 +49,14 @@ skill 側では `gh issue view --json number,title,body,labels,url` で **本文
 
 ユーザの指示テキストからブランチ名を `feat/<slug>` 形式で生成して `workspace add <slug>` に渡す。slug は英語 3〜6単語、kebab-case。
 
-## 2. ユーザ確認（必須）
+## 2. 細部確認（`AskUserQuestion` 1 回）
 
-`AskUserQuestion` で：
+skill 起動の可否は `confirm-before-run` で既に済んでいる。ここでは **実行ディテールのみ** を確認する：
 
-* worktree + zellij 新タブを作ってよいか（`キャンセル` / `このタブで続ける` を選ばれたら中断）
+* 生成したブランチ名で問題ないか（編集可能なよう候補提示）
 * permission mode（デフォルト `auto`、他 `plan` / `acceptEdits` / `default`）
-* 生成したブランチ名で問題ないか
 
-ユーザ確認を **スキップしない**。
+ここで追加の「本当に spawn する？」を二重に聞かない。ユーザが編集したいのは枝葉の値だけ。
 
 ## 3. `.task-prompt.md` の中身
 
@@ -131,9 +134,10 @@ skill 内から直接使う箇所だけ：
 
 ```
 □ zellij セッション内か？
+□ 実装/ファイル変更を伴うタスクか？（調査・閲覧のみなら skill 自体を呼ばない）
 □ タスクソース（issue / テキスト）を正しく識別したか？
 □ issue の場合 issue 本文・ラベルを .task-prompt.md に含めたか？
-□ ユーザ確認を取ったか？（skip 禁止）
+□ ブランチ名と permission mode を AskUserQuestion で確認したか？
 □ permission mode の既定は auto か？
 □ 本セッション側で完了報告したか？
 ```
