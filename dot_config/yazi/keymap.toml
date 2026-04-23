@@ -4,6 +4,11 @@ run = "plugin lazygit"
 desc = "run lazygit"
 
 [[mgr.prepend_keymap]]
+on = [ "g", "p" ]
+run = "plugin pr-diff"
+desc = "highlight files changed in a PR"
+
+[[mgr.prepend_keymap]]
 on = [ "c", "a" ]
 run = "plugin ops -- copy-contents"
 desc = "copy file contents"
