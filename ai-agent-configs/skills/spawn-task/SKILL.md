@@ -7,13 +7,13 @@ description: 実装・ファイル変更を伴うタスク（新機能・バグ�
 
 実装/編集を伴うタスクが来たら、**本セッションで即着手する前に「別セッション化するか？」をユーザに問い直す**。yes なら新 worktree + 新 zellij タブで claude を立ち上げ、no なら skill を抜けて呼び出し側で従来通り作業する。
 
-worktree/タブ管理は PATH 上の `workspace` コマンド（`~/.local/bin/workspace`）に委譲し、skill 本体はタスクプロンプトの準備と claude 起動だけを担う。
+worktree 管理は `gwq` (basedir = `~/ghq-worktrees`) に委譲。skill 本体は issue→branch 変換、`.task-prompt.md` 準備、`gwq add` 起動、zellij タブ起動・claude 起動を `setup-zellij.sh` で一括実施する。
 
 ## 前提条件
 
 * zellij セッション内（`$ZELLIJ` セット）
-* cwd が git リポジトリ内
-* `gh` / `jq` / `git` 利用可能
+* cwd が git リポジトリ内（理想的には `ghq` でクローン済みのリポ — gwq の path テンプレートが `{Host}/{Owner}/{Repo}/{Branch}` で機能するため）
+* `gwq` / `gh` / `jq` / `git` 利用可能
 
 いずれか欠けていたら skill を中断。
 
@@ -23,7 +23,7 @@ worktree/タブ管理は PATH 上の `workspace` コマンド（`~/.local/bin/wo
 
 1. **最初に** `AskUserQuestion` で「このタスクを別セッションで実行する？」を 1 回だけ聞く。no / スキップを選ばれたら即終了
 2. タスク情報収集（issue URL なら `gh issue view` で本文取得、それ以外は指示テキストを整理）
-3. ブランチ名を自動決定（issue→`feat/<num>-<slug>` は `workspace add` 任せ、自由テキストは skill 側で `feat/<slug>` 生成）
+3. ブランチ名を自動決定（issue → `setup-zellij.sh` 内で `feat/<num>-<slug>` 変換、自由テキスト → skill 側で `feat/<slug>` 生成）
 4. `.task-prompt.md` を `/tmp/` に書き出す
 5. `setup-zellij.sh <branch-arg> <prompt-file> auto` を実行（permission mode は auto 固定）
 6. 完了報告して本セッション側は終了
@@ -34,17 +34,16 @@ worktree/タブ管理は PATH 上の `workspace` コマンド（`~/.local/bin/wo
 
 ### issue URL / issue 番号
 
-`workspace add` 自体が issue を受け付けるのでそのまま渡せばよい：
+`setup-zellij.sh` は issue 番号 / URL を直接受け付ける（内部で `gh issue view --json number,title` で `feat/<num>-<slug>` に変換）：
 
-* `https://github.com/owner/repo/issues/123` → `workspace add https://...`
-* `123` → `workspace add 123`
+* `https://github.com/owner/repo/issues/123` → そのまま渡す
+* `123` → そのまま渡す
 
-ブランチ名は `feat/<number>-<english-slug>` に自動変換される。
-skill 側では `gh issue view --json number,title,body,labels,url` で **本文・ラベル等** を取得して `.task-prompt.md` に含める。
+ただし skill 側では本文・ラベル等を `.task-prompt.md` に含めたいので、`gh issue view --json number,title,body,labels,url` で別途取得して整形する。
 
 ### 自由テキスト
 
-ユーザの指示テキストからブランチ名を `feat/<slug>` 形式で生成して `workspace add <slug>` に渡す。slug は英語 3〜6単語、kebab-case。
+ユーザの指示テキストからブランチ名を `feat/<slug>` 形式で生成して `setup-zellij.sh feat/<slug>` に渡す。slug は英語 3〜6 単語、kebab-case。
 
 ## 2. 起動可否確認（`AskUserQuestion` 1 回・必須）
 
@@ -91,8 +90,11 @@ bash "$HOME/.claude/skills/spawn-task/setup-zellij.sh" \
 
 スクリプト内で以下を実施：
 
-* `workspace add` で worktree 作成 + zellij 新タブ作成 + cd（macOS の zellij `--cwd` 問題は workspace 側で吸収）
+* issue 引数なら `feat/<num>-<slug>` に変換
+* 既存 worktree (同 branch) があれば再利用、無ければ `gwq add -b <branch>` (新規 branch) または `gwq add <branch>` (既存 branch)
+* `gwq list -g --json` で作成された worktree の path を解決
 * `.task-prompt.md` を worktree にコピー
+* zellij 新タブを開いて cd（macOS は write-chars 経由）
 * 新タブに `command claude --permission-mode <mode> '.task-prompt.md を読んで...'` を送る
 
 `command claude` は zsh 側の `claude` 関数（`--dangerously-skip-permissions --remote-control` を強制）を迂回するため。
@@ -102,30 +104,25 @@ bash "$HOME/.claude/skills/spawn-task/setup-zellij.sh" \
 * 作成（または再利用）した worktree のパス
 * ブランチ名
 * タスクソース要約
-* タブを新規作成したこと（フォーカスは workspace add によって自動で切り替わっている）
+* タブを新規作成したこと（フォーカスは zellij 側で自動切替）
 
 ---
 
-## workspace コマンドの仕様（抜粋）
+## gwq の挙動メモ
 
-skill 内から直接使う箇所だけ：
-
-* `workspace add <branch|issue-num|issue-url> [--base <ref>]`
-  * issue の場合 `feat/<num>-<slug>` に変換
-  * `~/.worktree/<repo>/<branch>/` に作成
-  * base 未指定なら `origin/HEAD`
-  * 既存 worktree があれば再利用
-  * zellij 新タブを開き cd（macOS workaround込み）
-  * stdout 最終行 = worktree 絶対パス
-
-詳細は `workspace --help`。
+* worktree 配置: `<basedir>/<host>/<owner>/<repo>/<branch>` (デフォルトテンプレート、basedir = `~/ghq-worktrees`)
+  * 例: `feat/123-fix` の repo `github.com/foo/bar` → `~/ghq-worktrees/github.com/foo/bar/feat-123-fix/` (`/` は `-` にスラッグ化)
+* `gwq list -g`: グローバル (basedir 配下全 worktree) を一覧。`--json` でスクリプト連携可
+* `gwq remove <pattern>`: pattern 部分一致で削除。fzf interactive: 引数省略
+* `gwq add` 自体は worktree path を stdout しないので、作成後 `gwq list -g --json | jq` で path を引き当てる
 
 ## 失敗時の方針
 
 | 失敗箇所 | 対応 |
 |---|---|
 | zellij 外で実行 | skill 中断、ユーザに案内 |
-| `workspace add` 失敗 | エラーを転送して中断（タブは作られていない）|
+| `gwq add` 失敗 | エラーを転送して中断（タブは作られていない）|
+| worktree path 解決失敗 | エラー報告。gwq list -g で手動確認を案内 |
 | `.task-prompt.md` コピー失敗 | worktree は残る。手動でファイル配置を案内 |
 | claude 起動失敗 | タブは残る。`.task-prompt.md` のパスを案内 |
 
