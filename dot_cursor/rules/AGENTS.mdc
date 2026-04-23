@@ -14,8 +14,18 @@
 
 ## Obsidian
 
-* 作業記録・知見を細かく蓄積し、ナレッジベースを育てる
+* 作業記録・知見を蓄積し、ナレッジベースを育てる
 
 ## chezmoi
 
 * dotfiles・ツール設定を宣言的に管理する（`~/.local/share/chezmoi`）
+
+## ghq
+
+* リポジトリのクローン先を `~/ghq/<host>/<owner>/<repo>/` に統一
+* 取得は `ghq get <url>`、一覧は `ghq list`、cd は `cdg`（fzf, Alt+G）
+
+## gwq
+
+* worktree を `~/gwq/<host>/<owner>/<repo>/<branch>/` に作成（ghq.root と sibling）
+* 作成は `gwq add -b <branch>`、一覧は `gwq list -g`（クロスリポ、`--json` でスクリプト連携）、cd は `cdw`（fzf, Alt+W）

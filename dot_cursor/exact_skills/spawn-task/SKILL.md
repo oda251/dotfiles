@@ -7,7 +7,7 @@ description: 実装・ファイル変更を伴うタスク（新機能・バグ�
 
 実装/編集を伴うタスクが来たら、**本セッションで即着手する前に「別セッション化するか？」をユーザに問い直す**。yes なら新 worktree + 新 zellij タブで claude を立ち上げ、no なら skill を抜けて呼び出し側で従来通り作業する。
 
-worktree 管理は `gwq` (basedir = `~/ghq-worktrees`) に委譲。skill 本体は issue→branch 変換、`.task-prompt.md` 準備、`gwq add` 起動、zellij タブ起動・claude 起動を `setup-zellij.sh` で一括実施する。
+worktree 管理は `gwq` (basedir = `~/gwq`) に委譲。skill 本体は issue→branch 変換、`.task-prompt.md` 準備、`gwq add` 起動、zellij タブ起動・claude 起動を `setup-zellij.sh` で一括実施する。
 
 ## 前提条件
 
@@ -110,8 +110,8 @@ bash "$HOME/.claude/skills/spawn-task/setup-zellij.sh" \
 
 ## gwq の挙動メモ
 
-* worktree 配置: `<basedir>/<host>/<owner>/<repo>/<branch>` (デフォルトテンプレート、basedir = `~/ghq-worktrees`)
-  * 例: `feat/123-fix` の repo `github.com/foo/bar` → `~/ghq-worktrees/github.com/foo/bar/feat-123-fix/` (`/` は `-` にスラッグ化)
+* worktree 配置: `<basedir>/<host>/<owner>/<repo>/<branch>` (デフォルトテンプレート、basedir = `~/gwq`)
+  * 例: `feat/123-fix` の repo `github.com/foo/bar` → `~/gwq/github.com/foo/bar/feat-123-fix/` (`/` は `-` にスラッグ化)
 * `gwq list -g`: グローバル (basedir 配下全 worktree) を一覧。`--json` でスクリプト連携可
 * `gwq remove <pattern>`: pattern 部分一致で削除。fzf interactive: 引数省略
 * `gwq add` 自体は worktree path を stdout しないので、作成後 `gwq list -g --json | jq` で path を引き当てる

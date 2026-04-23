@@ -1,6 +1,7 @@
 [worktree]
-# ghq.root と sibling に分けることで:
+# ghq.root と sibling (~/gwq) に分けることで:
 #   - {Host}/{Owner}/{Repo}/{Branch} がクローン先と衝突しない
 #   - ghq list が worktree を拾わない
-basedir = "{{ .chezmoi.homeDir }}/ghq-worktrees"
+#   - gwq list -g (basedir 走査) が hidden-dir スキップに引っかからない
+basedir = "{{ .chezmoi.homeDir }}/gwq"
 auto_mkdir = true

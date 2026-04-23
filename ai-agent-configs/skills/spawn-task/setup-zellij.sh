@@ -7,7 +7,7 @@
 # Behavior:
 #   - issue 番号 / URL の場合 gh+jq で `feat/<num>-<slug>` に変換
 #   - `gwq add -b <branch>` でカレントリポの worktree を作成
-#     (basedir は ~/.config/gwq/config.toml で設定済み: ~/ghq-worktrees)
+#     (basedir は ~/.config/gwq/config.toml で設定済み: ~/gwq)
 #   - <prompt-file> を <worktree>/.task-prompt.md にコピー
 #   - zellij 新タブ (--cwd は darwin 不安定なので write-chars で cd) を開いて claude を起動
 set -euo pipefail
