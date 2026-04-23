@@ -10,15 +10,15 @@
 * 出典が無い場合は `（未検証）` と明記する
 * WebSearch のスニペットは出典にしない。WebFetch で本文を読んだ上で引用する
 
-# 汎用ツール
+# 汎用CLIツール
 
-## Obsidian
+## obsidian
 
-* 作業記録・知見を蓄積し、ナレッジベースを育てる
+* 作業記録・知見、その他ドキュメント全般を管理する（`~/obsidian-vault`）
 
 ## chezmoi
 
-* dotfiles・ツール設定を宣言的に管理する（`~/.local/share/chezmoi`）
+* dotfiles管理。使用ツールやツール設定、AIエージェント設定など環境全般を管理する（`~/.local/share/chezmoi`）
 
 ## ghq
 
