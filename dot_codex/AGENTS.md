@@ -22,10 +22,10 @@
 
 ## ghq
 
-* リポジトリのクローン先を `~/ghq/<host>/<owner>/<repo>/` に統一
+- ローカルのGitリポジトリをまとめて管理するツール
 * 取得は `ghq get <url>`、一覧は `ghq list`、cd は `cdg`（fzf, Alt+G）
 
 ## gwq
 
-* worktree を `~/gwq/<host>/<owner>/<repo>/<branch>/` に作成（ghq.root と sibling）
+- ローカルのGit Worktreeをまとめて管理するツール
 * 作成は `gwq add -b <branch>`、一覧は `gwq list -g`（クロスリポ、`--json` でスクリプト連携）、cd は `cdw`（fzf, Alt+W）
