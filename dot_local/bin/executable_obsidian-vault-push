@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+VAULT="${OBSIDIAN_VAULT_DIR:-$HOME/obsidian-vault}"
+
+if [[ ! -d "$VAULT/.git" ]]; then
+  echo "obsidian-vault-push: $VAULT is not a git repo, skipping" >&2
+  exit 0
+fi
+
+cd "$VAULT"
+
+if [[ -z "$(git status --porcelain)" ]]; then
+  exit 0
+fi
+
+git add -A
+git commit -m "auto: $(hostname) $(date -Iseconds)"
+git push

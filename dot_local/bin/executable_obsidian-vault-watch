@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+VAULT="${OBSIDIAN_VAULT_DIR:-$HOME/obsidian-vault}"
+DEBOUNCE="${OBSIDIAN_PUSH_DEBOUNCE:-10}"
+PUSH="$HOME/.local/bin/obsidian-vault-push"
+
+if [[ ! -d "$VAULT/.git" ]]; then
+  echo "obsidian-vault-watch: $VAULT is not a git repo, exiting" >&2
+  exit 0
+fi
+
+emit_events() {
+  case "$(uname -s)" in
+    Darwin)
+      exec fswatch -r -l "$DEBOUNCE" --event=Created --event=Updated --event=Removed --event=Renamed \
+        --exclude '\.git(/|$)' --exclude '\.obsidian/workspace' \
+        "$VAULT"
+      ;;
+    Linux)
+      exec inotifywait -mrq \
+        -e close_write -e moved_to -e moved_from -e create -e delete \
+        --exclude '(^|/)\.git(/|$)|\.obsidian/workspace' \
+        --format '%w%f' \
+        "$VAULT"
+      ;;
+    *)
+      echo "obsidian-vault-watch: unsupported OS $(uname -s)" >&2
+      exit 1
+      ;;
+  esac
+}
+
+emit_events | while read -r _; do
+  # Coalesce bursts: after any event, drain further events until DEBOUNCE
+  # seconds of silence, then push once.
+  while IFS= read -r -t "$DEBOUNCE" _; do :; done
+  "$PUSH" || true
+done

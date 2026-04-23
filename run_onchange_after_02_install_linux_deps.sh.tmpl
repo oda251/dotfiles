@@ -2,7 +2,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-packages=(gcc g++ unzip fontconfig zsh libasound2-dev pkg-config libx11-dev libxrandr-dev libxi-dev libgl1-mesa-dev libxcursor-dev libxkbcommon-dev libgtk-3-dev libnspr4 libnss3 fonts-noto-color-emoji)
+packages=(gcc g++ unzip fontconfig zsh libasound2-dev pkg-config libx11-dev libxrandr-dev libxi-dev libgl1-mesa-dev libxcursor-dev libxkbcommon-dev libgtk-3-dev libnspr4 libnss3 fonts-noto-color-emoji inotify-tools)
 missing=()
 
 for pkg in "${packages[@]}"; do

@@ -1,14 +1,49 @@
-{{- if eq .chezmoi.os "linux" -}}
 #!/usr/bin/env bash
 set -euo pipefail
 
-# service/timer hash: {{ include "dot_config/systemd/user/obsidian-vault-sync.service" | sha256sum }}{{ include "dot_config/systemd/user/obsidian-vault-sync.timer" | sha256sum }}
+{{- if eq .chezmoi.os "linux" }}
+# unit hash: {{ include "dot_config/systemd/user/obsidian-vault-pull.service" | sha256sum }}{{ include "dot_config/systemd/user/obsidian-vault-pull.timer" | sha256sum }}{{ include "dot_config/systemd/user/obsidian-vault-watch.service" | sha256sum }}
 
 if ! command -v systemctl &>/dev/null; then
-  echo "systemctl not available, skipping obsidian-vault-sync timer setup" >&2
+  echo "systemctl not available, skipping obsidian-vault sync setup" >&2
   exit 0
 fi
 
+# Retire the old single-sync timer if systemd still has it in memory (chezmoi
+# has already removed the unit files from disk by this point, but a running
+# timer survives until we stop it explicitly).
+systemctl --user stop obsidian-vault-sync.timer 2>/dev/null || true
+systemctl --user disable obsidian-vault-sync.timer 2>/dev/null || true
+systemctl --user reset-failed obsidian-vault-sync.service 2>/dev/null || true
+
 systemctl --user daemon-reload
-systemctl --user enable --now obsidian-vault-sync.timer
+systemctl --user enable --now obsidian-vault-pull.timer
+systemctl --user enable --now obsidian-vault-watch.service
+{{- end }}
+
+{{- if eq .chezmoi.os "darwin" }}
+# plist hash: {{ include "private_Library/LaunchAgents/com.obsidian-vault.pull.plist" | sha256sum }}{{ include "private_Library/LaunchAgents/com.obsidian-vault.watch.plist" | sha256sum }}
+
+domain="gui/$(id -u)"
+launch_agents="$HOME/Library/LaunchAgents"
+
+# Retire the old gitwatch launchd job if it exists.
+if launchctl print "${domain}/com.obsidian-vault.gitwatch" &>/dev/null; then
+  launchctl bootout "${domain}/com.obsidian-vault.gitwatch" 2>/dev/null || true
+fi
+rm -f "${launch_agents}/com.obsidian-vault.gitwatch.plist"
+
+for label in com.obsidian-vault.pull com.obsidian-vault.watch; do
+  plist="${launch_agents}/${label}.plist"
+  if [[ ! -f "$plist" ]]; then
+    echo "enable_obsidian_sync: $plist missing, skipping $label" >&2
+    continue
+  fi
+  # bootout first so the job reloads with the latest plist contents
+  if launchctl print "${domain}/${label}" &>/dev/null; then
+    launchctl bootout "${domain}/${label}" 2>/dev/null || true
+  fi
+  launchctl bootstrap "${domain}" "${plist}"
+  launchctl enable "${domain}/${label}"
+done
 {{- end }}

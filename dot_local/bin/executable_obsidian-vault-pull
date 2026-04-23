@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+VAULT="${OBSIDIAN_VAULT_DIR:-$HOME/obsidian-vault}"
+
+if [[ ! -d "$VAULT/.git" ]]; then
+  echo "obsidian-vault-pull: $VAULT is not a git repo, skipping" >&2
+  exit 0
+fi
+
+cd "$VAULT"
+
+if ! git pull --rebase --autostash; then
+  git rebase --abort 2>/dev/null || true
+  git stash pop 2>/dev/null || true
+  echo "obsidian-vault-pull: pull failed; aborted rebase, will retry next tick" >&2
+  exit 0
+fi

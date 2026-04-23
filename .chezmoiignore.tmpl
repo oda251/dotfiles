@@ -27,6 +27,7 @@ Documents/WindowsPowerShell/
 # macOS-specific configs (ignore on non-macOS systems)
 {{ if ne .chezmoi.os "darwin" }}
 .config/ghostty/
+Library/
 {{ end }}
 
 # Linux/macOS-specific configs (ignore on Windows)
@@ -54,5 +55,8 @@ node_modules/
 
 # Homebrew configuration files
 dot_Brewfile.tmpl
+
+# macOS LaunchAgents
+Library/
 {{ end }}
 
