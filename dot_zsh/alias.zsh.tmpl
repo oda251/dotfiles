@@ -61,3 +61,24 @@ function y() {
 	fi
 	rm -f -- "$tmp"
 }
+
+# ghq クローン済みリポジトリへ fzf で cd
+cdg() {
+  command -v ghq >/dev/null 2>&1 || { echo "ghq not found" >&2; return 1; }
+  local root repo
+  root="$(ghq root)" || return 1
+  repo=$(ghq list | fzf --height 40% --reverse --preview "ls -la $root/{}") || return
+  builtin cd -- "$root/$repo"
+}
+
+# gwq worktree へ fzf で cd
+cdw() {
+  command -v gwq >/dev/null 2>&1 || { echo "gwq not found" >&2; return 1; }
+  command -v jq >/dev/null 2>&1 || { echo "jq not found" >&2; return 1; }
+  local target
+  target=$(gwq list -g --json 2>/dev/null \
+    | jq -r '.[] | "\(.branch)\t\(.path)"' \
+    | fzf --height 40% --reverse --with-nth=1 --delimiter='\t' \
+    | awk -F'\t' '{print $2}') || return
+  [[ -d "$target" ]] && builtin cd -- "$target"
+}

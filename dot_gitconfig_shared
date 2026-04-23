@@ -18,3 +18,5 @@
 	colorMoved = default
 [pull]
 	rebase = false
+[ghq]
+	root = ~/ghq

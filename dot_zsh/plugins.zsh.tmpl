@@ -68,6 +68,8 @@ _cache_completion chezmoi "completion zsh"
 _cache_completion gh "completion -s zsh"
 _cache_completion mise "completion zsh"
 _cache_completion docker "completion zsh"
+_cache_completion ghq "completion zsh"
+_cache_completion gwq "completion zsh"
 fpath=( "$_completion_cache_dir" $fpath )
 autoload -Uz compinit
 if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
@@ -122,6 +124,15 @@ source "$HOME/.zsh/history-list.zsh"
 
 bindkey '^P' __hl_up
 bindkey '^N' __hl_down
+
+# ghq/gwq fzf-cd ウィジェット (Alt+G / Alt+W)
+__cdg_widget() { cdg < /dev/tty; zle reset-prompt }
+zle -N __cdg_widget
+bindkey '\eg' __cdg_widget
+
+__cdw_widget() { cdw < /dev/tty; zle reset-prompt }
+zle -N __cdw_widget
+bindkey '\ew' __cdw_widget
 
 # zsh-syntax-highlighting（最後に読み込む）
 if [[ -f "$_brew_prefix/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
