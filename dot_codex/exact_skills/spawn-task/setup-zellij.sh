@@ -60,10 +60,12 @@ worktree_dir="$(
 if [[ -n "$worktree_dir" ]]; then
   echo "spawn-task: reusing existing worktree at $worktree_dir"
 else
+  branch_is_new=0
   if git show-ref --verify --quiet "refs/heads/$BRANCH"; then
     gwq add "$BRANCH"
   else
     gwq add -b "$BRANCH"
+    branch_is_new=1
   fi
   # gwq add は path を直接 stdout しないので list -g --json で解決
   worktree_dir="$(
@@ -73,6 +75,18 @@ else
   )"
   [[ -n "$worktree_dir" && -d "$worktree_dir" ]] \
     || { echo "spawn-task: gwq add succeeded but worktree path not found" >&2; exit 1; }
+
+  # 新規ブランチは呼び出し元 HEAD から切られる (gwq に start-point 指定が無い) ため、
+  # 明示的に origin の default branch に揃える。git reset は post-checkout を発火させない。
+  if [[ "$branch_is_new" == "1" ]]; then
+    default_ref="$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/||')"
+    default_ref="${default_ref:-origin/main}"
+    default_branch="${default_ref#origin/}"
+    git fetch --quiet origin "$default_branch" || true
+    (cd "$worktree_dir" && git reset --hard "$default_ref") \
+      || { echo "spawn-task: failed to reset worktree to $default_ref" >&2; exit 1; }
+    echo "spawn-task: new branch '$BRANCH' rebased onto $default_ref"
+  fi
 fi
 
 cp "$PROMPT_SRC" "$worktree_dir/.task-prompt.md"
