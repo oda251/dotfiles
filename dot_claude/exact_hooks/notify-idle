@@ -61,12 +61,13 @@ display notification item 1 of argv with title item 2 of argv
 end run' \
       "$body" "$heading" >/dev/null 2>&1 || true
   fi
-elif grep -qi microsoft /proc/version 2>/dev/null && command -v powershell.exe >/dev/null 2>&1; then
-  # WSL2 → Windows Toast via BurntToast PowerShell module.
-  # One-time setup: powershell.exe -Command "Install-Module BurntToast -Scope CurrentUser -Force"
+elif grep -qi microsoft /proc/version 2>/dev/null && command -v pwsh.exe >/dev/null 2>&1; then
+  # WSL2 → Windows Toast via BurntToast PowerShell module (pwsh / PowerShell 7).
+  # PowerShell 5.1 (powershell.exe) won't find BurntToast installed under
+  # Documents\PowerShell\Modules — use pwsh exclusively.
   ps_heading="${heading//\'/\'\'}"
   ps_body="${body//\'/\'\'}"
-  powershell.exe -NoProfile -Command \
+  pwsh.exe -NoProfile -Command \
     "New-BurntToastNotification -Text '$ps_heading','$ps_body'" \
     >/dev/null 2>&1 || true
 fi

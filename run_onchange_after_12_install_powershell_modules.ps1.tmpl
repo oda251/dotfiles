@@ -1,15 +1,20 @@
 {{- if eq .chezmoi.os "windows" -}}
 # PowerShell modules required by chezmoi-managed scripts.
-# Notably: BurntToast — used by WSL2's notify-idle hook to show Windows toasts.
+# Notably: BurntToast — used by WSL2's notify-idle hook (calls pwsh.exe) to show Windows toasts.
 
-$modules = @(
-    "BurntToast"
-)
+if (-not (Get-Command pwsh -ErrorAction SilentlyContinue)) {
+    Write-Warning "pwsh (PowerShell 7) not found; skipping module install"
+    return
+}
+
+$modules = @("BurntToast")
 
 foreach ($name in $modules) {
-    if (-not (Get-Module -ListAvailable -Name $name)) {
-        Write-Host "Installing PowerShell module: $name"
-        Install-Module -Name $name -Scope CurrentUser -Force -AllowClobber
-    }
+    pwsh -NoProfile -Command @"
+        if (-not (Get-Module -ListAvailable -Name '$name')) {
+            Write-Host 'Installing PowerShell module: $name'
+            Install-Module -Name '$name' -Scope CurrentUser -Force -AllowClobber
+        }
+"@
 }
 {{- end -}}
