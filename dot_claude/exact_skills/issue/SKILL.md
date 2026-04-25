@@ -13,7 +13,7 @@ confirm-before-run: true
 1. 類似issue探索
 2. template & community guidelines解析
 3. 証拠収集
-4. draft作成（journal skill）
+4. draft作成（journal skill, `{org}/note/` 配下）
 5. ユーザ確認
 6. 投稿 / 紐付け
 
@@ -68,7 +68,7 @@ APIで取れない場合（大きなrepo・branchデフォルト違い等）は 
 
 ## 4. draft作成
 
-journal skill に従い `type=draft` として作成する。
+journal skill のパス規約に従い `{org}/note/{date}-{title}.md` として作成する。
 
 ### 本文の原則
 
@@ -106,7 +106,7 @@ repo owner が自身のloginまたは所属orgに含まれるかで内部/外部
 ```bash
 gh issue create --repo {repo} \
   --title "..." \
-  --body-file <(obsidian read vault=obsidian-vault path="{org}/draft/{date}-{title}.md" | sed '/^---$/,/^---$/d') \
+  --body-file <(obsidian read vault=obsidian-vault path="{org}/note/{date}-{title}.md" | sed '/^---$/,/^---$/d') \
   --label "..."
 ```
 
@@ -114,7 +114,7 @@ gh issue create --repo {repo} \
 
 ```bash
 obsidian append vault=obsidian-vault \
-  path="{org}/draft/{date}-{title}.md" \
+  path="{org}/note/{date}-{title}.md" \
   content="\n\n---\nPosted: {issue-url}"
 ```
 

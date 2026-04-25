@@ -46,13 +46,12 @@ obsidian create vault=obsidian-vault path="{path}" content="$(cat /tmp/doc.md)"
 ### パス規約
 
 ```
-{org}/{type}/{date}-{title}.md   # GitHub repoに紐づく作業
-{type}/{date}-{title}.md          # repoに紐づかない
+{org}/note/{date}-{title}.md   # GitHub repoに紐づく作業
+note/{date}-{title}.md          # repoに紐づかない
 ```
 
-- `type`
-  - `draft` — 別所で公開・投稿する前の下書き（issue 本文、PR description、ADR 等）
-  - `note` — それ以外のドキュメント全般（調査、ミーティング、意思決定 等）
+ドキュメントはすべて `note/` 配下に置く（調査・ミーティング・意思決定、別所投稿予定の下書き等を区別しない）。
+
 - `date` = `YYYY-MM-DD`
 - `title` = kebab-case。第三者が見て題材と目的がわかる粒度で書く（例: `hono-auth-middleware-comparison`）
 - `{org}` = GitHub owner（`git remote get-url origin` から抽出。不明なら repo-less 形式）
@@ -74,10 +73,6 @@ nested tag を活用する。ルートは以下から選ぶ。子要素は自由
 ### 関連ドキュメント
 
 依存・関連ドキュメントは本文内に `[[path/to/doc]]` で wikilink を張る。Obsidian のバックリンクで辿れる。
-
-### draft 作成時
-
-AgentLog にタスクを追加する: `- [ ] draft: {title} [[{path}]] ➕ {YYYY-MM-DD}`
 
 ## ルール
 
