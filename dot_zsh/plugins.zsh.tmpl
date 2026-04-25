@@ -8,6 +8,14 @@ source_cache_script() {
   fi
 }
 
+# cache 生成時に呼び出し元 PATH から /mnt/* を除く。
+# 過去 28 個の Windows パスがキャッシュに焼き込まれて永続化した事故対策。
+_path_without_wsl_mounts() {
+  local -a parts=(${(s.:.)PATH})
+  parts=(${parts:#/mnt/*})
+  print -r -- "${(j.:.)parts}"
+}
+
 # コマンドの init スクリプトをキャッシュして source する
 # 使い方: _init_tool_cache <コマンド名> <init サブコマンド...>
 _init_tool_cache() {
@@ -19,7 +27,7 @@ _init_tool_cache() {
   local cache_file="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/${tool_name}-init.zsh"
   mkdir -p "${cache_file:h}"
   if [[ ! -s "$cache_file" || "$bin_path" -nt "$cache_file" ]]; then
-    "$bin_path" "$@" >| "$cache_file"
+    PATH="$(_path_without_wsl_mounts)" "$bin_path" "$@" >| "$cache_file"
     rm -f "${cache_file}.zwc"
   fi
   source_cache_script "$cache_file"
@@ -32,10 +40,20 @@ if _init_tool_cache mise activate zsh; then
   if [[ ! -s "$mise_env_cache" \
         || ( -f "$mise_global_config" && "$mise_global_config" -nt "$mise_env_cache" ) \
         || "$(command -v mise)" -nt "$mise_env_cache" ]]; then
-    mise env -s zsh >| "$mise_env_cache" 2>/dev/null
+    PATH="$(_path_without_wsl_mounts)" mise env -s zsh >| "$mise_env_cache" 2>/dev/null
     rm -f "${mise_env_cache}.zwc"
   fi
   source_cache_script "$mise_env_cache"
+fi
+
+# WSL: wsl.exe / clip.exe 等の interop バイナリ用に Windows System32 を追加。
+# mise-env は PATH を上書きする & __MISE_ORIG_PATH も上書き先になるため、
+# mise の後で append し、precmd の hook-env でも消えないよう __MISE_ORIG_PATH にも反映する。
+if [[ -n "${WSL_DISTRO_NAME:-}" ]] && [[ ":$PATH:" != *":/mnt/c/Windows/System32:"* ]]; then
+  export PATH="$PATH:/mnt/c/Windows/System32"
+  if [[ -n "${__MISE_ORIG_PATH:-}" && ":$__MISE_ORIG_PATH:" != *":/mnt/c/Windows/System32:"* ]]; then
+    export __MISE_ORIG_PATH="$__MISE_ORIG_PATH:/mnt/c/Windows/System32"
+  fi
 fi
 
 {{- if ne .chezmoi.os "windows" }}
