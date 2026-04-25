@@ -23,7 +23,19 @@ if [[ -n "$cwd" ]]; then
   scope="$(basename "$cwd")"
 fi
 if [[ -n "${ZELLIJ_SESSION_NAME:-}" ]]; then
-  tab=$(zellij action query-tab-names 2>/dev/null | head -1 || true)
+  # The hook inherits ZELLIJ_PANE_ID from Claude's pane env, so we can
+  # resolve THIS Claude's tab unambiguously even with multiple Claude
+  # instances across tabs. `list-panes --all` is the only zellij action
+  # that exposes per-pane TAB_NAME + PANE_ID; fields are 2-space separated.
+  tab=""
+  if [[ -n "${ZELLIJ_PANE_ID:-}" ]]; then
+    tab=$(zellij action list-panes --all 2>/dev/null \
+      | awk -F'  ' -v pid="terminal_${ZELLIJ_PANE_ID}" 'NR>1 && $4 == pid { print $3; exit }' || true)
+  fi
+  # Fallback: user's currently-focused tab
+  if [[ -z "$tab" ]]; then
+    tab=$(zellij action current-tab-info 2>/dev/null | awk '/^name:/{sub(/^name: /,""); print; exit}' || true)
+  fi
   [[ -n "$tab" ]] && scope="${scope:+$scope · }$tab"
 fi
 
