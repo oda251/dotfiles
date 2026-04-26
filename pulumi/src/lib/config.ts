@@ -10,6 +10,7 @@ const RepoSpecSchema = v.object({
   template: v.optional(v.string()),
   hasESC: v.optional(v.boolean(), false),
   vulnerabilityAlerts: v.optional(v.boolean(), true),
+  protectMain: v.optional(v.boolean(), false),
 });
 
 export type RepoSpec = v.InferOutput<typeof RepoSpecSchema>;

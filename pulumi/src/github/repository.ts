@@ -41,7 +41,7 @@ export const createRepository = (spec: RepoSpec): RepoBundle => {
       : {}),
   });
 
-  if (spec.visibility === "public" && !spec.isTemplate) {
+  if (spec.protectMain) {
     new github.RepositoryFile(
       `${spec.name}/gate`,
       {
@@ -54,9 +54,7 @@ export const createRepository = (spec: RepoSpec): RepoBundle => {
       },
       { ignoreChanges: ["content"] },
     );
-  }
 
-  if (spec.visibility === "public") {
     new github.RepositoryRuleset(
       `${spec.name}/main`,
       {
