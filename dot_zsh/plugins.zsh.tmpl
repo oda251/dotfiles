@@ -174,7 +174,27 @@ add-zsh-hook chpwd __notify_terminal_cwd
 __notify_terminal_cwd
 
 if [[ "${ZELLIJ_AUTO_START:-false}" == "true" && -z "$ZELLIJ" && -o interactive && -t 0 && -t 1 ]] && command -v zellij >/dev/null 2>&1; then
-    zellij attach -c main
+    # Serialize concurrent shells (e.g. Windows Terminal restoring multiple panes
+    # at WSL boot) so only one creates the session; later shells attach to it.
+    # Without this, two `zellij attach -c` racing causes AddrInUse on the server
+    # socket and cascades into wasm_bridge plugin panics.
+    {
+        if command -v flock >/dev/null 2>&1 && flock -n 9; then
+            # Leader: create-or-resurrect, then attach. Lock is held until zellij exits.
+            if zellij list-sessions -s 2>/dev/null | grep -qx main; then
+                zellij attach main
+            else
+                zellij attach -c main
+            fi
+        else
+            # Follower: wait for leader's session to appear, then plain attach.
+            for _ in {1..30}; do
+                zellij list-sessions -s 2>/dev/null | grep -qx main && break
+                sleep 0.5
+            done
+            zellij attach main
+        fi
+    } 9>"${XDG_RUNTIME_DIR:-/tmp}/zellij-autostart-${UID}.lock"
 
     if [[ "$ZELLIJ_AUTO_EXIT" == "true" ]]; then
         exit
