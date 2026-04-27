@@ -71,6 +71,20 @@ cdg() {
   builtin cd -- "$root/$repo"
 }
 
+# ghq クローン済みリポジトリを fzf で選んで削除（複数可）
+rmg() {
+  command -v ghq >/dev/null 2>&1 || { echo "ghq not found" >&2; return 1; }
+  local root repos
+  root="$(ghq root)" || return 1
+  repos=$(ghq list | fzf -m --height 40% --reverse --preview "ls -la $root/{}") || return
+  [[ -z "$repos" ]] && return
+  echo "$repos" | sed 's/^/  /'
+  printf 'remove these? [y/N]: '
+  read -r ans
+  [[ "$ans" == [yY] ]] || { echo "aborted"; return 1; }
+  echo "$repos" | xargs -n1 ghq rm
+}
+
 # gwq worktree へ fzf で cd
 cdw() {
   command -v gwq >/dev/null 2>&1 || { echo "gwq not found" >&2; return 1; }

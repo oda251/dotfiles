@@ -23,9 +23,9 @@
 ## ghq
 
 - ローカルのGitリポジトリをまとめて管理するツール
-* 取得は `ghq get <url>`、一覧は `ghq list`、cd は `cdg`（fzf, Alt+G）
+* 取得は `ghq get <url>`、一覧は `ghq list`、ルートは `ghq root`
 
 ## gwq
 
 - ローカルのGit Worktreeをまとめて管理するツール
-* 作成は `gwq add -b <branch>`、一覧は `gwq list -g`（クロスリポ、`--json` でスクリプト連携）、cd は `cdw`（fzf, Alt+W）
+* 作成は `gwq add -b <branch>`、一覧は `gwq list -g`（クロスリポ、`--json` でスクリプト連携）
