@@ -1,6 +1,6 @@
 ---
 name: docs
-description: "Obsidian ドキュメント作成・更新。調査・比較検討・草案など、ドキュメント自体が成果物になる作業で使う。`obsidian` コマンド経由で vault 操作（ファイルシステムへの直書き禁止）。"
+description: "Obsidian ドキュメント作成・更新。調査・比較検討・草案など、ドキュメント自体が成果物になる作業で使う。"
 inputs:
   content: ドキュメント本文
 ---
