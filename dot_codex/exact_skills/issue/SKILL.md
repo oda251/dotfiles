@@ -13,7 +13,7 @@ confirm-before-run: true
 1. 類似issue探索
 2. template & community guidelines解析
 3. 証拠収集
-4. draft作成（journal skill, `{org}/note/` 配下）
+4. draft作成（docs skill, `{org}/note/` 配下）
 5. ユーザ確認
 6. 投稿 / 紐付け
 
@@ -68,7 +68,7 @@ APIで取れない場合（大きなrepo・branchデフォルト違い等）は 
 
 ## 4. draft作成
 
-journal skill のパス規約に従い `{org}/note/{date}-{title}.md` として作成する。
+docs skill のパス規約に従い `{org}/note/{date}-{title}.md` として作成する。
 
 ### 本文の原則
 
@@ -138,7 +138,7 @@ APIが想定どおり動かない場合は、親issue本文の Tasklist に `- [
 □ 主張・修正内容にインライン出典を付けたか？
 □ 出典なしの情報に（未検証）を付けたか？
 □ 1 issue = 1 concern か？
-□ draft を journal skill の規約で vault に保存したか？
+□ draft を docs skill の規約で vault に保存したか？
 □ ユーザ確認を取ってから投稿したか？
 □ 投稿後、draft末尾にissue URLを追記したか？
 □ sub-issue紐付けの要否を判断したか？
