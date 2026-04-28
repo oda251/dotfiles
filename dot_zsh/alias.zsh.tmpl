@@ -84,6 +84,32 @@ rmg() {
   done <<< "$repos"
 }
 
+# gh で取れる repo を fzf で選んで ghq get → cd（無引数=自分、引数=owner/org）
+# fzf は即座に開き、gh の結果が届き次第ストリームで流し込む
+getg() {
+  command -v gh  >/dev/null 2>&1 || { echo "gh not found"  >&2; return 1; }
+  command -v ghq >/dev/null 2>&1 || { echo "ghq not found" >&2; return 1; }
+  local owner=${1:-} pick url
+  pick=$(
+    { if [[ -n "$owner" ]]; then
+        gh repo list "$owner" --limit 1000 \
+          --json nameWithOwner,description,url \
+          -q '.[] | [.nameWithOwner, (.description // ""), .url] | @tsv'
+      else
+        gh repo list --limit 1000 \
+          --json nameWithOwner,description,url \
+          -q '.[] | [.nameWithOwner, (.description // ""), .url] | @tsv'
+      fi
+    } | fzf --height 40% --reverse \
+            --with-nth=1,2 --delimiter='\t' \
+            --preview 'echo {2}'
+  ) || return
+  url=$(awk -F'\t' '{print $3}' <<< "$pick")
+  [[ -z "$url" ]] && return
+  ghq get -- "$url" || return
+  builtin cd -- "$(ghq root)/${url#https://}"
+}
+
 # gwq worktree へ fzf で cd
 cdw() {
   command -v gwq >/dev/null 2>&1 || { echo "gwq not found" >&2; return 1; }
