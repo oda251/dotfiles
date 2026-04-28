@@ -91,7 +91,10 @@ bash "$HOME/.claude/skills/spawn-task/setup-zellij.sh" \
 スクリプト内で以下を実施：
 
 * issue 引数なら `feat/<num>-<slug>` に変換
-* 既存 worktree (同 branch) があれば再利用、無ければ `gwq add -b <branch>` (新規 branch) または `gwq add <branch>` (既存 branch)
+* 既存 worktree (同 branch) があれば再利用、無ければ以下の優先順で worktree を作成:
+  1. ローカル branch が既存 → `gwq add <branch>`
+  2. リモート branch のみ存在 (PR 追従等) → `git fetch` で `origin/<branch>` を引き、`git branch --track <branch> origin/<branch>` してから `gwq add <branch>`。**push 時に既存 PR コミットを吹き飛ばさないために必須**
+  3. ローカル/リモート共に未存在 → `gwq add -b <branch>` で新規作成し `origin/HEAD` に reset
 * `gwq list -g --json` で作成された worktree の path を解決
 * `.task-prompt.md` を worktree にコピー
 * zellij 新タブを開いて cd（macOS は write-chars 経由）

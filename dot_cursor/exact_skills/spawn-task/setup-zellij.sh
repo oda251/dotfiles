@@ -64,8 +64,20 @@ else
   if git show-ref --verify --quiet "refs/heads/$BRANCH"; then
     gwq add "$BRANCH"
   else
-    gwq add -b "$BRANCH"
-    branch_is_new=1
+    # local branch is missing — check the remote before creating a fresh branch.
+    # remote-tracking ref が無ければ fetch を試行 (オフライン時は無視)
+    if ! git show-ref --verify --quiet "refs/remotes/origin/$BRANCH"; then
+      git fetch --quiet origin "$BRANCH" 2>/dev/null || true
+    fi
+    if git show-ref --verify --quiet "refs/remotes/origin/$BRANCH"; then
+      # existing remote branch (e.g. PR への追従) — tracking branch を作ってから worktree 化
+      git branch --track "$BRANCH" "origin/$BRANCH"
+      gwq add "$BRANCH"
+      echo "spawn-task: tracking existing remote branch 'origin/$BRANCH'"
+    else
+      gwq add -b "$BRANCH"
+      branch_is_new=1
+    fi
   fi
   # gwq add は path を直接 stdout しないので list -g --json で解決
   worktree_dir="$(
