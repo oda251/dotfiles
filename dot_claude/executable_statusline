@@ -31,6 +31,7 @@ ICON_CTX=$'󰍩'      # nf-md-message_text
 ICON_BRANCH=$''   # nf-pl-branch
 ICON_5H=$''       # nf-fa-clock_o
 ICON_7D=$''       # nf-fa-calendar
+ICON_GITHUB=$'󰉒'   # nf-md-folder_move (used when display_dir is org/repo)
 
 color_for_pct() {
   local pct="$1"
@@ -76,9 +77,31 @@ ctx_int="$(to_int "$ctx_pct")"
 h5_int="$(to_int "$h5_pct")"
 d7_int="$(to_int "$d7_pct")"
 
-# Directory: $HOME -> ~, last 3 components ---------------------------
+# Git ---------------------------------------------------------------
+branch=""
+remote_url=""
+if [[ -n "$cwd" ]] && command -v git >/dev/null 2>&1; then
+  branch="$(git -C "$cwd" branch --show-current 2>/dev/null || true)"
+  remote_url="$(git -C "$cwd" remote get-url origin 2>/dev/null || true)"
+fi
+
+# Directory display:
+#   1) git repo with origin remote -> "org/repo" extracted from URL
+#   2) otherwise -> path with $HOME -> ~ and last 3 components
 display_dir=""
-if [[ -n "$cwd" ]]; then
+icon_dir_active="$ICON_DIR"
+if [[ -n "$remote_url" ]]; then
+  url="${remote_url%.git}"
+  url="${url%/}"
+  repo="${url##*/}"
+  rest="${url%/$repo}"
+  org="${rest##*[/:]}"
+  if [[ -n "$org" && -n "$repo" && "$org" != "$repo" ]]; then
+    display_dir="$org/$repo"
+    [[ "$remote_url" == *github.com* ]] && icon_dir_active="$ICON_GITHUB"
+  fi
+fi
+if [[ -z "$display_dir" && -n "$cwd" ]]; then
   shortened="${cwd/#$HOME/~}"
   IFS='/' read -r -a segs <<<"$shortened"
   if [[ ${#segs[@]} -gt 0 && -z "${segs[0]}" ]]; then
@@ -97,19 +120,13 @@ if [[ -n "$cwd" ]]; then
   fi
 fi
 
-# Git ---------------------------------------------------------------
-branch=""
-if [[ -n "$cwd" ]] && command -v git >/dev/null 2>&1; then
-  branch="$(git -C "$cwd" branch --show-current 2>/dev/null || true)"
-fi
-
 SEP="${C_DIM} │ ${RESET}"
 
 # Line 1: dir | model | ctx | branch --------------------------------
 line1=""
 append_l1() { [[ -n "$line1" ]] && line1+="$SEP"; line1+="$1"; }
 
-[[ -n "$display_dir" ]] && append_l1 "${C_I_DIR}${ICON_DIR}${RESET} ${C_FG}${display_dir}${RESET}"
+[[ -n "$display_dir" ]] && append_l1 "${C_I_DIR}${icon_dir_active}${RESET} ${C_FG}${display_dir}${RESET}"
 [[ -n "$model" ]]       && append_l1 "${C_I_MODEL}${ICON_MODEL}${RESET} ${C_FG}${model}${RESET}"
 [[ -n "$ctx_int" ]]     && append_l1 "${C_I_CTX}${ICON_CTX}${RESET} $(color_for_pct "$ctx_int")${ctx_int}%${RESET}"
 [[ -n "$branch" ]]      && append_l1 "${C_I_BRANCH}${ICON_BRANCH}${RESET} ${C_FG}${branch}${RESET}"
