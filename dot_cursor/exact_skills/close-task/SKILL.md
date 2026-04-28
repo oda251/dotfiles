@@ -64,7 +64,7 @@ JSON 1 オブジェクトを stdout に出す:
 
 ### 3. obsidian journal 追記
 
-`AgentLog/YYYY-MM-DD.md` に 1 行 append。日次ファイルが無ければ `obsidian create` で作ってから append。
+本セッションで実際に行ったことを `AgentLog/` 日次ファイルに 1 行残す。
 
 #### フォーマット
 
@@ -76,7 +76,7 @@ URL は markdown リンク `[text](url)` 形式。URL が無いときは素の `
 
 | 要素 | 内容 | 省略時 |
 |---|---|---|
-| `HH:MM` | 現在時刻 | 必須 |
+| `HH:MM` | 現在時刻 | script が自動付与 |
 | `[<org/repo>]` | `repo_nwo` | repo 外なら丸ごと省略 |
 | `<TOPIC>` | 優先度: ① issue → ② PR title → ③ branch → ④ 自然言語によるトピック | 必須 |
 | `<URL>` | issue / PR の URL（markdown link で TOPIC に貼る） | 無ければ素の TOPIC のみ |
@@ -100,12 +100,11 @@ TOPIC の解決ルール:
 
 #### 実行
 
+時刻プレフィックスより後ろの本文を作って `append-journal.sh` に渡す:
+
 ```bash
-date_str=$(date +%Y-%m-%d)
-journal="AgentLog/${date_str}.md"
-obsidian create vault=obsidian-vault path="$journal" content="" 2>/dev/null || true
-obsidian append vault=obsidian-vault path="$journal" \
-  content="- $(date +%H:%M) [<org/repo>] [<TOPIC>](<URL>) — <SUMMARY>"
+bash "$HOME/.claude/skills/close-task/append-journal.sh" \
+  "[<org/repo>] [<TOPIC>](<URL>) — <SUMMARY>"
 ```
 
 サマリは generic 文言（「タスク完了」等）を避け、**本セッションで実際に何をしたか**を書く。
