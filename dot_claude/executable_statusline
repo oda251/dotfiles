@@ -27,8 +27,8 @@ C_I_7D="$(fg 247 118 142)"      # red-pink
 # Nerd Font glyphs (codepoints written as escapes so the source stays ASCII)
 ICON_DIR=$''      # nf-fa-folder
 ICON_MODEL=$''    # nf-fa-cog
-ICON_CTX=$''      # nf-fa-inbox
-ICON_BRANCH=$''   # nf-pl-branch (same glyph used in starship.toml)
+ICON_CTX=$'󰍩'      # nf-md-message_text
+ICON_BRANCH=$''   # nf-pl-branch
 ICON_5H=$''       # nf-fa-clock_o
 ICON_7D=$''       # nf-fa-calendar
 
