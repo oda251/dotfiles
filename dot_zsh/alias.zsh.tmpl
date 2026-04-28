@@ -121,3 +121,20 @@ cdw() {
     | awk -F'\t' '{print $2}') || return
   [[ -d "$target" ]] && builtin cd -- "$target"
 }
+
+# just runner: 引数あれば素通し、無ければカレント justfile から fzf で recipe を選んで実行
+j() {
+  command -v just >/dev/null 2>&1 || { echo "just not found" >&2; return 1; }
+  if (( $# > 0 )); then
+    just "$@"
+    return
+  fi
+  local recipe
+  recipe=$(just --list --unsorted 2>/dev/null \
+    | tail -n +2 \
+    | sed 's/^    //' \
+    | fzf --height 40% --reverse \
+    | awk '{print $1}') || return
+  [[ -z "$recipe" ]] && return
+  just "$recipe"
+}
