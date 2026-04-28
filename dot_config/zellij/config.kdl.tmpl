@@ -7,11 +7,11 @@ keybinds {
 {{- if eq .chezmoi.os "darwin" }}
         // macOS-style bindings
         bind "Super t" { NewTab; }
-        bind "Super w" { CloseTab; }
+        bind "Super w" { CloseFocus; }
 {{- else }}
         // Windows/Linux-style bindings
         bind "Ctrl t" { NewTab; }
-        bind "Ctrl w" { CloseTab; }
+        bind "Ctrl w" { CloseFocus; }
 {{- end }}
     }
     shared_except "locked" {
