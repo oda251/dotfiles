@@ -103,15 +103,46 @@ getg() {
   builtin cd -- "$(ghq root)/${url#https://}"
 }
 
-# gwq worktree へ fzf で cd
+# worktree へ fzf で cd
+# 既定: cwd が属する repo の worktree のみ。-g で ghq 管理下の全 repo を対象。
+# gwq list -g は worktree ごとに git を叩くため激遅 (実測 ~2s/件)。
+# 代わりに git worktree list --porcelain を直接読む。
+# 表示は "owner/repo  branch  path" の3カラム整列、検索対象は 1,2 カラムのみ。
 cdw() {
-  command -v gwq >/dev/null 2>&1 || { echo "gwq not found" >&2; return 1; }
-  command -v jq >/dev/null 2>&1 || { echo "jq not found" >&2; return 1; }
+  command -v ghq >/dev/null 2>&1 || { echo "ghq not found" >&2; return 1; }
+  local repos=()
+  if [[ "$1" == "-g" ]]; then
+    repos=("${(@f)$(ghq list -p)}")
+  else
+    local gitdir
+    gitdir=$(git rev-parse --git-common-dir 2>/dev/null) || {
+      echo "cdw: not in a git repository (use -g for all ghq repos)" >&2
+      return 1
+    }
+    repos=("${${gitdir:A}:h}")
+  fi
   local target
-  target=$(gwq list -g --json 2>/dev/null \
-    | jq -r '.[] | "\(.branch)\t\(.path)"' \
-    | fzf --with-nth=1 --delimiter='\t' \
-    | awk -F'\t' '{print $2}') || return
+  target=$(
+    for repo in "${repos[@]}"; do
+      short="${${repo:h}:t}/${repo:t}"
+      git -C "$repo" worktree list --porcelain 2>/dev/null \
+        | awk -v r="$short" '
+          /^worktree /{wt=$2; next}
+          /^branch /{sub(/^refs\/heads\//,"",$2); print r"\t"$2"\t"wt}
+          /^detached$/{print r"\t(detached)\t"wt}
+        '
+    done \
+    | awk -F'\t' '
+      { rec[NR]=$0; if(length($1)>m1)m1=length($1); if(length($2)>m2)m2=length($2) }
+      END {
+        for(i=1;i<=NR;i++) {
+          split(rec[i],f,"\t")
+          printf "%-*s  %-*s  %s\n", m1, f[1], m2, f[2], f[3]
+        }
+      }' \
+    | fzf --nth=1,2 \
+    | awk '{print $NF}'
+  ) || return
   [[ -d "$target" ]] && builtin cd -- "$target"
 }
 
