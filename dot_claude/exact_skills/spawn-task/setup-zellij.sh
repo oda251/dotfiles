@@ -6,7 +6,7 @@
 #
 # Behavior:
 #   - issue 番号 / URL の場合 gh+jq で `feat/<num>-<slug>` に変換
-#   - `gwq add -b <branch>` でカレントリポの worktree を作成
+#   - ローカル branch を ensure_local_branch で揃えてから `gwq add <branch>` で worktree 作成
 #     (basedir は ~/.config/gwq/config.toml で設定済み: ~/gwq)
 #   - <prompt-file> を <worktree>/.task-prompt.md にコピー
 #   - zellij 新タブ (--cwd は darwin 不安定なので write-chars で cd) を開いて claude を起動
@@ -45,6 +45,37 @@ resolve_branch() {
   printf '%s' "$arg"
 }
 
+# ローカル branch を「あるべき start-point」で用意する。優先順位:
+#   1. 既存のローカル branch を再利用
+#   2. リモートに同名 branch があれば tracking branch として作成 (PR 追従)
+#   3. どこにも無ければ origin/HEAD (= default branch) から新規作成
+# 呼び出し後は `gwq add <branch>` で worktree 化するだけでよい。
+ensure_local_branch() {
+  local branch="$1"
+
+  if git show-ref --verify --quiet "refs/heads/$branch"; then
+    return 0
+  fi
+
+  # remote-tracking ref が無ければ fetch を試行 (オフライン時は無視)
+  if ! git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+    git fetch --quiet origin "$branch" 2>/dev/null || true
+  fi
+
+  if git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+    git branch --track "$branch" "origin/$branch"
+    echo "spawn-task: tracking existing remote branch 'origin/$branch'"
+    return 0
+  fi
+
+  local default_ref
+  default_ref="$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/||')"
+  default_ref="${default_ref:-origin/main}"
+  git fetch --quiet origin "${default_ref#origin/}" 2>/dev/null || true
+  git branch "$branch" "$default_ref"
+  echo "spawn-task: new branch '$branch' created from $default_ref"
+}
+
 BRANCH="$(resolve_branch "$ARG")"
 [[ -n "$BRANCH" ]] || { echo "could not resolve branch from '$ARG'" >&2; exit 1; }
 
@@ -60,25 +91,9 @@ worktree_dir="$(
 if [[ -n "$worktree_dir" ]]; then
   echo "spawn-task: reusing existing worktree at $worktree_dir"
 else
-  branch_is_new=0
-  if git show-ref --verify --quiet "refs/heads/$BRANCH"; then
-    gwq add "$BRANCH"
-  else
-    # local branch is missing — check the remote before creating a fresh branch.
-    # remote-tracking ref が無ければ fetch を試行 (オフライン時は無視)
-    if ! git show-ref --verify --quiet "refs/remotes/origin/$BRANCH"; then
-      git fetch --quiet origin "$BRANCH" 2>/dev/null || true
-    fi
-    if git show-ref --verify --quiet "refs/remotes/origin/$BRANCH"; then
-      # existing remote branch (e.g. PR への追従) — tracking branch を作ってから worktree 化
-      git branch --track "$BRANCH" "origin/$BRANCH"
-      gwq add "$BRANCH"
-      echo "spawn-task: tracking existing remote branch 'origin/$BRANCH'"
-    else
-      gwq add -b "$BRANCH"
-      branch_is_new=1
-    fi
-  fi
+  ensure_local_branch "$BRANCH"
+  gwq add "$BRANCH"
+
   # gwq add は path を直接 stdout しないので list -g --json で解決
   worktree_dir="$(
     gwq list -g --json \
@@ -87,18 +102,6 @@ else
   )"
   [[ -n "$worktree_dir" && -d "$worktree_dir" ]] \
     || { echo "spawn-task: gwq add succeeded but worktree path not found" >&2; exit 1; }
-
-  # 新規ブランチは呼び出し元 HEAD から切られる (gwq に start-point 指定が無い) ため、
-  # 明示的に origin の default branch に揃える。git reset は post-checkout を発火させない。
-  if [[ "$branch_is_new" == "1" ]]; then
-    default_ref="$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/||')"
-    default_ref="${default_ref:-origin/main}"
-    default_branch="${default_ref#origin/}"
-    git fetch --quiet origin "$default_branch" || true
-    (cd "$worktree_dir" && git reset --hard "$default_ref") \
-      || { echo "spawn-task: failed to reset worktree to $default_ref" >&2; exit 1; }
-    echo "spawn-task: new branch '$BRANCH' rebased onto $default_ref"
-  fi
 fi
 
 cp "$PROMPT_SRC" "$worktree_dir/.task-prompt.md"
