@@ -166,8 +166,9 @@ if command -v zsh >/dev/null 2>&1; then
 fi
 
 # OSC 7: ターミナルに CWD を通知（Zellij のペイン/タブ CWD 引き継ぎに必要）
+# stdout に出すと $(cd ... && pwd) 等のコマンド代入に escape が混入するため /dev/tty へ。
 __notify_terminal_cwd() {
-  printf '\e]7;file://%s%s\e\\' "${HOST}" "${PWD}"
+  printf '\e]7;file://%s%s\e\\' "${HOST}" "${PWD}" >/dev/tty 2>/dev/null
 }
 autoload -Uz add-zsh-hook
 add-zsh-hook chpwd __notify_terminal_cwd
