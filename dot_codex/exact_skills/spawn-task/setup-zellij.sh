@@ -71,7 +71,7 @@ ensure_local_branch() {
   local default_ref
   default_ref="$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/||')"
   default_ref="${default_ref:-origin/main}"
-  git fetch --quiet origin "${default_ref#origin/}" 2>/dev/null || true
+  git fetch --quiet origin "${default_ref#origin/}" || true
   git branch "$branch" "$default_ref"
   echo "spawn-task: new branch '$branch' created from $default_ref"
 }
@@ -94,12 +94,7 @@ else
   ensure_local_branch "$BRANCH"
   gwq add "$BRANCH"
 
-  # gwq add は path を直接 stdout しないので list -g --json で解決
-  worktree_dir="$(
-    gwq list -g --json \
-      | jq -r --arg b "$BRANCH" '.[] | select(.branch == $b) | .path' \
-      | head -n1
-  )"
+  worktree_dir="$(gwq get "$BRANCH" 2>/dev/null || true)"
   [[ -n "$worktree_dir" && -d "$worktree_dir" ]] \
     || { echo "spawn-task: gwq add succeeded but worktree path not found" >&2; exit 1; }
 fi

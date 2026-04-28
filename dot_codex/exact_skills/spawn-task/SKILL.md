@@ -88,19 +88,9 @@ bash "$HOME/.claude/skills/spawn-task/setup-zellij.sh" \
   "<permission_mode>"
 ```
 
-スクリプト内で以下を実施：
+スクリプトの責務は「issue/branch 引数の正規化 → worktree 用意 → `.task-prompt.md` コピー → zellij 新タブで claude 起動」。詳細な分岐 (ローカル/リモート/新規 branch の判定など) はスクリプト内で完結しており、呼び出し側は引数を渡すだけでよい。
 
-* issue 引数なら `feat/<num>-<slug>` に変換
-* 既存 worktree (同 branch) があれば再利用、無ければ以下の優先順で worktree を作成:
-  1. ローカル branch が既存 → `gwq add <branch>`
-  2. リモート branch のみ存在 (PR 追従等) → `git fetch` で `origin/<branch>` を引き、`git branch --track <branch> origin/<branch>` してから `gwq add <branch>`。**push 時に既存 PR コミットを吹き飛ばさないために必須**
-  3. ローカル/リモート共に未存在 → `gwq add -b <branch>` で新規作成し `origin/HEAD` に reset
-* `gwq list -g --json` で作成された worktree の path を解決
-* `.task-prompt.md` を worktree にコピー
-* zellij 新タブを開いて cd（macOS は write-chars 経由）
-* 新タブに `command claude --permission-mode <mode> '.task-prompt.md を読んで...'` を送る
-
-`command claude` は zsh 側の `claude` 関数（`--dangerously-skip-permissions --remote-control` を強制）を迂回するため。
+成功時、worktree path を stdout に 1 行出力する。
 
 ## 5. 完了報告
 
