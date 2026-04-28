@@ -62,12 +62,14 @@ function y() {
 	rm -f -- "$tmp"
 }
 
+_fzf_repo_preview='eza --tree --level=2 --color=always --icons=auto'
+
 # ghq クローン済みリポジトリへ fzf で cd
 cdg() {
   command -v ghq >/dev/null 2>&1 || { echo "ghq not found" >&2; return 1; }
   local root repo
   root="$(ghq root)" || return 1
-  repo=$(ghq list | fzf --height 40% --reverse --preview "ls -la $root/{}") || return
+  repo=$(ghq list | fzf --preview "$_fzf_repo_preview $root/{}") || return
   builtin cd -- "$root/$repo"
 }
 
@@ -76,7 +78,7 @@ rmg() {
   command -v ghq >/dev/null 2>&1 || { echo "ghq not found" >&2; return 1; }
   local root repos
   root="$(ghq root)" || return 1
-  repos=$(ghq list | fzf -m --height 40% --reverse --preview "ls -la $root/{}") || return
+  repos=$(ghq list | fzf -m --preview "$_fzf_repo_preview $root/{}") || return
   [[ -z "$repos" ]] && return
   while IFS= read -r repo; do
     [[ -z "$repo" ]] && continue
@@ -85,25 +87,16 @@ rmg() {
 }
 
 # gh で取れる repo を fzf で選んで ghq get → cd（無引数=自分、引数=owner/org）
-# fzf は即座に開き、gh の結果が届き次第ストリームで流し込む
+# 注: gh repo list はページネーションを内部で完了させてから出力するため、
+#     fzf には全件揃ってから流れる (体感は数百ms-数秒の待ちあり)
 getg() {
   command -v gh  >/dev/null 2>&1 || { echo "gh not found"  >&2; return 1; }
   command -v ghq >/dev/null 2>&1 || { echo "ghq not found" >&2; return 1; }
   local owner=${1:-} pick url
-  pick=$(
-    { if [[ -n "$owner" ]]; then
-        gh repo list "$owner" --limit 1000 \
-          --json nameWithOwner,description,url \
-          -q '.[] | [.nameWithOwner, (.description // ""), .url] | @tsv'
-      else
-        gh repo list --limit 1000 \
-          --json nameWithOwner,description,url \
-          -q '.[] | [.nameWithOwner, (.description // ""), .url] | @tsv'
-      fi
-    } | fzf --height 40% --reverse \
-            --with-nth=1,2 --delimiter='\t' \
-            --preview 'echo {2}'
-  ) || return
+  pick=$(gh repo list ${owner:+"$owner"} --limit 1000 \
+      --json nameWithOwner,description,url \
+      -q '.[] | [.nameWithOwner, (.description // ""), .url] | @tsv' \
+    | fzf --with-nth=1,2 --delimiter='\t' --preview 'echo {2}') || return
   url=$(awk -F'\t' '{print $3}' <<< "$pick")
   [[ -z "$url" ]] && return
   ghq get -- "$url" || return
@@ -117,7 +110,7 @@ cdw() {
   local target
   target=$(gwq list -g --json 2>/dev/null \
     | jq -r '.[] | "\(.branch)\t\(.path)"' \
-    | fzf --height 40% --reverse --with-nth=1 --delimiter='\t' \
+    | fzf --with-nth=1 --delimiter='\t' \
     | awk -F'\t' '{print $2}') || return
   [[ -d "$target" ]] && builtin cd -- "$target"
 }
@@ -133,7 +126,7 @@ just() {
   recipe=$(command just --list --unsorted 2>/dev/null \
     | tail -n +2 \
     | sed 's/^    //' \
-    | fzf --height 40% --reverse \
+    | fzf \
     | awk '{print $1}') || return
   [[ -z "$recipe" ]] && return
   command just "$recipe"
