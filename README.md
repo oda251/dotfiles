@@ -30,9 +30,6 @@ chezmoi init --apply https://github.com/oda251/dotfiles.git
 | **mise** | 言語ランタイム + CLI ツールの統一管理 |
 | **brew** (macOS) / **winget** (Windows) | mise で扱わないアプリ |
 | **pulumi** | GitHub repos / NewRelic ダッシュボードの IaC |
-| **obsidian** | ドキュメント・作業ログ (`~/obsidian-vault`) |
-| **ghq** + **gwq** | git リポ / worktree 管理 |
-| **lefthook** | このリポジトリ自身の pre-commit |
 
 ## AI エージェント設定
 
