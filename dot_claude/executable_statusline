@@ -1,0 +1,134 @@
+#!/usr/bin/env bash
+# Claude Code statusLine — 3-line layout inspired by:
+#   https://zenn.dev/suthio/articles/f832922e18f994
+set -euo pipefail
+
+input="$(cat)"
+
+# ANSI helpers ------------------------------------------------------
+ESC=$'\033'
+RESET="${ESC}[0m"
+fg() { printf '%s[38;2;%d;%d;%dm' "$ESC" "$1" "$2" "$3"; }
+
+C_LOW="$(fg 158 206 106)"   # vivid green   (<50%)
+C_MID="$(fg 224 175 104)"   # vivid amber   (50-79%)
+C_HIGH="$(fg 247 118 142)"  # vivid red     (>=80%)
+C_DIM="$(fg 74 88 92)"      # separator gray
+C_FG="$(fg 198 208 245)"    # default text
+
+# Vivid per-icon colors -------------------------------------------
+C_I_DIR="$(fg 122 162 247)"     # blue
+C_I_MODEL="$(fg 187 154 247)"   # mauve
+C_I_CTX="$(fg 125 207 255)"     # cyan
+C_I_BRANCH="$(fg 255 158 100)"  # orange
+C_I_5H="$(fg 125 207 255)"      # cyan
+C_I_7D="$(fg 247 118 142)"      # red-pink
+
+# Nerd Font glyphs (codepoints written as escapes so the source stays ASCII)
+ICON_DIR=$''      # nf-fa-folder
+ICON_MODEL=$''    # nf-fa-cog
+ICON_CTX=$''      # nf-fa-inbox
+ICON_BRANCH=$''   # nf-pl-branch (same glyph used in starship.toml)
+ICON_5H=$''       # nf-fa-clock_o
+ICON_7D=$''       # nf-fa-calendar
+
+color_for_pct() {
+  local pct="$1"
+  if   (( pct < 50 )); then printf '%s' "$C_LOW"
+  elif (( pct < 80 )); then printf '%s' "$C_MID"
+  else                       printf '%s' "$C_HIGH"
+  fi
+}
+
+progress_bar() {
+  local pct="$1" width="${2:-10}"
+  local filled=$(( pct * width / 100 ))
+  (( filled > width )) && filled=$width
+  (( filled < 0 ))     && filled=0
+  local empty=$(( width - filled ))
+  local out
+  out="$(color_for_pct "$pct")"
+  local i
+  for ((i=0; i<filled; i++)); do out+="▰"; done
+  out+="$C_DIM"
+  for ((i=0; i<empty; i++)); do out+="▱"; done
+  out+="$RESET"
+  printf '%s' "$out"
+}
+
+to_int() {
+  local v="${1:-}"
+  if [[ "$v" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
+    printf '%.0f' "$v"
+  fi
+}
+
+# Parse stdin -------------------------------------------------------
+jqv() { printf '%s' "$input" | jq -r "$1" 2>/dev/null || true; }
+
+model="$(jqv '.model.display_name // empty')"
+cwd="$(jqv '.cwd // .workspace.current_dir // empty')"
+ctx_pct="$(jqv '.context_window.used_percentage // empty')"
+h5_pct="$(jqv '.rate_limits.five_hour.used_percentage // empty')"
+d7_pct="$(jqv '.rate_limits.seven_day.used_percentage // empty')"
+
+ctx_int="$(to_int "$ctx_pct")"
+h5_int="$(to_int "$h5_pct")"
+d7_int="$(to_int "$d7_pct")"
+
+# Directory: $HOME -> ~, last 3 components ---------------------------
+display_dir=""
+if [[ -n "$cwd" ]]; then
+  shortened="${cwd/#$HOME/~}"
+  IFS='/' read -r -a segs <<<"$shortened"
+  if [[ ${#segs[@]} -gt 0 && -z "${segs[0]}" ]]; then
+    segs=("${segs[@]:1}")
+    leading="/"
+  else
+    leading=""
+  fi
+  if (( ${#segs[@]} == 0 )); then
+    display_dir="${leading:-/}"
+  elif (( ${#segs[@]} > 3 )); then
+    tail_segs=("${segs[@]: -3}")
+    display_dir="…/$(IFS=/; echo "${tail_segs[*]}")"
+  else
+    display_dir="${leading}$(IFS=/; echo "${segs[*]}")"
+  fi
+fi
+
+# Git ---------------------------------------------------------------
+branch=""
+if [[ -n "$cwd" ]] && command -v git >/dev/null 2>&1; then
+  branch="$(git -C "$cwd" branch --show-current 2>/dev/null || true)"
+fi
+
+SEP="${C_DIM} │ ${RESET}"
+
+# Line 1: dir | model | ctx | branch --------------------------------
+line1=""
+append_l1() { [[ -n "$line1" ]] && line1+="$SEP"; line1+="$1"; }
+
+[[ -n "$display_dir" ]] && append_l1 "${C_I_DIR}${ICON_DIR}${RESET} ${C_FG}${display_dir}${RESET}"
+[[ -n "$model" ]]       && append_l1 "${C_I_MODEL}${ICON_MODEL}${RESET} ${C_FG}${model}${RESET}"
+[[ -n "$ctx_int" ]]     && append_l1 "${C_I_CTX}${ICON_CTX}${RESET} $(color_for_pct "$ctx_int")${ctx_int}%${RESET}"
+[[ -n "$branch" ]]      && append_l1 "${C_I_BRANCH}${ICON_BRANCH}${RESET} ${C_FG}${branch}${RESET}"
+
+# Line 2: 5h --------------------------------------------------------
+line2=""
+if [[ -n "$h5_int" ]]; then
+  line2="${C_I_5H}${ICON_5H}${RESET} ${C_FG}5h${RESET}  $(progress_bar "$h5_int")  $(color_for_pct "$h5_int")${h5_int}%${RESET}"
+fi
+
+# Line 3: 7d --------------------------------------------------------
+line3=""
+if [[ -n "$d7_int" ]]; then
+  line3="${C_I_7D}${ICON_7D}${RESET} ${C_FG}7d${RESET}  $(progress_bar "$d7_int")  $(color_for_pct "$d7_int")${d7_int}%${RESET}"
+fi
+
+# Emit --------------------------------------------------------------
+output="$line1"
+[[ -n "$line2" ]] && output+=$'\n'"$line2"
+[[ -n "$line3" ]] && output+=$'\n'"$line3"
+
+printf '%s' "$output"
