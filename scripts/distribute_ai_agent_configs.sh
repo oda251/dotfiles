@@ -18,16 +18,41 @@ trim() {
   printf "%s" "$value"
 }
 
+# Apply chezmoi attribute prefix (executable_) to destination basename
+# when the source file has the executable bit. Destinations under dot_*/
+# are chezmoi-managed and need this prefix to preserve the exec bit.
+chezmoi_dst_rel() {
+  local src="$1"
+  local dst_rel="$2"
+  if [[ ! -x "$src" ]]; then
+    printf "%s" "$dst_rel"
+    return
+  fi
+  local dst_dir dst_base
+  dst_dir="$(dirname "$dst_rel")"
+  dst_base="$(basename "$dst_rel")"
+  if [[ "$dst_base" != executable_* ]]; then
+    dst_base="executable_$dst_base"
+  fi
+  if [[ "$dst_dir" == "." ]]; then
+    printf "%s" "$dst_base"
+  else
+    printf "%s/%s" "$dst_dir" "$dst_base"
+  fi
+}
+
 sync_copy() {
   local src_rel="$1"
   local dst_rel="$2"
   local src="$repo_root/$src_rel"
-  local dst="$repo_root/$dst_rel"
 
   if [[ ! -f "$src" ]]; then
     echo "source file not found: $src_rel" >&2
     exit 1
   fi
+
+  dst_rel="$(chezmoi_dst_rel "$src" "$dst_rel")"
+  local dst="$repo_root/$dst_rel"
 
   mkdir -p "$(dirname "$dst")"
   if [[ ! -f "$dst" ]] || ! cmp -s "$src" "$dst"; then
@@ -113,12 +138,26 @@ while IFS= read -r raw_line || [[ -n "$raw_line" ]]; do
       rel="${file#"$src_abs/"}"
       sync_copy "$src_dir/$rel" "$dst_dir/$rel"
     done < <(find "$src_abs" -type f -print0)
-    # Remove files in destination that no longer exist in source
+    # Remove files in destination that no longer correspond to a source file.
+    # A destination file is stale if either:
+    #   (a) no source file exists for its logical rel (with executable_ stripped), or
+    #   (b) the destination basename doesn't match what the current source state
+    #       would produce (e.g. source gained/lost the executable bit).
     dst_abs="$repo_root/$dst_dir"
     if [[ -d "$dst_abs" ]]; then
       while IFS= read -r -d '' file; do
         rel="${file#"$dst_abs/"}"
-        if [[ ! -f "$src_abs/$rel" ]]; then
+        rel_dir="$(dirname "$rel")"
+        rel_base="$(basename "$rel")"
+        rel_base_logical="${rel_base#executable_}"
+        if [[ "$rel_dir" == "." ]]; then
+          src_rel_check="$rel_base_logical"
+          expected_rel="$(chezmoi_dst_rel "$src_abs/$src_rel_check" "$rel_base_logical")"
+        else
+          src_rel_check="$rel_dir/$rel_base_logical"
+          expected_rel="$(chezmoi_dst_rel "$src_abs/$src_rel_check" "$src_rel_check")"
+        fi
+        if [[ ! -f "$src_abs/$src_rel_check" ]] || [[ "$expected_rel" != "$rel" ]]; then
           rm "$file"
           echo "removed: $dst_dir/$rel (no longer in source)"
           sync_count=$((sync_count + 1))
