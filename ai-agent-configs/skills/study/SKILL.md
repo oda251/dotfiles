@@ -51,6 +51,7 @@ inputs:
 ```
 note/{date}-{topic-slug}.md            # 通常はこちら
 {org}/note/{date}-{topic-slug}.md      # 明確に特定リポジトリの学習なら
+term/{word-slug}.md                    # ユーザが単語に明示言及したとき（後述「単語ページ」）
 ```
 
 - `date` = `YYYY-MM-DD`
@@ -105,6 +106,52 @@ obsidian create vault=obsidian-vault path="note/2026-05-11-tcp-congestion-contro
 ```
 
 作成後、`obsidian open vault=obsidian-vault path="..."` で開けることをユーザに伝える。
+
+## 単語ページ (term/)
+
+ユーザが特定の単語に明示的に言及した場合、note と並列に `term/` 配下の単語ページとして作成する（Scrapbox 風に単語間を相互リンク）。
+
+ノート構造・タグ規約・フェーズ構成（初回回答 / 追加質問ループ / クイズ）は通常の study ノートと同じ。固有事項はパスとリンクのみ。
+
+### トリガー
+
+- 単発の用語質問（「<word> って何？」）
+- study セッション中の派生質問でユーザが単語に明示言及したとき
+
+### パス
+
+```
+term/{word-slug}.md
+```
+
+- `word-slug` = kebab-case。日付プレフィックスなし
+- 例: `term/mutex.md`, `term/cap-theorem.md`, `term/tcp-fast-open.md`
+
+### 同名衝突（辞書方式）
+
+同じ `word-slug` で異なる語義が出てきた場合、新ファイルを作らず **同一ファイル内に `## {分野ラベル}` で語義セクションを並べる**。分野ラベルは frontmatter の `topic/*` `tech/*` タグと整合させる。
+
+```markdown
+# python
+
+## プログラミング言語
+...（概要・詳細・参考をこの下にぶら下げる）
+
+## ギリシャ神話
+...
+```
+
+手順:
+
+1. 作成前に `obsidian read path="term/{slug}.md"` で存在確認
+2. 既存あり → `obsidian append` で新語義セクション（`## {分野ラベル}` 以下）を追加。frontmatter の tags は既存とマージして `obsidian replace` で更新
+3. 既存なし → `obsidian create` で新規作成
+
+### リンクの貼り方
+
+- term ページ作成時、本文に出現する単語のうち `term/` に既存ページがあるものは自動で `[[term/word]]` リンク化
+- 親 study ノートから派生して term ページを作った場合、親ノートの該当箇所（QA エントリ末尾 or 関連セクション）に `[[term/word]]` を 1 箇所追加して逆リンクを張る
+- 全文書を遡及してリンク化はしない
 
 ## [2] 追加質問ループ
 
@@ -188,8 +235,10 @@ obsidian append vault=obsidian-vault path="note/2026-05-11-...md" content="$(cat
 
 完了前に確認:
 
-- ノートのパス・タグ規約は docs スキル準拠か（`~/.references/policy/documentation.md` および `note/{date}-{slug}.md`）
+- ノートのパス・タグ規約は docs スキル準拠か（`~/.references/policy/documentation.md` および `note/{date}-{slug}.md` / `term/{word-slug}.md`）
 - 全ての事実にインライン出典 or 未検証マーカーが付いているか
 - 追加質問の性質分類（A/B/C/D）に従って QA 追記 / 本文更新を正しく行ったか
+- term ページ作成時、同名衝突を `obsidian read` で確認し辞書方式（`## {分野ラベル}`）で追加したか
+- term ページ作成時、本文の既知 term への `[[term/word]]` リンク化と、親ノートからの逆リンクを張ったか
 - クイズはユーザの明示合図を待ったか（自発的に促していないか）
 - クイズで露呈した弱点をノートに反映したか
