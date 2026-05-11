@@ -21,8 +21,10 @@ inputs:
 cat > /tmp/doc.md << 'EOF'
 {本文}
 EOF
-obsidian create vault=obsidian-vault path="{path}" content="$(cat /tmp/doc.md)"
+obsidian create vault=obsidian-vault path="{path}" content="$(cat /tmp/doc.md)" open
 ```
+
+作成時は必ず `open` を付与し、保存と同時に Obsidian で開く。
 
 ### パス規約
 
@@ -54,7 +56,3 @@ nested tag を活用する。ルートは以下から選ぶ。子要素は自由
 ### 関連ドキュメント
 
 依存・関連ドキュメントは本文内に `[[path/to/doc]]` で wikilink を張る。Obsidian のバックリンクで辿れる。
-
-## ルール
-
-- 作成・更新したファイルは `obsidian open vault=obsidian-vault path="{path}"` で開けることをユーザーに伝える
