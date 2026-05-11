@@ -77,6 +77,15 @@ ctx_int="$(to_int "$ctx_pct")"
 h5_int="$(to_int "$h5_pct")"
 d7_int="$(to_int "$d7_pct")"
 
+# Clamp displayed percentages at 100 (Claude Code can report >100% during
+# compaction or when over the soft auto-compact threshold).
+for var in ctx_int h5_int d7_int; do
+  v="${!var}"
+  if [[ -n "$v" ]] && (( v > 100 )); then
+    printf -v "$var" '%s' 100
+  fi
+done
+
 # Git ---------------------------------------------------------------
 branch=""
 remote_url=""
