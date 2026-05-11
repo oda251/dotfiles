@@ -41,17 +41,42 @@ note/{date}-{title}.md          # repoに紐づかない
 
 ### タグ
 
-nested tag を活用する。ルートは以下から選ぶ。子要素は自由。
+nested tag を活用する。**個数ではなく分野で網羅性を担保する**。下記の必須カテゴリそれぞれから最低 1 つ拾う。
 
 必須:
 
-- `purpose/*` — 目的（`purpose/research`, `purpose/meeting`, `purpose/decision` 等）
-- `topic/*` — トピック
+- `purpose/*` — 目的（`purpose/research`, `purpose/meeting`, `purpose/decision`, `purpose/comparison` 等）
+- `ndc/*` — 汎用分野分類。日本十進分類法（NDC）の 3 桁コードで付ける。あらゆるノートに付与し「広い知の中での位置」を示す。語彙: `~/.references/taxonomy/ndc.md`
+
+技術関連ノートの場合（追加で必須）:
+
+- `tech/*` — 技術。**具体ツール（`tech/typescript`, `tech/hono`, `tech/terraform`）と概念レベル（`tech/async`, `tech/middleware`, `tech/authentication`）の両方を拾う**。ツール名だけで埋めない
+- `ccs/*` — 計算機分野の領域分類。ACM CCS 2012 のトップレベル 13 区分に準拠。語彙: `~/.references/taxonomy/ccs.md`
 
 該当時:
 
 - `repo/*` — リポジトリ紐付き（`repo/{org}/{repo}`）
-- `tech/*` — 技術領域（`tech/typescript`, `tech/terraform` 等）
+
+**運用ルール**:
+
+- 「`tech/*` がツール名だけ」になっていたら必ず立ち止まる。そのノートで扱っている**概念・パターン・問題領域**も `tech/*` で表現する
+- `ccs/*` は計算機分野の分類、`ndc/*` は汎用知識分類、`tech/*` は実体（ツール+概念）の語彙、と役割を分ける
+
+例: Hono の認証ミドルウェア比較ノート
+
+```yaml
+tags:
+  - purpose/research
+  - purpose/comparison
+  - tech/hono           # ツール
+  - tech/typescript     # ツール
+  - tech/middleware     # 概念
+  - tech/authentication # 概念
+  - ccs/security        # CCS 領域
+  - ccs/software        # CCS 領域
+  - ndc/007             # NDC: 情報科学
+  - ndc/548             # NDC: 情報工学
+```
 
 ### 関連ドキュメント
 

@@ -68,7 +68,7 @@ APIで取れない場合（大きなrepo・branchデフォルト違い等）は 
 
 ## 4. draft作成
 
-docs skill のパス規約に従い `{org}/note/{date}-{title}.md` として作成する。
+docs skill を経由して `{org}/note/{date}-{title}.md` として作成する。
 
 ### 本文の原則
 
@@ -79,7 +79,7 @@ docs skill のパス規約に従い `{org}/note/{date}-{title}.md` として作�
 
 ## 5. ユーザ確認
 
-draft を `obsidian open` で見せて承認を取る。community guidelines 抵触や類似issue等の懸念があれば伝える。
+開かれた draft でユーザに承認を取る。community guidelines 抵触や類似issue等の懸念があれば伝える。
 
 ## 6. 投稿 / 紐付け
 

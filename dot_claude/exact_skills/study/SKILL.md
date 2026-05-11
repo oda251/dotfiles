@@ -79,14 +79,12 @@ tags:
 
 {セクション分け。コード例・図（mermaid）も活用}
 
-## QA
-
-<!-- 追加質問はここに Q/A 形式で追記される -->
-
 ## 参考
 
 - [{タイトル}]({URL})
 ```
+
+`## QA` のような QA 用ラッパーセクションは **置かない**。追加質問は `### Q: ...` エントリとして末尾に直接 append する（後述）。
 
 ### 作成コマンド例
 
@@ -114,7 +112,7 @@ obsidian create vault=obsidian-vault path="note/2026-05-11-tcp-congestion-contro
 
 | 質問の性質 | 例 | 反映先 |
 |---|---|---|
-| (A) 概念に関する新規質問 | 「Slow Start と Congestion Avoidance の違いは？」 | `## QA` に追記 |
+| (A) 概念に関する新規質問 | 「Slow Start と Congestion Avoidance の違いは？」 | 末尾に `### Q: ...` で追記 |
 | (B) 本文の記述に対する質問/疑問 | 「『閾値』って具体的に何の値？」「ここの説明があいまい」 | 本文の該当箇所を更新（明確化・補強・訂正） |
 | (C) 両方の性質を持つ | 概念質問だが、答えると本文の弱い部分が露呈する | (A) と (B) の **両方** を行う |
 | (D) 本文に要改善事項が発覚 | 回答中に本文の誤り・抜け漏れに気付いた | 本文を更新（QA追記は質問次第） |
@@ -129,7 +127,7 @@ obsidian create vault=obsidian-vault path="note/2026-05-11-tcp-congestion-contro
 
 ### QA 追記 (A/C)
 
-`## QA` セクションに以下フォーマットで `obsidian append` で追記:
+`obsidian append` で末尾に `### Q: ...` エントリとして追記する。
 
 ```markdown
 
