@@ -1,6 +1,6 @@
 ---
 name: study
-description: "普遍的な概念・技術・理論を学ぶ Q&A セッション。「<X>について教えて」「<X>を学びたい」「study」「勉強したい」等の依頼で起動する。Out of scope: 現在のプロジェクト・リポジトリ・特定ファイルや関数・進行中の作業に関する質問 — コード解説や docs スキルで対応する。"
+description: "普遍的な概念・技術・理論（プログラミング・数学・自然科学・人文など、リポジトリ非依存の題材）を学ぶ Q&A セッション。「<X>について教えて」「<X>を学びたい」「study」「勉強したい」等の依頼で起動する。Out of scope: 現在のプロジェクト・リポジトリ・特定ファイルや関数・進行中の作業に関する質問 — コード解説や docs スキルで対応する。"
 inputs:
   topic: 学習テーマ（例: TCP輻輳制御、useEffect、CAP定理）
   question: ユーザの最初の質問
@@ -10,7 +10,7 @@ inputs:
 
 ## 適用範囲
 
-このスキルは **題材が普遍的に通用する学習** に限定する。
+このスキルは **題材が普遍的に通用する学習** に限定する。判断基準は「同じ説明が **別のプロジェクトの読者にもそのまま価値を持つか**」。
 
 | トリガーする | しない |
 |---|---|
@@ -18,9 +18,7 @@ inputs:
 | 「JWTってどう動くの？」 | 「この repo のauth middlewareの流れ追って」 |
 | 「CAP定理って？」 | 「我々のDB構成のトレードオフを整理して」 |
 
-判断基準: 「同じ説明が **別のプロジェクトの読者にもそのまま価値を持つか**」。Yes → study。No（特定コード・特定構成への依存が強い） → 通常の会話 or docs スキルで対応。
-
-ハイブリッド（一般概念 + 自プロジェクトでの実例）の場合は、**一般部分のみ** をノート化し、プロジェクト固有の話は会話に留める。それでも残したいなら docs スキルへ。
+ハイブリッド（一般概念 + 自プロジェクト実例）の場合は **一般部分のみ** をノート化し、プロジェクト固有の話は会話に留める。それでも残したいなら docs スキルへ。
 
 ## フェーズ構成
 
@@ -32,12 +30,12 @@ inputs:
 [3] 記述式クイズによる理解確認
 ```
 
+ユーザが単語に明示言及した場合は [1]/[2] と並行して **単語ページ (term/)** を作成する。詳細は `references/term-pages.md`。
+
 ## 共通ルール
 
 - vault 操作は `obsidian` コマンド経由のみ。ファイルシステム直書き禁止
-- 出典は **インラインで** 付ける（`~/.references/policy/documentation.md` に従う）
-  - 出典が無い情報は **（未検証）** と明記
-  - WebSearch スニペットは出典にしない。WebFetch で本文確認した上で引用
+- 出典・未検証マーカーの扱いは `~/.references/policy/documentation.md` に従う
 - 確認できない事項は捏造せず「わかりません」と明言
 - 本文は学習者目線で書く。専門用語は初出時に簡潔な定義を添える
 
@@ -51,7 +49,7 @@ inputs:
 ```
 note/{date}-{topic-slug}.md            # 通常はこちら
 {org}/note/{date}-{topic-slug}.md      # 明確に特定リポジトリの学習なら
-term/{word-slug}.md                    # ユーザが単語に明示言及したとき（後述「単語ページ」）
+term/{word-slug}.md                    # 単語への明示言及時（references/term-pages.md 参照）
 ```
 
 - `date` = `YYYY-MM-DD`
@@ -107,52 +105,6 @@ obsidian create vault=obsidian-vault path="note/2026-05-11-tcp-congestion-contro
 
 作成後、`obsidian open vault=obsidian-vault path="..."` で開けることをユーザに伝える。
 
-## 単語ページ (term/)
-
-ユーザが特定の単語に明示的に言及した場合、note と並列に `term/` 配下の単語ページとして作成する（Scrapbox 風に単語間を相互リンク）。
-
-ノート構造・タグ規約・フェーズ構成（初回回答 / 追加質問ループ / クイズ）は通常の study ノートと同じ。固有事項はパスとリンクのみ。
-
-### トリガー
-
-- 単発の用語質問（「<word> って何？」）
-- study セッション中の派生質問でユーザが単語に明示言及したとき
-
-### パス
-
-```
-term/{word-slug}.md
-```
-
-- `word-slug` = kebab-case。日付プレフィックスなし
-- 例: `term/mutex.md`, `term/cap-theorem.md`, `term/tcp-fast-open.md`
-
-### 同名衝突（辞書方式）
-
-同じ `word-slug` で異なる語義が出てきた場合、新ファイルを作らず **同一ファイル内に `## {分野ラベル}` で語義セクションを並べる**。分野ラベルは frontmatter の `topic/*` `tech/*` タグと整合させる。
-
-```markdown
-# python
-
-## プログラミング言語
-...（概要・詳細・参考をこの下にぶら下げる）
-
-## ギリシャ神話
-...
-```
-
-手順:
-
-1. 作成前に `obsidian read path="term/{slug}.md"` で存在確認
-2. 既存あり → `obsidian append` で新語義セクション（`## {分野ラベル}` 以下）を追加。frontmatter の tags は既存とマージして `obsidian replace` で更新
-3. 既存なし → `obsidian create` で新規作成
-
-### リンクの貼り方
-
-- term ページ作成時、本文に出現する単語のうち `term/` に既存ページがあるものは自動で `[[term/word]]` リンク化
-- 親 study ノートから派生して term ページを作った場合、親ノートの該当箇所（QA エントリ末尾 or 関連セクション）に `[[term/word]]` を 1 箇所追加して逆リンクを張る
-- 全文書を遡及してリンク化はしない
-
 ## [2] 追加質問ループ
 
 追加質問が来たら **性質を分類** してから反映する:
@@ -174,24 +126,7 @@ term/{word-slug}.md
 
 ### QA 追記 (A/C)
 
-`obsidian append` で末尾に `### Q: ...` エントリとして追記する。
-
-```markdown
-
-### Q: {ユーザの質問を要約}
-
-{回答本文。インライン出典付き}
-```
-
-```bash
-cat > /tmp/qa.md << 'EOF'
-
-### Q: ...
-
-...
-EOF
-obsidian append vault=obsidian-vault path="note/2026-05-11-...md" content="$(cat /tmp/qa.md)"
-```
+`obsidian append` で末尾に `### Q: {質問要約}` 見出しと回答本文（インライン出典付き）を追記する。フォーマット・コマンド形は [1] の作成例に準じる。
 
 ### 本文更新 (B/C/D)
 
@@ -235,10 +170,7 @@ obsidian append vault=obsidian-vault path="note/2026-05-11-...md" content="$(cat
 
 完了前に確認:
 
-- ノートのパス・タグ規約は docs スキル準拠か（`~/.references/policy/documentation.md` および `note/{date}-{slug}.md` / `term/{word-slug}.md`）
-- 全ての事実にインライン出典 or 未検証マーカーが付いているか
 - 追加質問の性質分類（A/B/C/D）に従って QA 追記 / 本文更新を正しく行ったか
-- term ページ作成時、同名衝突を `obsidian read` で確認し辞書方式（`## {分野ラベル}`）で追加したか
-- term ページ作成時、本文の既知 term への `[[term/word]]` リンク化と、親ノートからの逆リンクを張ったか
 - クイズはユーザの明示合図を待ったか（自発的に促していないか）
 - クイズで露呈した弱点をノートに反映したか
+- term ページを扱った場合は `references/term-pages.md` のセルフチェックも確認したか
