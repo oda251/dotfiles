@@ -1,5 +1,5 @@
 ---
-name: copilot-review
+name: pr-review
 description: GitHub Copilot CLI を呼び出してローカルで PR レビューを行う手動コマンド。PR URL / 番号を引数に取る。
 disable-model-invocation: true
 argument-hint: <PR-URL or PR-number>
