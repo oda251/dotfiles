@@ -5,7 +5,7 @@ inputs:
   content: ドキュメント本文
 ---
 
-対象 vault: `obsidian-vault`。すべての vault 操作は `obsidian` コマンドで行う。
+対象 vault: `obsidian-vault`。
 
 !`obsidian --help`
 
@@ -13,7 +13,7 @@ inputs:
 
 ドキュメントの内容は `~/.references/policy/documentation.md` に従う。
 
-複雑な内容（コードブロック、特殊文字等）は一時ファイルに書いてから渡す:
+複雑な内容（コードブロック、特殊文字等）は一時ファイルに書いてから渡す。作成時は `open` を付与する:
 
 ```bash
 cat > /tmp/doc.md << 'EOF'
@@ -21,8 +21,6 @@ cat > /tmp/doc.md << 'EOF'
 EOF
 obsidian create vault=obsidian-vault path="{path}" content="$(cat /tmp/doc.md)" open
 ```
-
-作成時は `open` を付与する。
 
 ### パス規約
 
@@ -39,38 +37,36 @@ note/{date}-{title}.md          # repoに紐づかない
 
 ### タグ
 
-nested tag を活用する。**個数ではなく分野で網羅性を担保する**。下記の必須カテゴリそれぞれから最低 1 つ拾う。
-
 必須:
 
-- `purpose/*` — 目的（`purpose/research`, `purpose/meeting`, `purpose/decision`, `purpose/comparison` 等）
-- `ndc/*` — 汎用分野分類。日本十進分類法 3 桁コード。語彙: `~/.references/taxonomy/ndc.md`
-
-技術関連ノートの場合（追加で必須）:
-
-- `tech/*` — 具体ツール（`tech/typescript`, `tech/hono`）と概念（`tech/async`, `tech/middleware`）の両方を拾う
-- `ccs/*` — 計算機分野の領域分類（ACM CCS 2012）。語彙: `~/.references/taxonomy/ccs.md`
+- `purpose/*` — 目的（`purpose/research`, `purpose/meeting`, `purpose/decision`, `purpose/comparison`, `purpose/draft` 等）
 
 該当時:
 
+- `tech/*` — 技術関連ノート。具体ツール（`tech/hono`）と概念（`tech/async`）の両方を拾う
 - `repo/*` — リポジトリ紐付き（`repo/{org}/{repo}`）
 
-**運用ルール**: `ccs/*` は計算機分野、`ndc/*` は汎用知識、`tech/*` は実体（ツール+概念）と役割を分ける。
+永続知財として横断検索に乗せたい場合（長期参照する調査結果など）はさらに分野分類タグを付ける。流れていく系（draft・意思決定ログ・ミーティングメモ等）は不要:
 
-例: Hono の認証ミドルウェア比較ノート
+- `ndc/*` — 汎用分野分類。語彙: `~/.references/taxonomy/ndc.md`
+- `ccs/*` — 計算機分野の領域分類。語彙: `~/.references/taxonomy/ccs.md`
+
+`ccs/*` は計算機分野、`ndc/*` は汎用知識、`tech/*` は実体（ツール+概念）。
+
+例: Hono の認証ミドルウェア比較ノートを永続化する場合
 
 ```yaml
 tags:
   - purpose/research
   - purpose/comparison
-  - tech/hono           # ツール
-  - tech/typescript     # ツール
-  - tech/middleware     # 概念
-  - tech/authentication # 概念
-  - ccs/security        # CCS 領域
-  - ccs/software        # CCS 領域
-  - ndc/007             # NDC: 情報科学
-  - ndc/548             # NDC: 情報工学
+  - tech/hono
+  - tech/typescript
+  - tech/middleware
+  - tech/authentication
+  - ccs/security
+  - ccs/software
+  - ndc/007
+  - ndc/548
 ```
 
 ### 関連ドキュメント

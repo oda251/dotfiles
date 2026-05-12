@@ -18,6 +18,19 @@ inputs:
 
 判断基準は「同じ説明が別のプロジェクトの読者にもそのまま価値を持つか」。ハイブリッドの場合は一般部分のみノート化し、プロジェクト固有の話は会話に留める。
 
+## 前提
+
+ドキュメント作成・更新の共通規約は docs skill に従う。
+
+### 学習ノート固有の追加規約
+
+学習ノートは横断検索する前提なので、docs skill のタグに加えて以下を必須にする:
+
+- `purpose/study`
+- `ndc/*`（技術関連ノートはさらに `tech/*` と `ccs/*`）
+
+パスの `title` 部分は学習テーマの kebab-case slug（例: `tcp-congestion-control`）。単語への明示言及時は `term/{word-slug}.md`（詳細: `references/term-pages.md`）。
+
 ## フェーズ構成
 
 ```
@@ -30,64 +43,25 @@ inputs:
 
 ユーザが単語に明示言及した場合は [1]/[2] と並行して term/ ページを作成する。詳細は `references/term-pages.md`。
 
-## 共通ルール
-
-- vault 操作は `obsidian` コマンド経由のみ
-- 出典・未検証マーカーの扱いは `~/.references/policy/documentation.md` に従う
-- 確認できない事項は「わかりません」と明言
-- 本文は学習者目線で書く。専門用語は初出時に簡潔な定義を添える
-
 ## [1] 初回回答 + ノート作成
 
 ユーザの質問に簡潔に答えてから、ノートを作成する。
 
-### ノートパス
-
-```
-note/{date}-{topic-slug}.md            # 通常
-{org}/note/{date}-{topic-slug}.md      # 特定リポジトリ紐付け
-term/{word-slug}.md                    # 単語への明示言及時（references/term-pages.md）
-```
-
-- `date` = `YYYY-MM-DD`
-- `topic-slug` = kebab-case（例: `tcp-congestion-control`）
-- `{org}` = `git remote get-url origin` から抽出。原則 repo-less
-
-### ノート構造
+### 本文構造
 
 ```markdown
----
-tags:
-  - purpose/study
-  - topic/<topic>
-  - tech/<tech>   # 該当時
----
-
 # {タイトル}
 
 > 学習開始: {date}
 
 ## 概要
-{要点。インライン出典付き}
+{要点}
 
 ## 詳細
 {セクション分け。コード例・mermaid 図}
-
-## 参考
-- [{タイトル}]({URL})
 ```
 
 `## QA` のようなラッパーは置かない。追加質問は `### Q: ...` を末尾に直接 append する。
-
-### 作成
-
-heredoc で `/tmp/study.md` に本文を書き出した後:
-
-```bash
-obsidian create vault=obsidian-vault path="note/{date}-{slug}.md" content="$(cat /tmp/study.md)"
-```
-
-作成後、`obsidian open vault=obsidian-vault path="..."` で開けることをユーザに伝える。
 
 ## [2] 追加質問ループ
 
@@ -116,7 +90,7 @@ obsidian create vault=obsidian-vault path="note/{date}-{slug}.md" content="$(cat
 
 ### 進め方
 
-1. 出題数（デフォルト 3 問）、出題範囲（デフォルト ノート全体）、難易度（デフォルト 中）をユーザに確認
+1. 出題数（デフォルト 3 問）、出題範囲（デフォルト ノート全体）をユーザに確認
 2. 記述式で 1 問ずつ出題
 3. ユーザの回答に対し:
    - 模範解答と照合し、合致点・不足点・誤りを指摘
