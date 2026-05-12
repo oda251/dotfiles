@@ -1,6 +1,6 @@
 # 単語ページ (term/)
 
-note と並列に `term/` 配下の単語ページとして作成する（Scrapbox 風に単語間を相互リンク）。ノート構造・タグ規約・フェーズ構成は通常の study ノートと同じ。
+note と並列に `term/` 配下の単語ページとして作成する（Scrapbox 風に単語間を相互リンク）。本文構造・タグ規約・フェーズ構成は通常の study ノートと同じ。
 
 ## トリガー
 
@@ -21,7 +21,7 @@ term/{word-slug}.md
 
 ## 同名衝突（辞書方式）
 
-異なる語義が衝突したら、新ファイルを作らず同一ファイル内に `## {分野ラベル}` で並べる。ラベルは frontmatter の `topic/*` `tech/*` と整合させる。
+異なる語義が衝突したら、新ファイルを作らず同一ファイル内に `## {分野ラベル}` で並べる。ラベルは frontmatter の `ndc/*` `ccs/*` `tech/*` と整合させる。
 
 ```markdown
 # python
@@ -41,7 +41,7 @@ term/{word-slug}.md
 
 ### tag のマージ
 
-frontmatter の tags は全語義の `topic/*` `tech/*` を合算。
+frontmatter の tags は全語義分を合算（study skill のタグ規約を語義ごとに適用してから OR を取る）。
 
 ## 作成手順
 
