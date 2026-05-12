@@ -10,7 +10,7 @@ confirm-before-run: false
 
 1. 状態確認（`collect.sh`）
 2. 状態提示 + `AskUserQuestion` 確認
-3. obsidian journal (`AgentLog/`) に 1 行追記
+3. Daily ノート (`Daily/<date>.md`) の末尾に 1 行追記
 4. worktree 削除（`cleanup.sh` — ローカル branch ごと、remote には触らない）
 
 無いものは黙ってスキップ。あるものだけ処理する。
@@ -54,7 +54,7 @@ JSON 1 オブジェクトを stdout に出す:
 - 未 push commit: <件数 or なし>
 
 ## 実行内容
-1. AgentLog に 1 行追記
+1. Daily ノートに 1 行追記
 2. worktree 削除（`cleanup.sh <branch>` — ローカル branch も削除、remote は不変）<該当時のみ>
 ```
 
@@ -62,9 +62,9 @@ JSON 1 オブジェクトを stdout に出す:
 
 (a) 未コミット変更, (b) 未 push commit, (c) PR 未 merge or 不在 はそれぞれ独立に提示する（1 つでもあれば必ず明示）。
 
-### 3. obsidian journal 追記
+### 3. Daily ノート追記
 
-本セッションで実際に行ったことを `AgentLog/` 日次ファイルに 1 行残す。
+本セッションで実際に行ったことを `Daily/<date>.md` の末尾に 1 行残す。Daily ノートが無ければ `daily` テンプレから作成する（`append-journal.sh` が処理）。
 
 #### フォーマット
 
@@ -139,7 +139,7 @@ bash "$HOME/.claude/skills/close-task/cleanup.sh" "<branch>"
 
 ```
 □ collect.sh の出力を踏まえて未コミット / 未 push / 未 merge / PR 不在を全て検出して提示したか？
-□ AgentLog に **本セッションの実作業を反映した** 1 行を追記したか？
-□ 日次ファイルが無いとき create してから append したか？
+□ Daily ノートに **本セッションの実作業を反映した** 1 行を追記したか？
+□ Daily ノートが無いとき daily テンプレから create してから append したか？
 □ worktree 削除前に cwd を $HOME に戻したか？
 ```

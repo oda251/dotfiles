@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Append a single line to today's AgentLog journal in obsidian-vault.
+# Append a single line to today's Daily note in obsidian-vault.
 #
 # Usage: append-journal.sh "<body>"
 #
@@ -11,9 +11,10 @@ set -euo pipefail
 BODY="${1:?body argument required}"
 command -v obsidian >/dev/null 2>&1 || { echo "obsidian CLI not found on PATH" >&2; exit 1; }
 
-journal="AgentLog/$(date +%Y-%m-%d).md"
+journal="Daily/$(date +%Y-%m-%d).md"
 line="- $(date +%H:%M) ${BODY}"
 
-# 日次ファイルが無ければ作る (既存なら create が失敗するので無視)
-obsidian create vault=obsidian-vault path="$journal" content="" >/dev/null 2>&1 || true
+# Daily ノートが無ければ Templates/daily.md の内容で作る (既存なら create が失敗するので無視)
+template="$(obsidian read vault=obsidian-vault path="Templates/daily.md" 2>/dev/null || true)"
+obsidian create vault=obsidian-vault path="$journal" content="$template" >/dev/null 2>&1 || true
 obsidian append vault=obsidian-vault path="$journal" content="$line"
