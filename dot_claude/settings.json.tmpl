@@ -60,6 +60,18 @@
         ]
       }
     ],
+    "PreToolUse": [
+      {
+        "matcher": "Read|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.claude/hooks/inject-chezmoi-claude-md\"",
+            "async": false
+          }
+        ]
+      }
+    ],
     "Notification": [
       {
         "matcher": "",

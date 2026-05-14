@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+CHEZMOI_ROOT="$HOME/.local/share/chezmoi"
+CLAUDE_MD="$CHEZMOI_ROOT/CLAUDE.md"
+
+input=$(cat)
+file_path=$(printf '%s' "$input" | jq -r '.tool_input.file_path // empty')
+session_id=$(printf '%s' "$input" | jq -r '.session_id // "unknown"')
+
+[[ -n "$file_path" ]] || exit 0
+
+case "$file_path" in
+  "$CHEZMOI_ROOT"/*) ;;
+  *) exit 0 ;;
+esac
+
+sentinel="${TMPDIR:-/tmp}/claude-chezmoi-md-${session_id}"
+[[ -f "$sentinel" ]] && exit 0
+touch "$sentinel"
+
+[[ -f "$CLAUDE_MD" ]] || exit 0
+
+content=$(cat "$CLAUDE_MD")
+
+escape_for_json() {
+  local s="$1"
+  s="${s//\\/\\\\}"
+  s="${s//\"/\\\"}"
+  s="${s//$'\n'/\\n}"
+  s="${s//$'\r'/\\r}"
+  s="${s//$'\t'/\\t}"
+  printf '%s' "$s"
+}
+
+escaped=$(escape_for_json "$content")
+context="Contents of ${CLAUDE_MD}:\n\n${escaped}"
+
+printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "PreToolUse",\n    "additionalContext": "%s"\n  }\n}\n' "$context"
