@@ -120,6 +120,9 @@ _help_generic() {
 }
 compdef _help_generic -default-
 
+# `<cmd> --help` が極端に遅いコマンドは _help_generic を回避してファイル補完に固定
+compdef _files slidev
+
 # fzf-tab（Tab 補完を fzf でインタラクティブにする）
 _fzf_tab_dir="${HOME}/.zsh/fzf-tab"
 if [[ ! -d "$_fzf_tab_dir" ]]; then

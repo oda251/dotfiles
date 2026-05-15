@@ -3,8 +3,21 @@ name: slides
 description: "スライド作成時に利用。「スライドを作って」のようなスライド関連の指示に対して、常に利用する"
 ---
 
-`~/.references/slidev-template.md` を参照し、その規約に従ってスライドを作成する。
+## 作成場所
 
-スライドファイルの作成先は `~/obsidian-vault/slides/<name>.md`。同ディレクトリに slidev プロジェクト (`package.json` + `node_modules`) を用意してあるので、起動も同ディレクトリから行う。
+`~/obsidian-vault/slide/<YYYY-MM-DD>-<title>.md`。slidev プロジェクトとローカルテーマ (`theme/<name>/`) を同ディレクトリに用意してある。
 
-作成後は `cd ~/obsidian-vault/slides && bun x slidev <作成したスライドのパス>` をバックグラウンド実行し、起動した URL をユーザーに伝える。
+## frontmatter
+
+```yaml
+---
+theme: ./theme/<name>
+title: タイトル
+---
+```
+
+theme は `theme/` 配下の候補をユーザに提示し、確認を取って決める。
+
+## 起動
+
+`cd ~/obsidian-vault/slide && slidev <作成したスライドのパス>` をバックグラウンド実行し、URL をユーザーに伝える。
