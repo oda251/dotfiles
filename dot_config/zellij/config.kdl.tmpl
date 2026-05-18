@@ -41,3 +41,7 @@ theme "tokyo-night-storm"
 
 // Needed for reliable modified-key detection (eg. Ctrl+Tab) in compatible terminals.
 support_kitty_keyboard_protocol true
+
+// Disable to stop "creation time is not available" log spam on WSL2/musl builds.
+// Trade-off: cannot resurrect detached sessions. See zellij-org/zellij#4165.
+session_serialization false
