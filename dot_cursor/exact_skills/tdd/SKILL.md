@@ -7,17 +7,16 @@ description: 任意の実装タスクを開始するときに利用する。
 
 ## 手順
 
-1. 要件をテスト可能なアサーション（入力 → 期待）の箇条書きに分解する。1項目 = テスト1つの粒度
-2. 不足観点（異常系・境界・非機能・IF）を `AskUserQuestion` でユーザと詰め、要件を確定する
-3. worktree を作り、空コミット → push → draft PR。PR body に要件チェックリストを書く
+1. `main` を基点に worktree を作り、要件ファイル `$WT/docs/tmp/<slug>.md` を用意する
 
    ```bash
-   gwq add -b feat/<slug>
+   git branch feat/<slug> main
+   gwq add feat/<slug>
    WT=$(gwq list -g --json | jq -r '.[]|select(.branch=="feat/<slug>").path' | head -1)
-   git -C "$WT" commit --allow-empty -m "chore: scaffold"
-   git -C "$WT" push -u origin feat/<slug>
-   gh pr create --draft --head feat/<slug> --title "<title>" --body "<要件チェックリスト>"
    ```
+
+2. 要件をテスト可能なアサーション（入力 → 期待）に分解し、要件ファイルにチェックリストで書く。1項目 = テスト1つの粒度
+3. 不足観点（異常系・境界・非機能・IF）を `AskUserQuestion` で詰め、要件ファイルを確定する
 
 4. 要件を1つずつ消化する（複数同時着手しない）。着手した要件ごとに、まずテストを書くか判断する:
 
@@ -34,6 +33,12 @@ description: 任意の実装タスクを開始するときに利用する。
    - commit する
 
 5. 全要件 green になったら `/simplify` → 全体テスト緑を再確認する
-6. `git -C "$WT" push`。draft のまま完了報告する（マージはユーザ判断）
+6. push して draft PR を作成（PR body は要件ファイル）。一時ファイルは消す。draft のまま完了報告する（マージはユーザ判断）
+
+   ```bash
+   git -C "$WT" push -u origin feat/<slug>
+   gh pr create --draft --head feat/<slug> --title "<title>" --body-file "$WT/docs/tmp/<slug>.md"
+   rm "$WT/docs/tmp/<slug>.md"
+   ```
 
 基盤未整備（シードデータ・テスト環境構築等）で赤テストが書けない要件は中断し、進め方をユーザと相談する。
