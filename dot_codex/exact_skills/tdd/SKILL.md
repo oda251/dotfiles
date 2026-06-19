@@ -3,7 +3,7 @@ name: tdd
 description: 任意の実装タスクを開始するときに利用する。
 ---
 
-メイン（自分 / Opus）は要件設計・赤緑判定・push を担当し、実装は Sonnet サブエージェント（`Agent`, `model: sonnet`）に委譲する。テストを書いた者（メイン or Sonnet）と実装する Sonnet は別にし、実装側にテストを編集させない。
+メイン（自分 / Opus）は要件設計・赤テスト・赤緑判定・push を担当し、実装は Sonnet サブエージェント（`Agent`, `model: sonnet`）に委譲する。実装する Sonnet にはテストを編集させない。
 
 ## 手順
 
@@ -25,7 +25,7 @@ description: 任意の実装タスクを開始するときに利用する。
    ```
 
    - 書く場合:
-     1. 赤テストを1つ用意する（メインが書く。委譲時は `${CLAUDE_SKILL_DIR}/red-test.md` を読んで Sonnet に渡す）
+     1. メインが赤テストを1つ書く
      2. メインがテストを実行し、振る舞い未実装で落ちることを確認する
      3. 別の Sonnet に `${CLAUDE_SKILL_DIR}/implement.md` を読んで渡し、テストを通す最小実装をさせる
      4. メインが緑・全体テスト緑・テスト未改変（`git -C "$WT" diff`）を確認する
