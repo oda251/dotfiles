@@ -29,6 +29,10 @@ prepend_rules = [
 	{ url = "*.html", use = [ "web", "edit" ] },
 	{ mime = "text/html", use = [ "web", "edit" ] },
 
+	# Markdown（macOS のデフォルトアプリに奪われないよう nvim へ明示）
+	{ url = "*.md", use = "edit" },
+	{ url = "*.markdown", use = "edit" },
+
 	# 画像
 	{ mime = "image/*", use = [ "image", "edit" ] },
 
