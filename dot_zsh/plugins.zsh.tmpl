@@ -185,7 +185,17 @@ autoload -Uz add-zsh-hook
 add-zsh-hook chpwd __notify_terminal_cwd
 __notify_terminal_cwd
 
-if [[ "${ZELLIJ_AUTO_START:-false}" == "true" && -z "$ZELLIJ" && -o interactive && -t 0 && -t 1 ]] && command -v zellij >/dev/null 2>&1; then
+# Read the real pty window size up front. WSL+systemd spawns an auto-login console
+# (/bin/login -f) on a separate pty with no terminal emulator attached; it reports
+# 0x0. If such a phantom shell auto-attaches to the shared `main` session, zellij —
+# which sizes a multi-client session to the SMALLEST client — collapses the visible
+# pane to its minimum, and resizing the real window can't grow past the 0x0 client.
+# Guard on a non-zero size so only real terminals start/attach zellij.
+# See zellij-org/zellij discussions #3124 / #5066.
+__zj_winsize=$(stty size 2>/dev/null) || __zj_winsize="0 0"
+__zj_rows="${__zj_winsize%% *}"; __zj_cols="${__zj_winsize##* }"
+if [[ "${ZELLIJ_AUTO_START:-false}" == "true" && -z "$ZELLIJ" && -o interactive && -t 0 && -t 1 \
+      && "${__zj_rows:-0}" -gt 0 && "${__zj_cols:-0}" -gt 0 ]] && command -v zellij >/dev/null 2>&1; then
     # Serialize concurrent shells (e.g. Windows Terminal restoring multiple panes
     # at WSL boot) so only one creates the session; later shells attach to it.
     # Without this, two `zellij attach -c` racing causes AddrInUse on the server
@@ -212,3 +222,4 @@ if [[ "${ZELLIJ_AUTO_START:-false}" == "true" && -z "$ZELLIJ" && -o interactive 
         exit
     fi
 fi
+unset __zj_winsize __zj_rows __zj_cols
