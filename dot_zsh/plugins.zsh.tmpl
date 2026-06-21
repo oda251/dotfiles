@@ -23,11 +23,19 @@ _init_tool_cache() {
   shift
   local bin_path
   bin_path="$(command -v "$tool_name")" || return 1
+  # mise upgrade 等でバージョンが変わると、生成済み init が旧バージョンの絶対パスを
+  # 焼き込んだまま残り、旧 install ディレクトリ削除後に "見つからない" 状態になる。
+  # command -v の mtime だけでなく、シンボリックリンク (mise の latest 等) を実体解決した
+  # パスを stamp として記録し、解決先が変わった/消えた場合も再生成する。
+  local real_path="${bin_path:A}"
+  local stamp="# tool-path: ${real_path}"
 
   local cache_file="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/${tool_name}-init.zsh"
   mkdir -p "${cache_file:h}"
-  if [[ ! -s "$cache_file" || "$bin_path" -nt "$cache_file" ]]; then
-    PATH="$(_path_without_wsl_mounts)" "$bin_path" "$@" >| "$cache_file"
+  local first=""
+  [[ -s "$cache_file" ]] && read -r first < "$cache_file"
+  if [[ ! -s "$cache_file" || "$real_path" -nt "$cache_file" || "$first" != "$stamp" ]]; then
+    { print -r -- "$stamp"; PATH="$(_path_without_wsl_mounts)" "$bin_path" "$@" } >| "$cache_file"
     rm -f "${cache_file}.zwc"
   fi
   source_cache_script "$cache_file"
