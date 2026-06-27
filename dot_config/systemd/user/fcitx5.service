@@ -1,0 +1,15 @@
+[Unit]
+Description=Fcitx5 input method
+After=default.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/fcitx5
+Restart=on-failure
+RestartSec=2
+# WSLg provides these displays; set explicitly so the user service can connect
+Environment=DISPLAY=:0
+Environment=WAYLAND_DISPLAY=wayland-0
+
+[Install]
+WantedBy=default.target

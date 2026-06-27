@@ -33,6 +33,12 @@ fi
 export PATH="$PATH:/usr/local/go/bin:/snap/bin"
 export ZELLIJ_AUTO_START="${ZELLIJ_AUTO_START:-true}"
 export ZELLIJ_AUTO_EXIT="${ZELLIJ_AUTO_EXIT:-false}"
+# WSLg は日本語入力を転送しないため fcitx5 を使う。GUI アプリ用 IME 環境変数。
+if [[ -n "${WSL_DISTRO_NAME:-}" ]]; then
+  export GTK_IM_MODULE=fcitx
+  export QT_IM_MODULE=fcitx
+  export XMODIFIERS=@im=fcitx
+fi
 {{- end }}
 unfunction _brew_shellenv_cache
 {{- end }}

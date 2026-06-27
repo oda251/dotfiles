@@ -1,0 +1,10 @@
+{{- if and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") }}
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Re-run when the unit definition changes.
+# unit-hash: {{ include "dot_config/systemd/user/fcitx5.service" | sha256sum }}
+
+systemctl --user daemon-reload
+systemctl --user enable --now fcitx5.service
+{{- end }}
