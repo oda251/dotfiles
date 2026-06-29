@@ -30,6 +30,15 @@ Documents/WindowsPowerShell/
 Library/
 {{ end }}
 
+# fcitx5 日本語入力は WSLg 専用 (非WSL では配布しない)
+{{ if eq .chezmoi.os "linux" }}
+{{ if not (.chezmoi.kernel.osrelease | lower | contains "microsoft") }}
+.config/systemd/user/fcitx5.service
+{{ end }}
+{{ else }}
+.config/systemd/user/fcitx5.service
+{{ end }}
+
 # Linux/macOS-specific configs (ignore on Windows)
 {{ if eq .chezmoi.os "windows" }}
 .config/zellij/

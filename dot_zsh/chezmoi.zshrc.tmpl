@@ -38,6 +38,7 @@ if [[ -n "${WSL_DISTRO_NAME:-}" ]]; then
   export GTK_IM_MODULE=fcitx
   export QT_IM_MODULE=fcitx
   export XMODIFIERS=@im=fcitx
+  export INPUT_METHOD=fcitx
 fi
 {{- end }}
 unfunction _brew_shellenv_cache

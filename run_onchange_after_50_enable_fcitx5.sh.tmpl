@@ -1,6 +1,33 @@
-{{- if and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") }}
+{{- if and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
 #!/usr/bin/env bash
 set -euo pipefail
+
+if ! command -v systemctl &>/dev/null; then
+  echo "systemctl not available, skipping fcitx5 service setup" >&2
+  exit 0
+fi
+
+# mozc を既定にした初期 profile を seed する。fcitx5 は実行時に profile を
+# 書き換えるため静的管理はせず、未作成のときだけ生成する（既存設定は壊さない）。
+profile="${XDG_CONFIG_HOME:-$HOME/.config}/fcitx5/profile"
+if [[ ! -f "$profile" ]]; then
+  mkdir -p "${profile%/*}"
+  cat > "$profile" <<'PROFILE'
+[Groups/0]
+Name=Default
+Default Layout=us
+DefaultIM=mozc
+
+[Groups/0/Items/0]
+Name=keyboard-us
+
+[Groups/0/Items/1]
+Name=mozc
+
+[GroupOrder]
+0=Default
+PROFILE
+fi
 
 # Re-run when the unit definition changes.
 # unit-hash: {{ include "dot_config/systemd/user/fcitx5.service" | sha256sum }}

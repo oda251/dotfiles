@@ -25,8 +25,11 @@ obsidian() {
   if [[ -S "$socket" ]]; then
     command obsidian "$@"
   else
-    # WSLg の Wayland は IME 連携が弱いため X11(XWayland) に固定して fcitx5 を効かせる
-    (ELECTRON_OZONE_PLATFORM_HINT=x11 nohup /opt/Obsidian/obsidian "$@" >/dev/null 2>&1 &)
+    # WSLg(Wayland) は IME 連携が弱いため X11(XWayland) に固定して fcitx5 を効かせる。
+    # 非WSL では Wayland を壊さないよう付けない。
+    local ozone=()
+    [[ -n "${WSL_DISTRO_NAME:-}" ]] && ozone=(ELECTRON_OZONE_PLATFORM_HINT=x11)
+    (env "${ozone[@]}" nohup /opt/Obsidian/obsidian "$@" >/dev/null 2>&1 &)
   fi
 }
 {{- end }}

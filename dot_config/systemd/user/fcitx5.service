@@ -1,15 +1,15 @@
 [Unit]
 Description=Fcitx5 input method
-After=default.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/fcitx5
+# WSLg の Weston は Wayland text-input を fcitx5 に渡さない。
+# --disable=wayland で X11/XWayland 専用に常駐させると Electron 等が拾える。
+ExecStart=/usr/bin/fcitx5 --disable=wayland,waylandim
 Restart=on-failure
 RestartSec=2
-# WSLg provides these displays; set explicitly so the user service can connect
+# WSLg の XWayland ディスプレイ。X11 フロントエンド接続に必要。
 Environment=DISPLAY=:0
-Environment=WAYLAND_DISPLAY=wayland-0
 
 [Install]
 WantedBy=default.target
