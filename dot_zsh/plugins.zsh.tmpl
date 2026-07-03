@@ -176,7 +176,7 @@ if command -v zsh >/dev/null 2>&1; then
   export SHELL="$(command -v zsh)"
 fi
 
-# OSC 7: ターミナルに CWD を通知（Zellij のペイン/タブ CWD 引き継ぎに必要）
+# OSC 7: ターミナルに CWD を通知（herdr のペイン/タブ CWD 引き継ぎに必要）
 # stdout に出すと $(cd ... && pwd) 等のコマンド代入に escape が混入するため /dev/tty へ。
 __notify_terminal_cwd() {
   printf '\e]7;file://%s%s\e\\' "${HOST}" "${PWD}" >/dev/tty 2>/dev/null
@@ -187,39 +187,19 @@ __notify_terminal_cwd
 
 # Read the real pty window size up front. WSL+systemd spawns an auto-login console
 # (/bin/login -f) on a separate pty with no terminal emulator attached; it reports
-# 0x0. If such a phantom shell auto-attaches to the shared `main` session, zellij —
-# which sizes a multi-client session to the SMALLEST client — collapses the visible
-# pane to its minimum, and resizing the real window can't grow past the 0x0 client.
-# Guard on a non-zero size so only real terminals start/attach zellij.
-# See zellij-org/zellij discussions #3124 / #5066.
-__zj_winsize=$(stty size 2>/dev/null) || __zj_winsize="0 0"
-__zj_rows="${__zj_winsize%% *}"; __zj_cols="${__zj_winsize##* }"
-if [[ "${ZELLIJ_AUTO_START:-false}" == "true" && -z "$ZELLIJ" && -o interactive && -t 0 && -t 1 \
-      && "${__zj_rows:-0}" -gt 0 && "${__zj_cols:-0}" -gt 0 ]] && command -v zellij >/dev/null 2>&1; then
-    # Serialize concurrent shells (e.g. Windows Terminal restoring multiple panes
-    # at WSL boot) so only one creates the session; later shells attach to it.
-    # Without this, two `zellij attach -c` racing causes AddrInUse on the server
-    # socket and cascades into wasm_bridge plugin panics.
-    {
-        if command -v flock >/dev/null 2>&1 && flock -n 9; then
-            # Leader: create-or-resurrect, then attach. Lock is held until zellij exits.
-            if zellij list-sessions -s 2>/dev/null | grep -qx main; then
-                zellij attach main
-            else
-                zellij attach -c main
-            fi
-        else
-            # Follower: wait for leader's session to appear, then plain attach.
-            for _ in {1..30}; do
-                zellij list-sessions -s 2>/dev/null | grep -qx main && break
-                sleep 0.5
-            done
-            zellij attach main
-        fi
-    } 9>"${XDG_RUNTIME_DIR:-/tmp}/zellij-autostart-${UID}.lock"
+# 0x0. Guard on a non-zero size so only real terminals start/attach a session and a
+# phantom 0x0 client can't collapse a multi-client session's visible pane.
+__mux_winsize=$(stty size 2>/dev/null) || __mux_winsize="0 0"
+__mux_rows="${__mux_winsize%% *}"; __mux_cols="${__mux_winsize##* }"
+if [[ "${HERDR_AUTO_START:-false}" == "true" && -z "$HERDR_ENV" && -o interactive && -t 0 && -t 1 \
+      && "${__mux_rows:-0}" -gt 0 && "${__mux_cols:-0}" -gt 0 ]] && command -v herdr >/dev/null 2>&1; then
+    # herdr keeps a persistent server, so `--session main` is launch-or-attach:
+    # concurrent shells (e.g. Windows Terminal restoring panes at WSL boot) all
+    # converge on the one server without the socket race zellij had.
+    herdr --session main
 
-    if [[ "$ZELLIJ_AUTO_EXIT" == "true" ]]; then
+    if [[ "$HERDR_AUTO_EXIT" == "true" ]]; then
         exit
     fi
 fi
-unset __zj_winsize __zj_rows __zj_cols
+unset __mux_winsize __mux_rows __mux_cols

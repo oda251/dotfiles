@@ -39,7 +39,6 @@ neovim = "latest"
 {{- if ne .chezmoi.os "windows" }}
 age = "latest"
 lazydocker = "latest"
-zellij = "latest"
 {{- if ne .chezmoi.os "darwin" }}
 make = "latest"
 {{- end }}
@@ -59,6 +58,9 @@ just = "latest"
 # Repository / worktree management
 ghq = "latest"
 "github:d-kuro/gwq" = "latest"
+
+# Process supervisor
+herdr = "latest"
 
 # Cloud storage sync
 rclone = "latest"
