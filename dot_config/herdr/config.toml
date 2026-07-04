@@ -12,16 +12,21 @@ name = "tokyo-night"
 [keys]
 prefix = "ctrl+g"
 
-new_tab          = ["prefix+t"]           # prefix -> t
+# spaces (= projects) are the primary unit
+new_workspace    = ["prefix+t"]           # prefix -> t : new space (inherits cwd -> repo label)
+rename_workspace = ["prefix+r"]           # prefix -> r : rename space (shows as repo name)
+
+new_tab          = ["prefix+ctrl+t"]      # prefix -> ctrl+t : new tab (secondary)
 split_vertical   = ["prefix+alt+t"]       # prefix -> alt+t : new pane
 close_pane       = ["prefix+w"]           # closes the tab too when it's the last pane
 resize_mode      = ["prefix+n"]           # prefix -> n, then arrow keys to resize
-rename_tab       = ["prefix+r"]           # prefix -> r
 rename_pane      = ["prefix+alt+r"]       # prefix -> alt+r
 
-# tab navigation: ctrl+left / ctrl+right (prefix-free)
-previous_tab     = ["ctrl+left"]
-next_tab         = ["ctrl+right"]
+# nav (prefix-free): ctrl+left/right = tabs, ctrl+up/down = spaces
+previous_tab       = ["ctrl+left"]
+next_tab           = ["ctrl+right"]
+previous_workspace = ["ctrl+up"]
+next_workspace     = ["ctrl+down"]
 
 # pane navigation: ctrl+alt+arrow (prefix-free)
 focus_pane_left  = ["ctrl+alt+left"]
