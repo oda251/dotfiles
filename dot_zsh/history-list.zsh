@@ -43,13 +43,13 @@ __hl_render() {
     done
     display="${display%$'\n'}"
   fi
-  # 表示内容が変わったときだけ zle -M を呼ぶ（ちらつき防止）
+  # ちらつき防止
   [[ "$display" == "$__hl_last_display" ]] && return
   __hl_last_display="$display"
   zle -M "$display"
 }
 
-# ナビゲーション開始（検索 + 初期カーソル位置設定）
+# ナビゲーション開始
 __hl_begin_nav() {
   __hl_query="$BUFFER"
   __hl_search "$__hl_query"

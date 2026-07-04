@@ -36,7 +36,7 @@ fi
 export PATH="$PATH:/usr/local/go/bin:/snap/bin"
 export HERDR_AUTO_START="${HERDR_AUTO_START:-true}"
 export HERDR_AUTO_EXIT="${HERDR_AUTO_EXIT:-false}"
-# WSLg は日本語入力を転送しないため fcitx5 を使う。GUI アプリ用 IME 環境変数。
+# WSLg は日本語入力を転送しないため fcitx5 を使う
 if [[ -n "${WSL_DISTRO_NAME:-}" ]]; then
   export GTK_IM_MODULE=fcitx
   export QT_IM_MODULE=fcitx
@@ -64,7 +64,7 @@ setopt HIST_IGNORE_DUPS HIST_IGNORE_ALL_DUPS HIST_SAVE_NO_DUPS HIST_REDUCE_BLANK
 source "$HOME/.zsh/plugins.zsh"
 source "$HOME/.zsh/alias.zsh"
 
-# 次回起動を速くするため rc 本体を zcompile（stale なら再生成）
+# 次回起動を速くするため rc 本体を zcompile
 for _f in "$HOME/.zshrc" "$HOME/.zsh/chezmoi.zshrc" "$HOME/.zsh/plugins.zsh" "$HOME/.zsh/alias.zsh"; do
   [[ -s "$_f" && ( ! -e "${_f}.zwc" || "$_f" -nt "${_f}.zwc" ) ]] && zcompile "$_f" 2>/dev/null
 done

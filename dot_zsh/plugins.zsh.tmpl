@@ -16,7 +16,6 @@ _path_without_wsl_mounts() {
 }
 
 # コマンドの init スクリプトをキャッシュして source する
-# 使い方: _init_tool_cache <コマンド名> <init サブコマンド...>
 _init_tool_cache() {
   local tool_name="$1"
   shift
