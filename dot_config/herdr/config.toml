@@ -1,39 +1,27 @@
-# Top-level state keys herdr writes back at runtime; kept here (before any
-# [table], as TOML requires) so chezmoi apply preserves them instead of stripping.
 onboarding = false
 auto_switch = false
 
-# Match Ghostty's theme (dot_config/ghostty/config: theme = TokyoNight).
 [theme]
 name = "tokyo-night"
 
-# zellij-style: single prefix (ctrl+g), then a key for each action.
-# (https://herdr.dev/docs/configuration/, https://herdr.dev/docs/keyboard/)
 [keys]
 prefix = "ctrl+g"
 
-# spaces (= projects) are the primary unit. Names are set automatically by the
-# space-namer poller (foreground cwd -> repo), so no manual rename binding.
-new_workspace    = ["prefix+t"]           # prefix -> t : new space (inherits cwd -> repo label)
+new_workspace    = ["prefix+t"]
+new_tab          = ["prefix+ctrl+t"]
+split_vertical   = ["prefix+alt+t"]
+split_horizontal = ["prefix+minus"]
+close_pane       = ["prefix+w"]
+resize_mode      = ["prefix+n"]
+rename_pane      = ["prefix+alt+r"]
+zoom             = ["prefix+z"]
 
-new_tab          = ["prefix+ctrl+t"]      # prefix -> ctrl+t : new tab (secondary)
-split_vertical   = ["prefix+alt+t"]       # prefix -> alt+t : new pane
-close_pane       = ["prefix+w"]           # closes the tab too when it's the last pane
-resize_mode      = ["prefix+n"]           # prefix -> n, then arrow keys to resize
-rename_pane      = ["prefix+alt+r"]       # prefix -> alt+r
-
-# nav (prefix-free): ctrl+left/right = tabs, ctrl+up/down = spaces
 previous_tab       = ["ctrl+left"]
 next_tab           = ["ctrl+right"]
 previous_workspace = ["ctrl+up"]
 next_workspace     = ["ctrl+down"]
 
-# pane navigation: ctrl+alt+arrow (prefix-free)
 focus_pane_left  = ["ctrl+alt+left"]
 focus_pane_down  = ["ctrl+alt+down"]
 focus_pane_up    = ["ctrl+alt+up"]
 focus_pane_right = ["ctrl+alt+right"]
-
-# kept on prefix for completeness
-split_horizontal = ["prefix+minus"]
-zoom             = ["prefix+z"]
