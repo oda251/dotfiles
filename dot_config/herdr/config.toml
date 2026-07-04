@@ -17,6 +17,7 @@ split_vertical   = ["prefix+alt+t"]       # prefix -> alt+t : new pane
 close_pane       = ["prefix+w"]           # closes the tab too when it's the last pane
 resize_mode      = ["prefix+n"]           # prefix -> n, then arrow keys to resize
 rename_tab       = ["prefix+r"]           # prefix -> r
+rename_pane      = ["prefix+alt+r"]       # prefix -> alt+r
 
 # pane navigation: ctrl+arrow (prefix-free, one chord)
 focus_pane_left  = ["ctrl+left"]
