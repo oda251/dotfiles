@@ -11,12 +11,13 @@ new_tab          = ["prefix+t"]           # prefix -> t
 split_vertical   = ["prefix+alt+t"]       # prefix -> alt+t : new pane
 close_pane       = ["prefix+w"]           # closes the tab too when it's the last pane
 resize_mode      = ["prefix+n"]           # prefix -> n, then arrow keys to resize
+rename_tab       = ["prefix+r"]           # prefix -> r
 
-# pane navigation: prefix -> arrow keys
-focus_pane_left  = ["prefix+left"]
-focus_pane_down  = ["prefix+down"]
-focus_pane_up    = ["prefix+up"]
-focus_pane_right = ["prefix+right"]
+# pane navigation: ctrl+arrow (prefix-free, one chord)
+focus_pane_left  = ["ctrl+left"]
+focus_pane_down  = ["ctrl+down"]
+focus_pane_up    = ["ctrl+up"]
+focus_pane_right = ["ctrl+right"]
 
 # tab navigation: prefix -> ctrl+tab / ctrl+shift+tab
 next_tab         = ["prefix+ctrl+tab"]
