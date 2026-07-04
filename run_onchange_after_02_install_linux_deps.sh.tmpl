@@ -18,15 +18,26 @@ fi
 
 # Obsidian (deb, snap版はWSLで動かない)
 if ! dpkg -s obsidian &>/dev/null; then
-  obsidian_version="1.12.7"
-  wget -q "https://github.com/obsidianmd/obsidian-releases/releases/download/v${obsidian_version}/obsidian_${obsidian_version}_amd64.deb" -O /tmp/obsidian.deb
-  sudo apt-get install -y /tmp/obsidian.deb
-  rm -f /tmp/obsidian.deb
+  obsidian_tag=$(curl -s https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/') || true
+  if [[ -n "$obsidian_tag" ]]; then
+    obsidian_version="${obsidian_tag#v}"
+    if curl -fsSL "https://github.com/obsidianmd/obsidian-releases/releases/download/${obsidian_tag}/obsidian_${obsidian_version}_amd64.deb" -o /tmp/obsidian.deb; then
+      sudo apt-get install -y /tmp/obsidian.deb
+    else
+      echo "⚠️ Obsidian のダウンロードに失敗しました。インストールをスキップします。"
+    fi
+    rm -f /tmp/obsidian.deb
+  else
+    echo "⚠️ Obsidian の最新バージョンの取得に失敗しました。インストールをスキップします。"
+  fi
 fi
 
 # WSL: symlink win32yank.exe for Neovim clipboard
-win32yank_src="/mnt/c/Users/odada/AppData/Local/Microsoft/WinGet/Packages/equalsraf.win32yank_Microsoft.Winget.Source_8wekyb3d8bbwe/win32yank.exe"
-if [[ -f "$win32yank_src" ]]; then
-  sudo ln -sf "$win32yank_src" /usr/local/bin/win32yank.exe
+win_user=$(/mnt/c/Windows/System32/cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r\n') || true
+if [[ -n "$win_user" ]]; then
+  win32yank_src=$(ls /mnt/c/Users/"$win_user"/AppData/Local/Microsoft/WinGet/Packages/equalsraf.win32yank_*/win32yank.exe 2>/dev/null | head -n1) || true
+  if [[ -n "$win32yank_src" && -f "$win32yank_src" ]]; then
+    sudo ln -sf "$win32yank_src" /usr/local/bin/win32yank.exe
+  fi
 fi
 {{- end }}
