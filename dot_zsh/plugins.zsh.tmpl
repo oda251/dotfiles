@@ -8,8 +8,7 @@ source_cache_script() {
   fi
 }
 
-# cache 生成時に呼び出し元 PATH から /mnt/* を除く。
-# 過去 28 個の Windows パスがキャッシュに焼き込まれて永続化した事故対策。
+# キャッシュ生成時に /mnt/* を PATH から除き、Windows パスの焼き込みを防ぐ
 _path_without_wsl_mounts() {
   local -a parts=(${(s.:.)PATH})
   parts=(${parts:#/mnt/*})
@@ -21,17 +20,14 @@ _path_without_wsl_mounts() {
 _init_tool_cache() {
   local tool_name="$1"
   shift
-  local bin_path
-  bin_path="$(command -v "$tool_name")" || return 1
-  # mise upgrade 等でバージョンが変わると、生成済み init が旧バージョンの絶対パスを
-  # 焼き込んだまま残り、旧 install ディレクトリ削除後に "見つからない" 状態になる。
-  # command -v の mtime だけでなく、シンボリックリンク (mise の latest 等) を実体解決した
-  # パスを stamp として記録し、解決先が変わった/消えた場合も再生成する。
+  local bin_path="$commands[$tool_name]"
+  [[ -n "$bin_path" ]] || return 1
+  # シンボリックリンクの実体解決パスを stamp に記録し、解決先が変わったら再生成する
   local real_path="${bin_path:A}"
   local stamp="# tool-path: ${real_path}"
 
   local cache_file="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/${tool_name}-init.zsh"
-  mkdir -p "${cache_file:h}"
+  [[ -d "${cache_file:h}" ]] || mkdir -p "${cache_file:h}"
   local first=""
   [[ -s "$cache_file" ]] && read -r first < "$cache_file"
   if [[ ! -s "$cache_file" || "$real_path" -nt "$cache_file" || "$first" != "$stamp" ]]; then
@@ -47,7 +43,7 @@ if _init_tool_cache mise activate zsh; then
   local mise_global_config="${XDG_CONFIG_HOME:-$HOME/.config}/mise/config.toml"
   if [[ ! -s "$mise_env_cache" \
         || ( -f "$mise_global_config" && "$mise_global_config" -nt "$mise_env_cache" ) \
-        || "$(command -v mise)" -nt "$mise_env_cache" ]]; then
+        || "$commands[mise]" -nt "$mise_env_cache" ]]; then
     PATH="$(_path_without_wsl_mounts)" mise env -s zsh >| "$mise_env_cache" 2>/dev/null
     rm -f "${mise_env_cache}.zwc"
   fi
@@ -55,8 +51,7 @@ if _init_tool_cache mise activate zsh; then
 fi
 
 # WSL: wsl.exe / clip.exe 等の interop バイナリ用に Windows System32 を追加。
-# mise-env は PATH を上書きする & __MISE_ORIG_PATH も上書き先になるため、
-# mise の後で append し、precmd の hook-env でも消えないよう __MISE_ORIG_PATH にも反映する。
+# mise が PATH と __MISE_ORIG_PATH を上書きするため、mise の後で両方に append する。
 if [[ -n "${WSL_DISTRO_NAME:-}" ]] && [[ ":$PATH:" != *":/mnt/c/Windows/System32:"* ]]; then
   export PATH="$PATH:/mnt/c/Windows/System32"
   if [[ -n "${__MISE_ORIG_PATH:-}" && ":$__MISE_ORIG_PATH:" != *":/mnt/c/Windows/System32:"* ]]; then
@@ -78,12 +73,12 @@ fi
 
 # 補完スクリプトの生成・キャッシュ
 _completion_cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/completions"
-mkdir -p "$_completion_cache_dir"
+[[ -d "$_completion_cache_dir" ]] || mkdir -p "$_completion_cache_dir"
 
 _cache_completion() {
   local cmd="$1" subcmd="${2:-completion zsh}"
   local bin_path cache_file
-  bin_path="$(command -v "$cmd")" || return 1
+  bin_path="$commands[$cmd]"; [[ -n "$bin_path" ]] || return 1
   cache_file="$_completion_cache_dir/_${cmd}"
   if [[ ! -s "$cache_file" || "$bin_path" -nt "$cache_file" ]]; then
     eval "$cmd $subcmd" >| "$cache_file" 2>/dev/null
@@ -97,9 +92,11 @@ _cache_completion docker "completion zsh"
 _cache_completion ghq "completion zsh"
 _cache_completion gwq "completion zsh"
 fpath=( "$_completion_cache_dir" $fpath )
+# (#q) には extendedglob が必要 / compinit は内容不変だと mtime を更新しないので touch する
 autoload -Uz compinit
-if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
+if () { setopt localoptions extendedglob; [[ -n ~/.zcompdump(#qN.mh+24) ]] }; then
   compinit
+  command touch ~/.zcompdump
   { zcompile ~/.zcompdump } &!
 else
   compinit -C
@@ -137,19 +134,19 @@ if [[ ! -d "$_fzf_tab_dir" ]]; then
   git clone https://github.com/Aloxaf/fzf-tab.git "$_fzf_tab_dir"
 fi
 if [[ -f "$_fzf_tab_dir/fzf-tab.plugin.zsh" ]]; then
-  source "$_fzf_tab_dir/fzf-tab.plugin.zsh"
+  source_cache_script "$_fzf_tab_dir/fzf-tab.plugin.zsh"
 fi
 zstyle ':fzf-tab:*' fzf-bindings 'space:accept' 'right:accept' 'enter:accept' 'up:up' 'down:down'
 zstyle ':fzf-tab:*' accept-line enter
 
 # パターンマッチ fzf 補完（fzf-tab の後に source し、^I をラップ）
-source "$HOME/.zsh/fzf-completion.zsh"
+source_cache_script "$HOME/.zsh/fzf-completion.zsh"
 
 # Windows 由来の不要な拡張子をコマンド補完から除外
 zstyle ':completion:*:*:*:*' ignored-patterns '*.dll' '*.dat' '*.exe'
 
 # 常時履歴リスト表示
-source "$HOME/.zsh/history-list.zsh"
+source_cache_script "$HOME/.zsh/history-list.zsh"
 
 bindkey '^P' __hl_up
 bindkey '^N' __hl_down
@@ -165,58 +162,35 @@ bindkey '\ew' __cdw_widget
 
 # zsh-syntax-highlighting（最後に読み込む）
 if [[ -f "$_brew_prefix/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
-  source "$_brew_prefix/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+  source_cache_script "$_brew_prefix/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 fi
 {{- end }}
 
 _init_tool_cache zoxide init zsh
 _init_tool_cache starship init zsh
 
-if command -v zsh >/dev/null 2>&1; then
-  export SHELL="$(command -v zsh)"
-fi
+(( $+commands[zsh] )) && export SHELL="$commands[zsh]"
 
 # OSC 7: ターミナルに CWD を通知（herdr のペイン/タブ CWD 引き継ぎに必要）
 # stdout に出すと $(cd ... && pwd) 等のコマンド代入に escape が混入するため /dev/tty へ。
 __notify_terminal_cwd() {
-  printf '\e]7;file://%s%s\e\\' "${HOST}" "${PWD}" >/dev/tty 2>/dev/null
+  { printf '\e]7;file://%s%s\e\\' "${HOST}" "${PWD}" >/dev/tty } 2>/dev/null
 }
 autoload -Uz add-zsh-hook
 add-zsh-hook chpwd __notify_terminal_cwd
 __notify_terminal_cwd
 
-# herdr: keep each space named after its primary pane's git repo / cwd.
-# A background poller (~/.config/herdr/space-namer.py) does the renaming; it
-# self-dedups via flock and exits when the session socket disappears. Only
-# launch when no poller currently holds the lock, so we don't spawn a doomed
-# process on every shell.
-if [[ "${HERDR_ENV:-}" == "1" && -n "${HERDR_SOCKET_PATH:-}" ]] && command -v python3 >/dev/null 2>&1; then
-  __herdr_namer="${HOME}/.config/herdr/space-namer.py"
-  __herdr_lock="${HERDR_SOCKET_PATH:h}/space-namer.lock"
-  if [[ -x "$__herdr_namer" ]] && command -v flock >/dev/null 2>&1 && flock -n "$__herdr_lock" true 2>/dev/null; then
-    if command -v setsid >/dev/null 2>&1; then
-      setsid "$__herdr_namer" >/dev/null 2>&1 </dev/null &!
-    else
-      nohup "$__herdr_namer" >/dev/null 2>&1 </dev/null &!
+# WSL の auto-login pty は 0x0 を報告するため実端末のみ起動する。
+# `--session main` は launch-or-attach: 複数シェルが同一サーバーに収束する。
+if [[ "${HERDR_AUTO_START:-false}" == "true" && -z "$HERDR_ENV" && -o interactive && -t 0 && -t 1 ]] \
+    && (( $+commands[herdr] )); then
+  __mux_winsize=$(stty size 2>/dev/null) || __mux_winsize="0 0"
+  __mux_rows="${__mux_winsize%% *}"; __mux_cols="${__mux_winsize##* }"
+  if [[ "${__mux_rows:-0}" -gt 0 && "${__mux_cols:-0}" -gt 0 ]]; then
+    herdr --session main
+    if [[ "$HERDR_AUTO_EXIT" == "true" ]]; then
+      exit
     fi
   fi
-  unset __herdr_namer __herdr_lock
+  unset __mux_winsize __mux_rows __mux_cols
 fi
-
-# Read the real pty window size up front. WSL+systemd spawns an auto-login console
-# (/bin/login -f) on a separate pty with no terminal emulator attached; it reports
-# 0x0. Guard on a non-zero size so only real terminals start/attach a session and a
-# phantom 0x0 client can't collapse a multi-client session's visible pane.
-__mux_winsize=$(stty size 2>/dev/null) || __mux_winsize="0 0"
-__mux_rows="${__mux_winsize%% *}"; __mux_cols="${__mux_winsize##* }"
-if [[ "${HERDR_AUTO_START:-false}" == "true" && -z "$HERDR_ENV" && -o interactive && -t 0 && -t 1 \
-      && "${__mux_rows:-0}" -gt 0 && "${__mux_cols:-0}" -gt 0 ]] && command -v herdr >/dev/null 2>&1; then
-    # `--session main` is launch-or-attach: concurrent shells (e.g. Windows
-    # Terminal restoring panes at WSL boot) all converge on the one server.
-    herdr --session main
-
-    if [[ "$HERDR_AUTO_EXIT" == "true" ]]; then
-        exit
-    fi
-fi
-unset __mux_winsize __mux_rows __mux_cols

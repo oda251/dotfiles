@@ -25,8 +25,7 @@ obsidian() {
   if [[ -S "$socket" ]]; then
     command obsidian "$@"
   else
-    # WSLg(Wayland) は IME 連携が弱いため X11(XWayland) に固定して fcitx5 を効かせる。
-    # 非WSL では Wayland を壊さないよう付けない。
+    # WSLg(Wayland) は IME 連携が弱いため X11(XWayland) に固定して fcitx5 を効かせる（非WSLでは付けない）。
     local ozone=()
     [[ -n "${WSL_DISTRO_NAME:-}" ]] && ozone=(ELECTRON_OZONE_PLATFORM_HINT=x11)
     (env "${ozone[@]}" nohup /opt/Obsidian/obsidian "$@" >/dev/null 2>&1 &)
@@ -90,8 +89,7 @@ rmg() {
 }
 
 # gh で取れる repo を fzf で選んで ghq get → cd（無引数=自分、引数=owner/org）
-# 注: gh repo list はページネーションを内部で完了させてから出力するため、
-#     fzf には全件揃ってから流れる (体感は数百ms-数秒の待ちあり)
+# gh repo list は全件取得後に出力するため fzf 表示まで待ちがある
 getg() {
   command -v gh  >/dev/null 2>&1 || { echo "gh not found"  >&2; return 1; }
   command -v ghq >/dev/null 2>&1 || { echo "ghq not found" >&2; return 1; }
@@ -108,8 +106,7 @@ getg() {
 
 # worktree へ fzf で cd
 # 既定: cwd が属する repo の worktree のみ。-g で ghq 管理下の全 repo を対象。
-# gwq list -g は worktree ごとに git を叩くため激遅 (実測 ~2s/件)。
-# 代わりに git worktree list --porcelain を直接読む。
+# gwq list -g は遅いため git worktree list --porcelain を直接読む
 # 表示は "owner/repo  branch  path" の3カラム整列、検索対象は 1,2 カラムのみ。
 cdw() {
   command -v ghq >/dev/null 2>&1 || { echo "ghq not found" >&2; return 1; }

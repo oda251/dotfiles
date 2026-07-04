@@ -18,15 +18,13 @@ __hl_clear_nav() {
 
 # HIST_IGNORE_ALL_DUPS により $history は既にユニーク
 __hl_search() {
-  __hl_matches=()
-  local line
-  for line in "${(@)history}"; do
-    if [[ -n "$1" ]]; then
-      [[ "$line" != "$1"* || "$line" == "$1" ]] && continue
-    fi
-    __hl_matches+=( "$line" )
-    (( ${#__hl_matches} >= __hl_max_lines )) && break
-  done
+  if [[ -n "$1" ]]; then
+    # :# 内のパラメータ展開は literal 扱いのため (b) 等のクオートは不要
+    __hl_matches=( "${(@M)history:#${1}?*}" )
+  else
+    __hl_matches=( "${(@)history}" )
+  fi
+  __hl_matches=( ${(@)__hl_matches[1,__hl_max_lines]} )
 }
 
 __hl_render() {

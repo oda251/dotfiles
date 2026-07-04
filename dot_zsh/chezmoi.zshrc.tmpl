@@ -2,12 +2,15 @@
 
 export XDG_CONFIG_HOME="$HOME/.config"
 
+# ネストシェルで継承された PATH/FPATH の重複を除去（compdump の無効化を防ぐ）
+typeset -gU path fpath
+
 {{- if ne .chezmoi.os "windows" }}
 # brew shellenv のキャッシュ
 _brew_shellenv_cache() {
   local brew_bin="$1"
   local cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/brew-shellenv.zsh"
-  mkdir -p "${cache:h}"
+  [[ -d "${cache:h}" ]] || mkdir -p "${cache:h}"
   if [[ ! -s "$cache" || "$brew_bin" -nt "$cache" ]]; then
     "$brew_bin" shellenv >| "$cache"
   fi
@@ -60,3 +63,9 @@ setopt HIST_IGNORE_DUPS HIST_IGNORE_ALL_DUPS HIST_SAVE_NO_DUPS HIST_REDUCE_BLANK
 
 source "$HOME/.zsh/plugins.zsh"
 source "$HOME/.zsh/alias.zsh"
+
+# 次回起動を速くするため rc 本体を zcompile（stale なら再生成）
+for _f in "$HOME/.zshrc" "$HOME/.zsh/chezmoi.zshrc" "$HOME/.zsh/plugins.zsh" "$HOME/.zsh/alias.zsh"; do
+  [[ -s "$_f" && ( ! -e "${_f}.zwc" || "$_f" -nt "${_f}.zwc" ) ]] && zcompile "$_f" 2>/dev/null
+done
+unset _f
