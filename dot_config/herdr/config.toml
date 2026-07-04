@@ -19,15 +19,15 @@ resize_mode      = ["prefix+n"]           # prefix -> n, then arrow keys to resi
 rename_tab       = ["prefix+r"]           # prefix -> r
 rename_pane      = ["prefix+alt+r"]       # prefix -> alt+r
 
-# pane navigation: ctrl+arrow (prefix-free, one chord)
-focus_pane_left  = ["ctrl+left"]
-focus_pane_down  = ["ctrl+down"]
-focus_pane_up    = ["ctrl+up"]
-focus_pane_right = ["ctrl+right"]
+# tab navigation: ctrl+left / ctrl+right (prefix-free)
+previous_tab     = ["ctrl+left"]
+next_tab         = ["ctrl+right"]
 
-# tab navigation: prefix -> ctrl+tab / ctrl+shift+tab
-next_tab         = ["prefix+ctrl+tab"]
-previous_tab     = ["prefix+ctrl+shift+tab"]
+# pane navigation: ctrl+alt+arrow (prefix-free)
+focus_pane_left  = ["ctrl+alt+left"]
+focus_pane_down  = ["ctrl+alt+down"]
+focus_pane_up    = ["ctrl+alt+up"]
+focus_pane_right = ["ctrl+alt+right"]
 
 # kept on prefix for completeness
 split_horizontal = ["prefix+minus"]
