@@ -21,7 +21,7 @@ import sys
 import time
 
 SOCK = os.environ.get("HERDR_SOCKET_PATH")
-INTERVAL = float(os.environ.get("HERDR_SPACE_NAMER_INTERVAL", "3"))
+INTERVAL = float(os.environ.get("HERDR_SPACE_NAMER_INTERVAL", "10"))
 HOME = os.path.realpath(os.path.expanduser("~"))
 
 

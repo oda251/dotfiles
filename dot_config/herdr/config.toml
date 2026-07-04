@@ -12,9 +12,9 @@ name = "tokyo-night"
 [keys]
 prefix = "ctrl+g"
 
-# spaces (= projects) are the primary unit
+# spaces (= projects) are the primary unit. Names are set automatically by the
+# space-namer poller (foreground cwd -> repo), so no manual rename binding.
 new_workspace    = ["prefix+t"]           # prefix -> t : new space (inherits cwd -> repo label)
-rename_workspace = ["prefix+r"]           # prefix -> r : rename space (shows as repo name)
 
 new_tab          = ["prefix+ctrl+t"]      # prefix -> ctrl+t : new tab (secondary)
 split_vertical   = ["prefix+alt+t"]       # prefix -> alt+t : new pane
