@@ -2,22 +2,26 @@
 [theme]
 name = "tokyo-night"
 
+# zellij-style: single prefix (ctrl+g), then a key for each action.
+# (https://herdr.dev/docs/configuration/, https://herdr.dev/docs/keyboard/)
 [keys]
-# Every action keeps its default prefix binding and gains a direct chord on top.
-# ctrl+alt is the modifier family Herdr's own docs recommend for prefix-free use:
-# untouched by macOS's alt-composing behavior and not claimed by Ghostty
-# defaults, unlike bare alt (https://herdr.dev/docs/keyboard/).
-new_tab          = ["prefix+c", "ctrl+alt+c", "super+t", "ctrl+t"]
-# close_pane closes the tab too when it's the last pane in the tab.
-close_pane       = ["prefix+x", "super+w", "ctrl+w", "alt+w"]
-previous_tab     = ["prefix+p", "ctrl+alt+["]
-next_tab         = ["prefix+n", "ctrl+alt+]"]
-focus_pane_left  = ["prefix+h", "ctrl+alt+h"]
-focus_pane_down  = ["prefix+j", "ctrl+alt+j"]
-focus_pane_up    = ["prefix+k", "ctrl+alt+k"]
-focus_pane_right = ["prefix+l", "ctrl+alt+l"]
-split_vertical   = ["prefix+v", "ctrl+alt+d", "alt+t"]
-split_horizontal = ["prefix+minus", "ctrl+alt+shift+d"]
-zoom             = ["prefix+z", "ctrl+alt+z"]
-# zellij-style: ctrl+n to enter resize mode, then arrow keys to resize.
-resize_mode      = ["prefix+r", "ctrl+n"]
+prefix = "ctrl+g"
+
+new_tab          = ["prefix+t"]           # prefix -> t
+split_vertical   = ["prefix+alt+t"]       # prefix -> alt+t : new pane
+close_pane       = ["prefix+w"]           # closes the tab too when it's the last pane
+resize_mode      = ["prefix+n"]           # prefix -> n, then arrow keys to resize
+
+# pane navigation: prefix -> arrow keys
+focus_pane_left  = ["prefix+left"]
+focus_pane_down  = ["prefix+down"]
+focus_pane_up    = ["prefix+up"]
+focus_pane_right = ["prefix+right"]
+
+# tab navigation: prefix -> ctrl+tab / ctrl+shift+tab
+next_tab         = ["prefix+ctrl+tab"]
+previous_tab     = ["prefix+ctrl+shift+tab"]
+
+# kept on prefix for completeness
+split_horizontal = ["prefix+minus"]
+zoom             = ["prefix+z"]
