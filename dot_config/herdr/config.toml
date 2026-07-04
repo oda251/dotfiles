@@ -19,3 +19,5 @@ focus_pane_right = ["prefix+l", "ctrl+alt+l"]
 split_vertical   = ["prefix+v", "ctrl+alt+d", "alt+t"]
 split_horizontal = ["prefix+minus", "ctrl+alt+shift+d"]
 zoom             = ["prefix+z", "ctrl+alt+z"]
+# zellij-style: ctrl+n to enter resize mode, then arrow keys to resize.
+resize_mode      = ["prefix+r", "ctrl+n"]
