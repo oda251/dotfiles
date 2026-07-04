@@ -185,6 +185,24 @@ autoload -Uz add-zsh-hook
 add-zsh-hook chpwd __notify_terminal_cwd
 __notify_terminal_cwd
 
+# herdr: keep each space named after its primary pane's git repo / cwd.
+# A background poller (~/.config/herdr/space-namer.py) does the renaming; it
+# self-dedups via flock and exits when the session socket disappears. Only
+# launch when no poller currently holds the lock, so we don't spawn a doomed
+# process on every shell.
+if [[ "${HERDR_ENV:-}" == "1" && -n "${HERDR_SOCKET_PATH:-}" ]] && command -v python3 >/dev/null 2>&1; then
+  __herdr_namer="${HOME}/.config/herdr/space-namer.py"
+  __herdr_lock="${HERDR_SOCKET_PATH:h}/space-namer.lock"
+  if [[ -x "$__herdr_namer" ]] && command -v flock >/dev/null 2>&1 && flock -n "$__herdr_lock" true 2>/dev/null; then
+    if command -v setsid >/dev/null 2>&1; then
+      setsid "$__herdr_namer" >/dev/null 2>&1 </dev/null &!
+    else
+      nohup "$__herdr_namer" >/dev/null 2>&1 </dev/null &!
+    fi
+  fi
+  unset __herdr_namer __herdr_lock
+fi
+
 # Read the real pty window size up front. WSL+systemd spawns an auto-login console
 # (/bin/login -f) on a separate pty with no terminal emulator attached; it reports
 # 0x0. Guard on a non-zero size so only real terminals start/attach a session and a
