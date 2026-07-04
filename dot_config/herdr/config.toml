@@ -1,3 +1,8 @@
+# Top-level state keys herdr writes back at runtime; kept here (before any
+# [table], as TOML requires) so chezmoi apply preserves them instead of stripping.
+onboarding = false
+auto_switch = false
+
 # Match Ghostty's theme (dot_config/ghostty/config: theme = TokyoNight).
 [theme]
 name = "tokyo-night"
