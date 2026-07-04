@@ -193,9 +193,8 @@ __mux_winsize=$(stty size 2>/dev/null) || __mux_winsize="0 0"
 __mux_rows="${__mux_winsize%% *}"; __mux_cols="${__mux_winsize##* }"
 if [[ "${HERDR_AUTO_START:-false}" == "true" && -z "$HERDR_ENV" && -o interactive && -t 0 && -t 1 \
       && "${__mux_rows:-0}" -gt 0 && "${__mux_cols:-0}" -gt 0 ]] && command -v herdr >/dev/null 2>&1; then
-    # herdr keeps a persistent server, so `--session main` is launch-or-attach:
-    # concurrent shells (e.g. Windows Terminal restoring panes at WSL boot) all
-    # converge on the one server without the socket race zellij had.
+    # `--session main` is launch-or-attach: concurrent shells (e.g. Windows
+    # Terminal restoring panes at WSL boot) all converge on the one server.
     herdr --session main
 
     if [[ "$HERDR_AUTO_EXIT" == "true" ]]; then

@@ -18,14 +18,12 @@ keybind = "global:ctrl+`=toggle_quick_terminal"
 macos-non-native-fullscreen = true
 window-decoration = false
 
-# Let Zellij receive these keys directly.
-# Keep only unbinds that override Ghostty defaults.
+# Unbind keys the terminal workspace manager (herdr) needs, so Ghostty
+# passes them through instead of claiming its own defaults.
 keybind = "super+t=unbind"
 keybind = "super+w=unbind"
 keybind = "super+shift+bracket_left=unbind"
 keybind = "super+shift+bracket_right=unbind"
-keybind = "ctrl+tab=text:\x1bl"
-keybind = "ctrl+shift+tab=text:\x1bh"
 keybind = "ctrl+comma=unbind"
 keybind = "ctrl+period=unbind"
 
