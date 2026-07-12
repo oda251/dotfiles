@@ -16,7 +16,9 @@ title: タイトル
 ---
 ```
 
-theme は `theme/` 配下の候補をユーザに提示し、確認を取って決める。
+theme は以下の候補をユーザに提示し、確認を取って決める:
+
+!`ls ~/obsidian-vault/slide/theme`
 
 ## 起動
 
