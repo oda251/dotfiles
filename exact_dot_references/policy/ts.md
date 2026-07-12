@@ -1,4 +1,4 @@
-# TypeScript ガイドライン
+# TypeScript ポリシー
 
 プロジェクト横断で適用する TypeScript 共通ルール。
 
