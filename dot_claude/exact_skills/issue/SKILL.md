@@ -43,18 +43,7 @@ confirm-before-run: true
 
 ### community guidelines
 
-投稿前に以下を確認:
-
-- `CONTRIBUTING.md`: issue起票の手順、必須情報、ラベル運用
-- `CODE_OF_CONDUCT.md`: 表現や対応の禁止事項
-- `SUPPORT.md` / `.github/SUPPORT.md`: 質問は Discussions や Stack Overflow へ誘導されていないか
-- `README` の contributing 節
-
-```bash
-gh api repos/{repo}/contents/CONTRIBUTING.md --jq .content | base64 -d
-```
-
-APIで取れない場合（大きなrepo・branchデフォルト違い等）は `/tmp/{repo-slug}/` に `gh repo clone` してローカルで読む。
+確認項目と取得コマンド: `references/guidelines-check.md`
 
 ガイドラインに抵触する可能性があれば draft作成前にユーザーへ相談する。
 
@@ -101,30 +90,7 @@ repo owner が自身のloginまたは所属orgに含まれるかで内部/外部
 | sub-issue紐付け | 投稿後 GitHub sub-issue API で親に紐付け | draft本文に parent URL 記載のみ |
 | 報告 | issue番号・URL + draftパス + 類似issueサマリ | draftパス + 投稿先repo + 類似issueサマリ + 手動投稿案内 |
 
-投稿コマンド:
-
-```bash
-gh issue create --repo {repo} \
-  --title "..." \
-  --body-file <(obsidian read vault=obsidian-vault path="{org}/note/{date}-{title}.md" | sed '/^---$/,/^---$/d') \
-  --label "..."
-```
-
-投稿後、draft 末尾に投稿URLを追記:
-
-```bash
-obsidian append vault=obsidian-vault \
-  path="{org}/note/{date}-{title}.md" \
-  content="\n\n---\nPosted: {issue-url}"
-```
-
-### 6-3. sub-issue紐付け（該当時）
-
-GitHub のsub-issue APIで紐付ける。`gh issue --help` で最新のサブコマンド対応を確認。
-
-一般的には `POST /repos/{owner}/{repo}/issues/{parent}/sub_issues` で `sub_issue_id` を渡す。`sub_issue_id` は issue の **database id**（`gh api repos/{repo}/issues/{num} --jq .id`）で、node_id や issue number とは別物。
-
-APIが想定どおり動かない場合は、親issue本文の Tasklist に `- [ ] #{child}` を追記する案をユーザーに提示する（自動編集はしない）。
+投稿・URL追記コマンドと sub-issue API の詳細（database id の注意含む）: `references/posting.md`
 
 ---
 
