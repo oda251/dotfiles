@@ -51,8 +51,6 @@ note/{date}-{title}.md          # repoに紐づかない
 - `ndc/*` — 汎用分野分類。語彙: `~/.references/taxonomy/ndc.md`
 - `ccs/*` — 計算機分野の領域分類。語彙: `~/.references/taxonomy/ccs.md`
 
-`ccs/*` は計算機分野、`ndc/*` は汎用知識、`tech/*` は実体（ツール+概念）。
-
 例: Hono の認証ミドルウェア比較ノートを永続化する場合
 
 ```yaml
