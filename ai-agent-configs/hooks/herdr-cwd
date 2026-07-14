@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+# herdr の space(workspace) 名と git branch を Claude Code の作業ディレクトリに
+# 追従させる。herdr は space 名を「シェルが cd 時に出す OSC 7」から live 解決する
+# (herdr issue #269/#345)。Claude Code は OSC 7 を出さず、内部 cwd は hook payload
+# にしか現れないため、この hook が payload の cwd を OSC 7 として pane の tty に注入する。
+#
+# polling ではなくイベント駆動 (PostToolUse:Bash / UserPromptSubmit)。cwd が前回と
+# 同じなら何もしない。herdr の外なら即終了。
+set -euo pipefail
+
+# herdr の pane 内でのみ意味を持つ
+[ "${HERDR_ENV:-}" = "1" ] || exit 0
+
+input="$(cat)"
+
+# この hook 自身は controlling terminal を持たない (Claude Code の hook 仕様)。
+# 祖先を辿って Claude Code プロセスの tty (= pane の pty) を見つける。
+tty=""
+pid="$PPID"
+for _ in 1 2 3 4 5 6 7 8; do
+  [ -n "$pid" ] && [ "$pid" != 0 ] || break
+  t="$(ps -o tty= -p "$pid" 2>/dev/null | tr -d '[:space:]')"
+  case "$t" in
+    ttys*|pts/*|pts*) tty="$t"; break ;;
+  esac
+  pid="$(ps -o ppid= -p "$pid" 2>/dev/null | tr -d '[:space:]')"
+done
+[ -n "$tty" ] || exit 0
+dev="/dev/$tty"
+[ -w "$dev" ] || exit 0
+
+# payload の cwd を取り出し、変化していれば OSC 7 (空ホスト形式) を注入。
+# herdr は file://host/path 形式を受け付けず file:///path のみ受理する。
+# JSON は一時ファイル経由で渡す (python3 - の `-` が stdin をプログラム入力に
+# 使うため、payload を stdin に流すと競合して読めない)。
+tmp="$(mktemp "${TMPDIR:-/tmp}/herdr-cwd-input.XXXXXX")" || exit 0
+trap 'rm -f "$tmp"' EXIT
+printf '%s' "$input" > "$tmp"
+python3 - "$dev" "$tmp" <<'PY'
+import json, os, sys, urllib.parse
+
+dev, tmp = sys.argv[1], sys.argv[2]
+try:
+    with open(tmp, encoding="utf-8") as f:
+        data = json.load(f)
+except Exception:
+    sys.exit(0)
+
+# サブエージェントの hook は無視（並列サブエージェントの cwd に space 名が
+# 引っ張られるのを防ぐ。herdr 公式 claude hook と同じフィルタ）
+if data.get("agent_id"):
+    sys.exit(0)
+
+cwd = data.get("cwd")
+if not isinstance(cwd, str) or not cwd:
+    sys.exit(0)
+
+sid = data.get("session_id") or "default"
+# セッション単位で最後に通知した cwd を記録し、差分がなければ no-op
+state_dir = (os.environ.get("TMPDIR") or "/tmp").rstrip("/")
+state = os.path.join(state_dir, f"herdr-cwd.{sid}")
+try:
+    with open(state) as f:
+        if f.read() == cwd:
+            sys.exit(0)
+except Exception:
+    pass
+
+# OSC 7: ESC ] 7 ; file:// <empty-host> <percent-encoded-abs-path> BEL
+path = urllib.parse.quote(cwd)  # '/' は safe のまま残る
+seq = f"\033]7;file://{path}\007"
+try:
+    with open(dev, "w") as f:
+        f.write(seq)
+        f.flush()
+    with open(state, "w") as f:
+        f.write(cwd)
+except Exception:
+    sys.exit(0)
+PY
+
+exit 0
