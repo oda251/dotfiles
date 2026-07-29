@@ -130,16 +130,11 @@ APIが想定どおり動かない場合は、親issue本文の Tasklist に `- [
 
 ## セルフチェック
 
+手順に従えば満たされる項目は挙げない。判断を伴い漏れやすいもののみ:
+
 ```
-□ 類似issue/PRを open/closed 両方検索したか？
 □ 近接duplicate発見時にユーザーへ判断を仰いだか？
-□ CONTRIBUTING / CODE_OF_CONDUCT / SUPPORT を確認したか？
-□ template必須フィールドを埋めたか？
-□ 主張・修正内容にインライン出典を付けたか？
-□ 出典なしの情報に（未検証）を付けたか？
+□ community guidelines（CONTRIBUTING / CODE_OF_CONDUCT / SUPPORT）に抵触していないか？
 □ 1 issue = 1 concern か？
-□ draft を docs skill の規約で vault に保存したか？
 □ ユーザ確認を取ってから投稿したか？
-□ 投稿後、draft末尾にissue URLを追記したか？
-□ sub-issue紐付けの要否を判断したか？
 ```
