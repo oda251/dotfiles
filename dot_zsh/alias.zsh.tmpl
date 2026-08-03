@@ -89,19 +89,30 @@ rmg() {
 }
 
 # gh で取れる repo を fzf で選んで ghq get → cd（無引数=自分、引数=owner/org）
+# URL / owner/repo を渡した場合は fzf を挟まず直接 get する
 # gh repo list は全件取得後に出力するため fzf 表示まで待ちがある
 getg() {
-  command -v gh  >/dev/null 2>&1 || { echo "gh not found"  >&2; return 1; }
   command -v ghq >/dev/null 2>&1 || { echo "ghq not found" >&2; return 1; }
-  local owner=${1:-} pick url
-  pick=$(gh repo list ${owner:+"$owner"} --limit 1000 \
-      --json nameWithOwner,description,url \
-      -q '.[] | [.nameWithOwner, (.description // ""), .url] | @tsv' \
-    | fzf --with-nth=1,2 --delimiter='\t' --preview 'echo {2}') || return
-  url=$(awk -F'\t' '{print $3}' <<< "$pick")
+  local arg=${1:-} pick url rel
+  if [[ "$arg" == *://* || "$arg" == git@*:* || "$arg" == */* ]]; then
+    url=$arg
+  else
+    command -v gh >/dev/null 2>&1 || { echo "gh not found" >&2; return 1; }
+    pick=$(gh repo list ${arg:+"$arg"} --limit 1000 \
+        --json nameWithOwner,description,url \
+        -q '.[] | [.nameWithOwner, (.description // ""), .url] | @tsv' \
+      | fzf --with-nth=1,2 --delimiter='\t' --preview 'echo {2}') || return
+    url=$(awk -F'\t' '{print $3}' <<< "$pick")
+  fi
   [[ -z "$url" ]] && return
   ghq get -- "$url" || return
-  builtin cd -- "$(ghq root)/${url#https://}"
+  rel=${url#*://}
+  rel=${rel/#git@/}
+  rel=${rel/://}
+  rel=${rel%.git}
+  rel=${rel%/}
+  [[ "$rel" == */*/* ]] || rel="github.com/$rel"
+  builtin cd -- "$(ghq root)/$rel"
 }
 
 # worktree へ fzf で cd
