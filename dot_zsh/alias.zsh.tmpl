@@ -67,11 +67,17 @@ function y() {
 _fzf_repo_preview='eza --tree --level=2 --color=always --icons=auto'
 
 # ghq クローン済みリポジトリへ fzf で cd
+# 引数は fzf の初期クエリ。一意に絞れた場合は fzf を出さず直接 cd する
 cdg() {
   command -v ghq >/dev/null 2>&1 || { echo "ghq not found" >&2; return 1; }
-  local root repo
+  local root repo ret
   root="$(ghq root)" || return 1
-  repo=$(ghq list | fzf --preview "$_fzf_repo_preview $root/{}") || return
+  repo=$(ghq list | fzf --query "${1:-}" --select-1 --exit-0 \
+    --preview "$_fzf_repo_preview $root/{}"); ret=$?
+  if (( ret != 0 )); then
+    (( ret == 1 )) && [[ -n "${1:-}" ]] && echo "cdg: no match: $1" >&2
+    return $ret
+  fi
   builtin cd -- "$root/$repo"
 }
 
