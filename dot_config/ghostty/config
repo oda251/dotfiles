@@ -26,6 +26,16 @@ keybind = "super+shift+bracket_left=unbind"
 keybind = "super+shift+bracket_right=unbind"
 keybind = "ctrl+comma=unbind"
 keybind = "ctrl+period=unbind"
+# Arrow navigation: Ghostty defaults these to line-move / jump_to_prompt /
+# goto_split, which steal herdr's cmd+arrow tab/workspace/pane bindings.
+keybind = "super+arrow_left=unbind"
+keybind = "super+arrow_right=unbind"
+keybind = "super+arrow_up=unbind"
+keybind = "super+arrow_down=unbind"
+keybind = "super+alt+arrow_left=unbind"
+keybind = "super+alt+arrow_right=unbind"
+keybind = "super+alt+arrow_up=unbind"
+keybind = "super+alt+arrow_down=unbind"
 
 # Improve readability for completion/secondary text while keeping TokyoNight base
 selection-background = 364a82

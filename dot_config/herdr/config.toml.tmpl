@@ -1,3 +1,5 @@
+{{- $mod := "ctrl" -}}
+{{- if eq .chezmoi.os "darwin" }}{{ $mod = "cmd" }}{{ end -}}
 onboarding = false
 auto_switch = false
 
@@ -5,10 +7,10 @@ auto_switch = false
 name = "tokyo-night"
 
 [keys]
-prefix = "ctrl+g"
+prefix = "{{ $mod }}+g"
 
 new_workspace    = ["prefix+t"]
-new_tab          = ["prefix+ctrl+t"]
+new_tab          = ["prefix+{{ $mod }}+t"]
 split_vertical   = ["prefix+alt+t"]
 split_horizontal = ["prefix+minus"]
 close_pane       = ["prefix+w"]
@@ -16,12 +18,12 @@ resize_mode      = ["prefix+n"]
 rename_pane      = ["prefix+alt+r"]
 zoom             = ["prefix+z"]
 
-previous_tab       = ["ctrl+left"]
-next_tab           = ["ctrl+right"]
-previous_workspace = ["ctrl+up"]
-next_workspace     = ["ctrl+down"]
+previous_tab       = ["{{ $mod }}+left"]
+next_tab           = ["{{ $mod }}+right"]
+previous_workspace = ["{{ $mod }}+up"]
+next_workspace     = ["{{ $mod }}+down"]
 
-focus_pane_left  = ["ctrl+alt+left"]
-focus_pane_down  = ["ctrl+alt+down"]
-focus_pane_up    = ["ctrl+alt+up"]
-focus_pane_right = ["ctrl+alt+right"]
+focus_pane_left  = ["{{ $mod }}+alt+left"]
+focus_pane_down  = ["{{ $mod }}+alt+down"]
+focus_pane_up    = ["{{ $mod }}+alt+up"]
+focus_pane_right = ["{{ $mod }}+alt+right"]
