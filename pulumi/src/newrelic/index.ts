@@ -1,5 +1,5 @@
 import * as newrelic from "@pulumi/newrelic";
-import type * as pulumi from "@pulumi/pulumi";
+import * as pulumi from "@pulumi/pulumi";
 import { Config } from "@/lib/config.ts";
 import { claudeCodeOverview } from "./dashboards.ts";
 
@@ -22,6 +22,7 @@ export const registerNewrelic = (): {
   dashboardGuid: pulumi.Output<string>;
 } => ({
   otlpEndpoint,
-  newrelicLicenseKey: ingestKey.key,
+  // provider が secret 扱いにしないため、stack output に出る前に明示的に包む
+  newrelicLicenseKey: pulumi.secret(ingestKey.key),
   dashboardGuid: claudeCodeOverview.guid,
 });
