@@ -14,32 +14,46 @@ export type RepoBundle = {
 };
 
 export const createRepository = (spec: RepoSpec): RepoBundle => {
-  const repo = new github.Repository(spec.name, {
-    name: spec.name,
-    description: spec.description,
-    visibility: spec.visibility,
-    topics: spec.topics,
-    isTemplate: spec.isTemplate,
-    hasIssues: true,
-    hasProjects: false,
-    hasWiki: false,
-    vulnerabilityAlerts: spec.vulnerabilityAlerts,
-    deleteBranchOnMerge: true,
-    allowSquashMerge: true,
-    allowMergeCommit: false,
-    allowRebaseMerge: false,
-    ...(spec.visibility === "public"
-      ? {
-          securityAndAnalysis: {
-            secretScanning: { status: "enabled" },
-            secretScanningPushProtection: { status: "enabled" },
-          },
-        }
-      : {}),
-    ...(spec.template
-      ? { template: { owner: Config.github.owner, repository: spec.template } }
-      : {}),
-  });
+  const repo = new github.Repository(
+    spec.name,
+    {
+      name: spec.name,
+      description: spec.description,
+      visibility: spec.visibility,
+      topics: spec.topics,
+      isTemplate: spec.isTemplate,
+      hasIssues: true,
+      hasProjects: false,
+      hasWiki: false,
+      deleteBranchOnMerge: true,
+      allowSquashMerge: true,
+      allowMergeCommit: false,
+      allowRebaseMerge: false,
+      ...(spec.visibility === "public"
+        ? {
+            securityAndAnalysis: {
+              secretScanning: { status: "enabled" },
+              secretScanningPushProtection: { status: "enabled" },
+            },
+          }
+        : {}),
+      ...(spec.template
+        ? { template: { owner: Config.github.owner, repository: spec.template } }
+        : {}),
+    },
+    // template は作成時のみ有効で provider が state に書き戻さないため、既存
+    // リポジトリでは毎回 phantom diff になる。作成時の値は無視されない
+    { ignoreChanges: ["template"] },
+  );
+
+  // Repository.vulnerabilityAlerts は deprecated のため専用リソースで管理する
+  new github.RepositoryVulnerabilityAlerts(
+    `${spec.name}/vulnerability-alerts`,
+    {
+      repository: repo.name,
+      enabled: spec.vulnerabilityAlerts,
+    },
+  );
 
   if (spec.protectMain) {
     new github.RepositoryFile(

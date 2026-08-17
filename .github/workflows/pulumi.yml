@@ -17,7 +17,27 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: pulumi
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      # oxlint --type-check --type-aware。型情報を使うので install 後に実行する
+      - run: bun run lint
+
   preview:
+    needs: lint
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     environment: production
@@ -53,6 +73,7 @@ jobs:
           work-dir: pulumi
 
   up:
+    needs: lint
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     environment: production
