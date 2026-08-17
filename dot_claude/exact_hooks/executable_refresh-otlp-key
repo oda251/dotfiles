@@ -5,8 +5,8 @@ SETTINGS="$HOME/.claude/settings.json"
 CACHE="$HOME/.cache/otlp-credentials"
 
 # Fetch OTLP credentials from Pulumi ESC
-key=$(esc env open oda251/dotfiles/prod environmentVariables.NEWRELIC_LICENSE_KEY 2>/dev/null | tr -d '"') || exit 0
-endpoint=$(esc env open oda251/dotfiles/prod environmentVariables.NEWRELIC_OTLP_ENDPOINT 2>/dev/null | tr -d '"') || exit 0
+key=$(pulumi env open oda251/dotfiles/prod environmentVariables.NEWRELIC_LICENSE_KEY 2>/dev/null | tr -d '"') || exit 0
+endpoint=$(pulumi env open oda251/dotfiles/prod environmentVariables.NEWRELIC_OTLP_ENDPOINT 2>/dev/null | tr -d '"') || exit 0
 
 [ -z "$key" ] && exit 0
 [ -z "$endpoint" ] && exit 0

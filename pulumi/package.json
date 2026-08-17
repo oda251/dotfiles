@@ -10,16 +10,16 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@pulumi/pulumi": "^3.180.0",
-    "@pulumi/gcp": "^8.0.0",
-    "@pulumi/github": "^6.12.0",
-    "@pulumi/newrelic": "^5.64.0",
+    "@pulumi/pulumi": "^3.257.0",
+    "@pulumi/github": "^6.15.0",
+    "@pulumi/newrelic": "^5.75.2",
     "neverthrow": "^8.2.0",
-    "valibot": "^1.0.0"
+    "valibot": "^1.4.2"
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/node": "^22.0.0",
-    "typescript": "^5.6.0"
+    "@types/node": "^26.2.0",
+    "oxlint-tsgolint": "^7.0.2001",
+    "typescript": "^7.0.2"
   }
 }

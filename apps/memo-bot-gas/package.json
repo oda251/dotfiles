@@ -1,8 +1,0 @@
-{
-  "name": "memo-bot-gas",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "deploy": "esc run oda251/dotfiles/prod -- ./scripts/deploy.sh"
-  }
-}

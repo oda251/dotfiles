@@ -1,6 +1,6 @@
 # Pulumi ESC environment: oda251/dotfiles/prod
-# Apply: esc env edit oda251/dotfiles/prod -f this-file
-# Then re-inject secrets: esc env set ... --secret --string
+# Apply: pulumi env edit oda251/dotfiles/prod -f this-file
+# Then re-inject secrets: pulumi env set ... --secret --string
 
 values:
   secrets:
