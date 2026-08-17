@@ -10,9 +10,9 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@pulumi/pulumi": "^3.257.0",
     "@pulumi/github": "^6.15.0",
     "@pulumi/newrelic": "^5.75.2",
+    "@pulumi/pulumi": "^3.257.0",
     "neverthrow": "^8.2.0",
     "valibot": "^1.4.2"
   },

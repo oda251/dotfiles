@@ -20,9 +20,7 @@ const ReposSchema = v.array(RepoSpecSchema);
 const parseRepos = (raw: unknown): RepoSpec[] => {
   const result = v.safeParse(ReposSchema, raw);
   if (!result.success) {
-    throw new Error(
-      `Invalid repos config: ${JSON.stringify(result.issues, null, 2)}`,
-    );
+    throw new Error(`Invalid repos config: ${JSON.stringify(result.issues, null, 2)}`);
   }
   return result.output;
 };

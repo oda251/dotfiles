@@ -4,9 +4,7 @@ import { gateWorkflow } from "./templates.ts";
 
 const REPO_ADMIN_ROLE_ID = 5;
 
-const ownerUserId = github
-  .getUserOutput({ username: Config.github.owner })
-  .id.apply(Number);
+const ownerUserId = github.getUserOutput({ username: Config.github.owner }).id.apply(Number);
 
 export type RepoBundle = {
   spec: RepoSpec;
@@ -47,13 +45,10 @@ export const createRepository = (spec: RepoSpec): RepoBundle => {
   );
 
   // Repository.vulnerabilityAlerts は deprecated のため専用リソースで管理する
-  new github.RepositoryVulnerabilityAlerts(
-    `${spec.name}/vulnerability-alerts`,
-    {
-      repository: repo.name,
-      enabled: spec.vulnerabilityAlerts,
-    },
-  );
+  new github.RepositoryVulnerabilityAlerts(`${spec.name}/vulnerability-alerts`, {
+    repository: repo.name,
+    enabled: spec.vulnerabilityAlerts,
+  });
 
   if (spec.protectMain) {
     new github.RepositoryFile(
@@ -69,50 +64,44 @@ export const createRepository = (spec: RepoSpec): RepoBundle => {
       { ignoreChanges: ["content"] },
     );
 
-    new github.RepositoryRuleset(
-      `${spec.name}/main`,
-      {
-        repository: repo.name,
-        name: "main",
-        target: "branch",
-        enforcement: "active",
-        bypassActors: [
-          {
-            actorId: REPO_ADMIN_ROLE_ID,
-            actorType: "RepositoryRole",
-            bypassMode: "always",
-          },
-        ],
-        conditions: {
-          refName: { includes: ["~DEFAULT_BRANCH"], excludes: [] },
+    new github.RepositoryRuleset(`${spec.name}/main`, {
+      repository: repo.name,
+      name: "main",
+      target: "branch",
+      enforcement: "active",
+      bypassActors: [
+        {
+          actorId: REPO_ADMIN_ROLE_ID,
+          actorType: "RepositoryRole",
+          bypassMode: "always",
         },
-        rules: {
-          pullRequest: {
-            requiredApprovingReviewCount: 1,
-            dismissStaleReviewsOnPush: true,
-          },
-          requiredStatusChecks: {
-            requiredChecks: [{ context: "gate" }],
-            strictRequiredStatusChecksPolicy: true,
-          },
+      ],
+      conditions: {
+        refName: { includes: ["~DEFAULT_BRANCH"], excludes: [] },
+      },
+      rules: {
+        pullRequest: {
+          requiredApprovingReviewCount: 1,
+          dismissStaleReviewsOnPush: true,
+        },
+        requiredStatusChecks: {
+          requiredChecks: [{ context: "gate" }],
+          strictRequiredStatusChecksPolicy: true,
         },
       },
-    );
+    });
   }
 
   if (spec.hasESC) {
-    new github.RepositoryEnvironment(
-      `${spec.name}/production`,
-      {
-        repository: repo.name,
-        environment: "production",
-        reviewers: [{ users: [ownerUserId] }],
-        deploymentBranchPolicy: {
-          protectedBranches: true,
-          customBranchPolicies: false,
-        },
+    new github.RepositoryEnvironment(`${spec.name}/production`, {
+      repository: repo.name,
+      environment: "production",
+      reviewers: [{ users: [ownerUserId] }],
+      deploymentBranchPolicy: {
+        protectedBranches: true,
+        customBranchPolicies: false,
       },
-    );
+    });
   }
 
   return { spec, repo };
