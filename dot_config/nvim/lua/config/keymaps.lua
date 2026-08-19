@@ -16,12 +16,12 @@ keymap("n", "<S-h>", ":bprevious<CR>", opts)
 
 -- 未編集かつバッファが1つなら終了、それ以外は検索ハイライトをクリア
 keymap("n", "<Esc>", function()
-	local listedBuffers = vim.fn.getbufinfo({ buflisted = 1 })
-	if #listedBuffers == 1 and not vim.bo.modified then
-		vim.cmd("quit")
-	else
-		vim.cmd("nohlsearch")
-	end
+  local listedBuffers = vim.fn.getbufinfo({ buflisted = 1 })
+  if #listedBuffers == 1 and not vim.bo.modified then
+    vim.cmd("quit")
+  else
+    vim.cmd("nohlsearch")
+  end
 end, opts)
 
 -- ビジュアルモードでインデント調整後も選択を維持

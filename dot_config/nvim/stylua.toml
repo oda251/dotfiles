@@ -1,0 +1,4 @@
+# nvim 設定は 2 スペース（lua/config/options.lua の expandtab/shiftwidth=2 に合わせる）
+# stylua の既定はタブなので、指定しないと保存時に全 Lua ファイルが再インデントされる
+indent_type = "Spaces"
+indent_width = 2

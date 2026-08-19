@@ -1,13 +1,13 @@
 return {
-  'saghen/blink.cmp',
+  "saghen/blink.cmp",
   event = "InsertEnter",
   -- optional: provides snippets for the snippet source
   dependencies = {
-    'rafamadriz/friendly-snippets',
-    'giuxtaposition/blink-cmp-copilot',
+    "rafamadriz/friendly-snippets",
+    "giuxtaposition/blink-cmp-copilot",
   },
 
-  version = '*',
+  version = "*",
 
   ---@module 'blink.cmp'
   ---@type blink.cmp.Config
@@ -25,8 +25,8 @@ return {
     --
     -- See :h blink-cmp-config-keymap for defining your own keymap
     keymap = {
-      preset = 'default',
-      ['<C-l>'] = {
+      preset = "default",
+      ["<C-l>"] = {
         function(cmp)
           if cmp.is_visible() then
             return cmp.accept()
@@ -35,9 +35,9 @@ return {
             return true
           end
         end,
-        'fallback',
+        "fallback",
       },
-      ['<M-l>'] = {
+      ["<M-l>"] = {
         function(cmp)
           if cmp.is_visible() then
             return cmp.accept()
@@ -46,14 +46,14 @@ return {
             return true
           end
         end,
-        'fallback',
+        "fallback",
       },
     },
 
     appearance = {
       -- 'mono' (default) for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
       -- Adjusts spacing to ensure icons are aligned
-      nerd_font_variant = 'mono'
+      nerd_font_variant = "mono",
     },
 
     completion = {
@@ -65,7 +65,7 @@ return {
     -- Default list of enabled providers defined so that you can extend it
     -- elsewhere in your config, without redefining it, due to `opts_extend`
     sources = {
-      default = { 'lsp', 'path', 'snippets', 'buffer', 'copilot' },
+      default = { "lsp", "path", "snippets", "buffer", "copilot" },
       providers = {
         copilot = {
           name = "copilot",
@@ -81,7 +81,7 @@ return {
     -- when the Rust fuzzy matcher is not available, by using `implementation = "prefer_rust"`
     --
     -- See the fuzzy documentation for more information
-    fuzzy = { implementation = "prefer_rust_with_warning" }
+    fuzzy = { implementation = "prefer_rust_with_warning" },
   },
-  opts_extend = { "sources.default" }
+  opts_extend = { "sources.default" },
 }

@@ -34,14 +34,9 @@ return {
       return { "oxfmt" }
     end
 
+    -- oxfmt は conform 組み込みの定義を使う。node_modules/.bin を優先解決し
+    -- .oxfmtrc.json を cwd の基準にするため、プロジェクト固定版と揃う
     return {
-      formatters = {
-        oxfmt = {
-          command = "oxfmt",
-          args = { "--stdin-filepath", "$FILENAME" },
-          stdin = true,
-        },
-      },
       formatters_by_ft = {
         lua = { "stylua" },
         javascript = get_web_formatter,

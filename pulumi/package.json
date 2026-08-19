@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "@pulumi/github": "^6.15.0",
-    "@pulumi/newrelic": "^5.75.2",
-    "@pulumi/pulumi": "^3.257.0",
+    "@pulumi/newrelic": "^5.75.3",
+    "@pulumi/pulumi": "^3.258.0",
     "neverthrow": "^8.2.0",
     "valibot": "^1.4.2"
   },
@@ -20,7 +20,7 @@
     "@types/bun": "latest",
     "@types/node": "^26.2.0",
     "oxfmt": "^0.63.0",
-    "oxlint": "^1.78.0",
+    "oxlint": "^1.79.0",
     "oxlint-tsgolint": "^7.0.2001",
     "typescript": "^7.0.2"
   }
