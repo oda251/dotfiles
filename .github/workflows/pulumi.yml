@@ -2,10 +2,14 @@ name: Pulumi
 
 on:
   pull_request:
-    paths: [pulumi/**]
+    paths:
+      - pulumi/**
+      - .github/workflows/pulumi.yml
   push:
     branches: [main]
-    paths: [pulumi/**]
+    paths:
+      - pulumi/**
+      - .github/workflows/pulumi.yml
 
 permissions:
   id-token: write       # required for GitHub OIDC token issuance
