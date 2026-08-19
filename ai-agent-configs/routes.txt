@@ -9,7 +9,6 @@
 # Top-level instructions (distributed to each agent's entry file)
 copy|ai-agent-configs/AGENT.md|dot_claude/CLAUDE.md
 copy|ai-agent-configs/AGENT.md|dot_codex/AGENTS.md
-copy|ai-agent-configs/AGENT.md|dot_cursor/rules/AGENTS.mdc
 
 # Agents (Claude Code only)
 sync|ai-agent-configs/agents|dot_claude/exact_agents
@@ -23,4 +22,3 @@ sync|ai-agent-configs/hooks|dot_claude/exact_hooks
 # Skills
 sync|ai-agent-configs/skills|dot_claude/exact_skills
 sync|ai-agent-configs/skills|dot_codex/exact_skills
-sync|ai-agent-configs/skills|dot_cursor/exact_skills

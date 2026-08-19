@@ -214,5 +214,5 @@ if [[ "$sync_count" -eq 0 ]]; then
   echo "AI agent config routing: no changes"
 else
   # Stage all distributed changes (new, modified, and deleted files)
-  git add dot_claude/ dot_codex/ dot_cursor/ 2>/dev/null || true
+  git add dot_claude/ dot_codex/ 2>/dev/null || true
 fi
