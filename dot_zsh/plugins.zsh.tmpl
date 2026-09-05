@@ -147,6 +147,9 @@ zstyle ':completion:*:*:*:*' ignored-patterns '*.dll' '*.dat' '*.exe'
 # 常時履歴リスト表示
 source_cache_script "$HOME/.zsh/history-list.zsh"
 
+# 直前のコマンドと出力をクリップボードへコピーする cpl コマンド
+source_cache_script "$HOME/.zsh/copy-last.zsh"
+
 bindkey '^P' __hl_up
 bindkey '^N' __hl_down
 

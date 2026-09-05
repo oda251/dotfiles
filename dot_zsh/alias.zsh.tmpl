@@ -2,20 +2,22 @@
 alias chrome="open -a 'Google Chrome'"
 alias idea="open -a 'IntelliJ IDEA'"
 alias pwb="git rev-parse --abbrev-ref HEAD | pbcopy"
-alias copy='pbcopy'
+# copy は alias ではなく関数にする。alias は定義時に展開されるため、
+# zcompile 済みの他ファイルの関数（cpl 等）から呼べない
+copy() { pbcopy "$@" }
 {{- else if eq .chezmoi.os "linux" }}
 if [[ -n "${WSL_DISTRO_NAME:-}" ]]; then
-    alias copy='clip.exe'
+    copy() { clip.exe "$@" }
     alias paste='powershell.exe -NoProfile -Command Get-Clipboard'
     alias pwb="git rev-parse --abbrev-ref HEAD | clip.exe"
 elif command -v wl-copy &> /dev/null; then
-    alias copy='wl-copy'
+    copy() { wl-copy "$@" }
 elif command -v xclip &> /dev/null; then
-    alias copy='xclip -selection clipboard'
+    copy() { xclip -selection clipboard "$@" }
     alias paste='xclip -selection clipboard -o'
     alias pwb="git rev-parse --abbrev-ref HEAD | xclip -selection clipboard"
 elif command -v xsel &> /dev/null; then
-    alias copy='xsel --clipboard --input'
+    copy() { xsel --clipboard --input "$@" }
     alias paste='xsel --clipboard --output'
     alias pwb="git rev-parse --abbrev-ref HEAD | xsel --clipboard --input"
 fi
