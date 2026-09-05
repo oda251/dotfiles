@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# yazi plugin config hash:
-# package: {{ include "dot_config/yazi/package.toml.tmpl" | sha256sum }}
-# init: {{ include "dot_config/yazi/init.lua" | sha256sum }}
+# init.lua hash: {{ include "dot_config/yazi/init.lua" | sha256sum }}
+
+{{ template "setup-brew-env.sh" . }}
+{{ template "setup-mise-env.sh" . }}
 
 if ! command -v ya >/dev/null 2>&1; then
   echo "ya not found; skip yazi plugins" >&2
@@ -13,6 +14,37 @@ fi
 if ! ya --help 2>/dev/null | grep -q '\bpkg\b'; then
   echo "ya pkg not supported; update yazi to use plugins" >&2
   exit 0
+fi
+
+# package.toml は `ya pkg install` が rev/hash を書き戻すロックファイルなので
+# chezmoi では create_ 扱い（初回のみ生成）にしている。
+# ソース側の宣言が正、実体との差分だけを ya pkg add/delete で同期する。
+extract_uses() {
+  sed -n 's/^[[:space:]]*use[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p'
+}
+
+desired="$(extract_uses <<'YAZI_PACKAGE_TOML'
+{{ include "dot_config/yazi/create_package.toml.tmpl" }}
+YAZI_PACKAGE_TOML
+)"
+
+package_toml="${HOME}/.config/yazi/package.toml"
+current=""
+if [[ -f "${package_toml}" ]]; then
+  current="$(extract_uses <"${package_toml}")"
+fi
+
+mapfile -t missing < <(comm -23 <(sort -u <<<"${desired}") <(sort -u <<<"${current}") | grep -v '^$' || true)
+mapfile -t extra < <(comm -13 <(sort -u <<<"${desired}") <(sort -u <<<"${current}") | grep -v '^$' || true)
+
+if (( ${#missing[@]} > 0 )); then
+  echo "Adding yazi packages: ${missing[*]}" >&2
+  ya pkg add "${missing[@]}"
+fi
+
+if (( ${#extra[@]} > 0 )); then
+  echo "Deleting yazi packages: ${extra[*]}" >&2
+  ya pkg delete "${extra[@]}" || echo "failed to delete: ${extra[*]}" >&2
 fi
 
 run_install() {
