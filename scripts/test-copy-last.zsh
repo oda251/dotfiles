@@ -68,6 +68,21 @@ prompt_block() {
   assert_eq "R3 履歴不一致なら直近の非 cpl コマンドを対象にする" "$expected" "$actual"
 }
 
+# R4 出力中の偽プロンプト: 終端は自分自身(cpl)の実行行。偽プロンプト行は出力に含める
+() {
+  local text expected actual
+  text="$(
+    prompt_block 'git log --oneline'
+    print -r -- "abc feat: 追加"
+    print -r -- "❯ これはプロンプトではなく出力の一部"
+    print -r -- "def fix: 修正"
+    prompt_block 'cpl'
+  )"
+  expected=$'$ git log --oneline\nabc feat: 追加\n❯ これはプロンプトではなく出力の一部\ndef fix: 修正'
+  actual="$(print -r -- "$text" | __cpl_extract 'git log --oneline')"
+  assert_eq "R4 出力中の偽プロンプト行で切り詰めない" "$expected" "$actual"
+}
+
 print -r -- "---"
 print -r -- "passed: $passed, failed: $failed"
 (( failed == 0 ))
