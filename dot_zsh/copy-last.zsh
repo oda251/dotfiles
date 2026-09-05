@@ -3,6 +3,7 @@
 
 : ${CPL_PROMPT_MARK:=❯}
 : ${CPL_SCAN_LINES:=2000}
+# 自分自身のコマンド名。cpl 実行時は funcstack から実際の関数名で上書きする
 typeset -g __cpl_self_name="cpl"
 
 # herdr ペインのテキスト（starship プロンプト付き）を stdin で受け取り、
@@ -17,7 +18,7 @@ __cpl_extract() {
   emulate -L zsh
   local target_cmd="$1"
   local -a lines
-  lines=("${(@f)"$(cat)"}")
+  lines=("${(@f)"$(<&0)"}")
 
   local -a prompt_idx
   local i
@@ -25,26 +26,29 @@ __cpl_extract() {
     [[ "${lines[i]}" == "${CPL_PROMPT_MARK} "* ]] && prompt_idx+=("$i")
   done
 
+  # 対象行: 直前コマンド文字列に一致する末尾側のプロンプト行
   local match_idx=0
   if [[ "$target_cmd" != "$__cpl_self_name" ]]; then
-    for i in "${prompt_idx[@]}"; do
-      [[ "${lines[i]#${CPL_PROMPT_MARK} }" == "$target_cmd" ]] && match_idx=$i
+    for (( i = ${#prompt_idx}; i >= 1; i-- )); do
+      if [[ "${lines[${prompt_idx[i]}]#${CPL_PROMPT_MARK} }" == "$target_cmd" ]]; then
+        match_idx=${prompt_idx[i]}
+        break
+      fi
     done
   fi
-
-  local matched_cmd="$target_cmd"
+  # フォールバック: 末尾側の cpl 実行行を読み飛ばし、直近の非 cpl・非空コマンド行を使う
   if (( match_idx == 0 )); then
+    local cmd
     for (( i = ${#prompt_idx}; i >= 1; i-- )); do
-      local idx=${prompt_idx[i]}
-      local cmd="${lines[idx]#${CPL_PROMPT_MARK} }"
+      cmd="${lines[${prompt_idx[i]}]#${CPL_PROMPT_MARK} }"
       if [[ -n "$cmd" && "$cmd" != "$__cpl_self_name" ]]; then
-        match_idx=$idx
-        matched_cmd="$cmd"
+        match_idx=${prompt_idx[i]}
         break
       fi
     done
   fi
   (( match_idx == 0 )) && return 1
+  local matched_cmd="${lines[match_idx]#${CPL_PROMPT_MARK} }"
 
   # 終端: 対象行より後で最も近い自分自身（cpl）の実行行
   local term_idx=0
@@ -63,9 +67,10 @@ __cpl_extract() {
     fi
   fi
 
-  # 次のプロンプトブロック（空行 + パワーライン行）を出力範囲から除く
+  # 終端の直前にあるプロンプトブロックの装飾行（空行 + パワーライン行）を出力範囲から除く
+  local -i prompt_trailer_lines=2
   local out_end=$(( term_idx - 1 ))
-  (( out_end >= match_idx + 2 )) && (( out_end -= 2 ))
+  (( out_end >= match_idx + prompt_trailer_lines )) && (( out_end -= prompt_trailer_lines ))
 
   local -a body
   for (( i = match_idx + 1; i <= out_end; i++ )); do
@@ -82,6 +87,8 @@ __cpl_extract() {
 # 直前のコマンドと出力をクリップボードへコピーする（herdr ペイン内限定）
 cpl() {
   emulate -L zsh
+  # 関数名を単一の情報源にする（リネームしても抽出側の判定が追従する）
+  local __cpl_self_name="${funcstack[1]}"
 
   if [[ "${HERDR_ENV:-}" != 1 || -z "${HERDR_PANE_ID:-}" ]]; then
     print -ru2 -- "cpl: herdr のペイン内でのみ使えます"
@@ -102,7 +109,7 @@ cpl() {
   fi
 
   local result
-  if ! result="$(print -r -- "$pane_text" | __cpl_extract "$prev_cmd")"; then
+  if ! result="$(__cpl_extract "$prev_cmd" <<< "$pane_text")"; then
     print -ru2 -- "cpl: 直前のコマンドを特定できませんでした"
     return 1
   fi
@@ -113,7 +120,7 @@ cpl() {
   (( ${#summary_cmd} > 40 )) && summary_cmd="${summary_cmd[1,40]}…"
 
   # クリップボードコマンドをランタイムで検出する（alias.zsh.tmpl の copy alias は
-  # zcompile 時の alias 展開に依存して壊れるため使わない）
+  # zcompile 時の alias 展開に依存して壊れるため使わない。優先順位は alias 側と揃える）
   local -a copy_cmd
   if [[ -n "${WSL_DISTRO_NAME:-}" ]] && (( $+commands[clip.exe] )); then
     copy_cmd=(clip.exe)
@@ -123,6 +130,8 @@ cpl() {
     copy_cmd=(wl-copy)
   elif (( $+commands[xclip] )); then
     copy_cmd=(xclip -selection clipboard)
+  elif (( $+commands[xsel] )); then
+    copy_cmd=(xsel --clipboard --input)
   fi
 
   if (( ${#copy_cmd} > 0 )); then
