@@ -98,7 +98,7 @@ cpl() {
   # 直前に実行したコマンド文字列（前後の空白をトリム）
   # 実行中の cpl 自身はまだ履歴リストに入らないため -1 が直前のコマンドになる
   local prev_cmd
-  prev_cmd="$(fc -ln -1 -1)"
+  prev_cmd="$(fc -ln -1 -1 2>/dev/null)"
   prev_cmd="${prev_cmd#"${prev_cmd%%[^[:space:]]*}"}"
   prev_cmd="${prev_cmd%"${prev_cmd##*[^[:space:]]}"}"
 
@@ -119,26 +119,13 @@ cpl() {
   local summary_cmd="${result_lines[1]#\$ }"
   (( ${#summary_cmd} > 40 )) && summary_cmd="${summary_cmd[1,40]}…"
 
-  # クリップボードコマンドをランタイムで検出する（alias.zsh.tmpl の copy alias は
-  # zcompile 時の alias 展開に依存して壊れるため使わない。優先順位は alias 側と揃える）
-  local -a copy_cmd
-  if [[ -n "${WSL_DISTRO_NAME:-}" ]] && (( $+commands[clip.exe] )); then
-    copy_cmd=(clip.exe)
-  elif (( $+commands[pbcopy] )); then
-    copy_cmd=(pbcopy)
-  elif (( $+commands[wl-copy] )); then
-    copy_cmd=(wl-copy)
-  elif (( $+commands[xclip] )); then
-    copy_cmd=(xclip -selection clipboard)
-  elif (( $+commands[xsel] )); then
-    copy_cmd=(xsel --clipboard --input)
-  fi
-
-  if (( ${#copy_cmd} > 0 )); then
-    print -r -- "$result" | "${copy_cmd[@]}"
+  # クリップボードへの書き込みは alias.zsh の copy 関数に任せる
+  # （どのコマンドを使うかの判定はそちらが単一の情報源）
+  if (( $+functions[copy] )); then
+    print -r -- "$result" | copy
     print -ru2 -- "cpl: ${#result_lines} 行コピーしました（${summary_cmd}）"
   else
     print -r -- "$result"
-    print -ru2 -- "cpl: クリップボードコマンドが見つからないため stdout に出力しました"
+    print -ru2 -- "cpl: copy が定義されていないため stdout に出力しました"
   fi
 }
