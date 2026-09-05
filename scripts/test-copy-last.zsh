@@ -83,6 +83,16 @@ prompt_block() {
   assert_eq "R4 出力中の偽プロンプト行で切り詰めない" "$expected" "$actual"
 }
 
+# R5 プロンプト行なし: 非0終了し、何も出力しない
+() {
+  local text actual rc
+  text=$'ただのテキスト\n出力っぽい行\nプロンプトはない'
+  actual="$(print -r -- "$text" | __cpl_extract 'echo hi')"
+  rc=$?
+  assert_eq "R5 プロンプト行が無ければ何も出力しない" "" "$actual"
+  assert_eq "R5 プロンプト行が無ければ非0終了" "1" "$rc"
+}
+
 print -r -- "---"
 print -r -- "passed: $passed, failed: $failed"
 (( failed == 0 ))
