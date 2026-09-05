@@ -49,13 +49,16 @@ if _init_tool_cache mise activate zsh; then
   source_cache_script "$mise_env_cache"
 fi
 
-# WSL: wsl.exe / clip.exe 等の interop バイナリ用に Windows System32 を追加。
+# WSL: wsl.exe / clip.exe / powershell.exe 等の interop バイナリ用に Windows のパスを追加。
 # mise が PATH と __MISE_ORIG_PATH を上書きするため、mise の後で両方に append する。
-if [[ -n "${WSL_DISTRO_NAME:-}" ]] && [[ ":$PATH:" != *":/mnt/c/Windows/System32:"* ]]; then
-  export PATH="$PATH:/mnt/c/Windows/System32"
-  if [[ -n "${__MISE_ORIG_PATH:-}" && ":$__MISE_ORIG_PATH:" != *":/mnt/c/Windows/System32:"* ]]; then
-    export __MISE_ORIG_PATH="$__MISE_ORIG_PATH:/mnt/c/Windows/System32"
-  fi
+if [[ -n "${WSL_DISTRO_NAME:-}" ]]; then
+  for _win_dir in /mnt/c/Windows/System32 /mnt/c/Windows/System32/WindowsPowerShell/v1.0; do
+    [[ ":$PATH:" == *":${_win_dir}:"* ]] || export PATH="$PATH:$_win_dir"
+    if [[ -n "${__MISE_ORIG_PATH:-}" && ":$__MISE_ORIG_PATH:" != *":${_win_dir}:"* ]]; then
+      export __MISE_ORIG_PATH="$__MISE_ORIG_PATH:$_win_dir"
+    fi
+  done
+  unset _win_dir
 fi
 
 {{- if ne .chezmoi.os "windows" }}
