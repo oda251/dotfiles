@@ -7,9 +7,14 @@ alias pwb="git rev-parse --abbrev-ref HEAD | pbcopy"
 copy() { pbcopy "$@" }
 {{- else if eq .chezmoi.os "linux" }}
 if [[ -n "${WSL_DISTRO_NAME:-}" ]]; then
-    copy() { clip.exe "$@" }
-    alias paste='powershell.exe -NoProfile -Command Get-Clipboard'
-    alias pwb="git rev-parse --abbrev-ref HEAD | clip.exe"
+    # clip.exe は stdin をコンソールのコードページで解釈するため非 ASCII が化ける。
+    # PowerShell に UTF-8 で読ませ、改行は Windows 側の CRLF に揃えて渡す
+    copy() {
+        powershell.exe -NoProfile -Command '[Console]::InputEncoding = [Text.Encoding]::UTF8; Set-Clipboard -Value ([Console]::In.ReadToEnd() -replace "\r?\n", "`r`n")'
+    }
+    # 読み出し側も既定ではコンソールのコードページで出力され化けるため UTF-8 を指定する
+    alias paste='powershell.exe -NoProfile -Command "[Console]::OutputEncoding = [Text.Encoding]::UTF8; Get-Clipboard"'
+    alias pwb="git rev-parse --abbrev-ref HEAD | copy"
 elif command -v wl-copy &> /dev/null; then
     copy() { wl-copy "$@" }
 elif command -v xclip &> /dev/null; then
