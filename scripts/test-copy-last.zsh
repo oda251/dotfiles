@@ -93,6 +93,21 @@ prompt_block() {
   assert_eq "R5 プロンプト行が無ければ非0終了" "1" "$rc"
 }
 
+# R8 直前コマンドが cpl 自身: 一致行として採用せずフォールバックする
+() {
+  local text expected actual
+  text="$(
+    prompt_block 'echo CCC'
+    print -r -- "CCC"
+    prompt_block 'cpl'
+    print -r -- "cpl: 2 行コピーしました（echo CCC）"
+    prompt_block 'cpl'
+  )"
+  expected=$'$ echo CCC\nCCC'
+  actual="$(print -r -- "$text" | __cpl_extract 'cpl')"
+  assert_eq "R8 直前コマンドが cpl 自身ならフォールバックする" "$expected" "$actual"
+}
+
 print -r -- "---"
 print -r -- "passed: $passed, failed: $failed"
 (( failed == 0 ))

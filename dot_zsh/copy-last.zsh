@@ -8,8 +8,9 @@ typeset -g __cpl_self_name="cpl"
 # herdr ペインのテキスト（starship プロンプト付き）を stdin で受け取り、
 # 直前コマンド文字列（$1）に一致するプロンプト行を境界として、
 # "$ <コマンド>" 行 + そのコマンドの出力を stdout へ出す。
-# 一致するプロンプト行が無い場合は、末尾側の自分自身（cpl）の実行行を
-# 読み飛ばし、直近の非 cpl・非空コマンド行を対象にする。
+# 一致するプロンプト行が無い場合や、直前コマンド文字列が自分自身（cpl）の
+# 場合は、末尾側の cpl の実行行を読み飛ばし、直近の非 cpl・非空コマンド行を
+# 対象にする（cpl 連投時に cpl 自身の実行行を対象にしてしまうのを防ぐ）。
 # 出力の終端は、対象行より後で最も近い自分自身（cpl）の実行行とする
 # （出力中に偶然 "❯ " で始まる行があっても、cpl の実行行でなければ終端にしない）。
 __cpl_extract() {
@@ -25,9 +26,11 @@ __cpl_extract() {
   done
 
   local match_idx=0
-  for i in "${prompt_idx[@]}"; do
-    [[ "${lines[i]#${CPL_PROMPT_MARK} }" == "$target_cmd" ]] && match_idx=$i
-  done
+  if [[ "$target_cmd" != "$__cpl_self_name" ]]; then
+    for i in "${prompt_idx[@]}"; do
+      [[ "${lines[i]#${CPL_PROMPT_MARK} }" == "$target_cmd" ]] && match_idx=$i
+    done
+  fi
 
   local matched_cmd="$target_cmd"
   if (( match_idx == 0 )); then
@@ -74,4 +77,59 @@ __cpl_extract() {
 
   print -r -- "\$ ${matched_cmd}"
   (( ${#body} > 0 )) && print -rl -- "${body[@]}"
+}
+
+# 直前のコマンドと出力をクリップボードへコピーする（herdr ペイン内限定）
+cpl() {
+  emulate -L zsh
+
+  if [[ "${HERDR_ENV:-}" != 1 || -z "${HERDR_PANE_ID:-}" ]]; then
+    print -ru2 -- "cpl: herdr のペイン内でのみ使えます"
+    return 1
+  fi
+
+  # 直前に実行したコマンド文字列（前後の空白をトリム）
+  # 実行中の cpl 自身はまだ履歴リストに入らないため -1 が直前のコマンドになる
+  local prev_cmd
+  prev_cmd="$(fc -ln -1 -1)"
+  prev_cmd="${prev_cmd#"${prev_cmd%%[^[:space:]]*}"}"
+  prev_cmd="${prev_cmd%"${prev_cmd##*[^[:space:]]}"}"
+
+  local pane_text
+  if ! pane_text="$(herdr pane read "$HERDR_PANE_ID" --source recent-unwrapped --lines "$CPL_SCAN_LINES" --format text)"; then
+    print -ru2 -- "cpl: herdr pane read に失敗しました"
+    return 1
+  fi
+
+  local result
+  if ! result="$(print -r -- "$pane_text" | __cpl_extract "$prev_cmd")"; then
+    print -ru2 -- "cpl: 直前のコマンドを特定できませんでした"
+    return 1
+  fi
+
+  local -a result_lines
+  result_lines=("${(@f)result}")
+  local summary_cmd="${result_lines[1]#\$ }"
+  (( ${#summary_cmd} > 40 )) && summary_cmd="${summary_cmd[1,40]}…"
+
+  # クリップボードコマンドをランタイムで検出する（alias.zsh.tmpl の copy alias は
+  # zcompile 時の alias 展開に依存して壊れるため使わない）
+  local -a copy_cmd
+  if [[ -n "${WSL_DISTRO_NAME:-}" ]] && (( $+commands[clip.exe] )); then
+    copy_cmd=(clip.exe)
+  elif (( $+commands[pbcopy] )); then
+    copy_cmd=(pbcopy)
+  elif (( $+commands[wl-copy] )); then
+    copy_cmd=(wl-copy)
+  elif (( $+commands[xclip] )); then
+    copy_cmd=(xclip -selection clipboard)
+  fi
+
+  if (( ${#copy_cmd} > 0 )); then
+    print -r -- "$result" | "${copy_cmd[@]}"
+    print -ru2 -- "cpl: ${#result_lines} 行コピーしました（${summary_cmd}）"
+  else
+    print -r -- "$result"
+    print -ru2 -- "cpl: クリップボードコマンドが見つからないため stdout に出力しました"
+  fi
 }
