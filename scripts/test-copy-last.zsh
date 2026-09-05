@@ -41,6 +41,33 @@ prompt_block() {
   assert_eq "R1 コマンド行と出力を切り出す" "$expected" "$actual"
 }
 
+# R2 出力なし: コマンド行のみを返す
+() {
+  local text expected actual
+  text="$(
+    prompt_block 'true'
+    prompt_block 'cpl'
+  )"
+  expected='$ true'
+  actual="$(print -r -- "$text" | __cpl_extract 'true')"
+  assert_eq "R2 出力なしならコマンド行のみ" "$expected" "$actual"
+}
+
+# R3 履歴不一致: cpl 行を読み飛ばし、直近の非 cpl コマンド行を対象にする
+() {
+  local text expected actual
+  text="$(
+    prompt_block 'echo hi'
+    print -r -- "hi"
+    prompt_block 'cpl'
+    print -r -- "cpl: 2 行コピーしました"
+    prompt_block 'cpl'
+  )"
+  expected=$'$ echo hi\nhi'
+  actual="$(print -r -- "$text" | __cpl_extract '')"
+  assert_eq "R3 履歴不一致なら直近の非 cpl コマンドを対象にする" "$expected" "$actual"
+}
+
 print -r -- "---"
 print -r -- "passed: $passed, failed: $failed"
 (( failed == 0 ))

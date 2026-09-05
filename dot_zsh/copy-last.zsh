@@ -3,10 +3,13 @@
 
 : ${CPL_PROMPT_MARK:=❯}
 : ${CPL_SCAN_LINES:=2000}
+typeset -g __cpl_self_name="cpl"
 
 # herdr ペインのテキスト（starship プロンプト付き）を stdin で受け取り、
 # 直前コマンド文字列（$1）に一致するプロンプト行を境界として、
 # "$ <コマンド>" 行 + そのコマンドの出力を stdout へ出す。
+# 一致するプロンプト行が無い場合は、末尾側の自分自身（cpl）の実行行を
+# 読み飛ばし、直近の非 cpl・非空コマンド行を対象にする。
 __cpl_extract() {
   emulate -L zsh
   local target_cmd="$1"
@@ -23,6 +26,19 @@ __cpl_extract() {
   for i in "${prompt_idx[@]}"; do
     [[ "${lines[i]#${CPL_PROMPT_MARK} }" == "$target_cmd" ]] && match_idx=$i
   done
+
+  local matched_cmd="$target_cmd"
+  if (( match_idx == 0 )); then
+    for (( i = ${#prompt_idx}; i >= 1; i-- )); do
+      local idx=${prompt_idx[i]}
+      local cmd="${lines[idx]#${CPL_PROMPT_MARK} }"
+      if [[ -n "$cmd" && "$cmd" != "$__cpl_self_name" ]]; then
+        match_idx=$idx
+        matched_cmd="$cmd"
+        break
+      fi
+    done
+  fi
   (( match_idx == 0 )) && return 1
 
   local next_idx=$(( ${#lines} + 1 ))
@@ -45,6 +61,6 @@ __cpl_extract() {
     body[-1]=()
   done
 
-  print -r -- "\$ ${target_cmd}"
+  print -r -- "\$ ${matched_cmd}"
   (( ${#body} > 0 )) && print -rl -- "${body[@]}"
 }
