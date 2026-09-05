@@ -91,7 +91,7 @@ cpl() {
   local __cpl_self_name="${funcstack[1]}"
 
   if [[ "${HERDR_ENV:-}" != 1 || -z "${HERDR_PANE_ID:-}" ]]; then
-    print -ru2 -- "cpl: herdr のペイン内でのみ使えます"
+    print -ru2 -- "cpl: only works inside a herdr pane"
     return 1
   fi
 
@@ -104,28 +104,26 @@ cpl() {
 
   local pane_text
   if ! pane_text="$(herdr pane read "$HERDR_PANE_ID" --source recent-unwrapped --lines "$CPL_SCAN_LINES" --format text)"; then
-    print -ru2 -- "cpl: herdr pane read に失敗しました"
+    print -ru2 -- "cpl: herdr pane read failed"
     return 1
   fi
 
   local result
   if ! result="$(__cpl_extract "$prev_cmd" <<< "$pane_text")"; then
-    print -ru2 -- "cpl: 直前のコマンドを特定できませんでした"
+    print -ru2 -- "cpl: could not identify the previous command"
     return 1
   fi
 
   local -a result_lines
   result_lines=("${(@f)result}")
-  local summary_cmd="${result_lines[1]#\$ }"
-  (( ${#summary_cmd} > 40 )) && summary_cmd="${summary_cmd[1,40]}…"
 
   # クリップボードへの書き込みは alias.zsh の copy 関数に任せる
   # （どのコマンドを使うかの判定はそちらが単一の情報源）
   if (( $+functions[copy] )); then
     print -r -- "$result" | copy
-    print -ru2 -- "cpl: ${#result_lines} 行コピーしました（${summary_cmd}）"
+    print -ru2 -- "cpl: copied ${#result_lines} lines"
   else
     print -r -- "$result"
-    print -ru2 -- "cpl: copy が定義されていないため stdout に出力しました"
+    print -ru2 -- "cpl: copy is not defined; wrote to stdout"
   fi
 }
