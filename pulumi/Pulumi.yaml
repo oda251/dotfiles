@@ -1,4 +1,4 @@
 name: dotfiles
-description: Dotfiles infrastructure (GitHub repos, NewRelic dashboards)
+description: Dotfiles infrastructure (GitHub repos)
 runtime: bun
 main: index.ts

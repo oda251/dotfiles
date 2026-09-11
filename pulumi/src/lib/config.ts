@@ -26,18 +26,12 @@ const parseRepos = (raw: unknown): RepoSpec[] => {
 };
 
 const cfgGithub = new pulumi.Config("github");
-const cfgNewrelic = new pulumi.Config("newrelic");
 const cfgRepos = new pulumi.Config("repos");
 
 export const Config = {
   github: {
     owner: cfgGithub.require("owner"),
     token: cfgGithub.requireSecret("token"),
-  },
-  newrelic: {
-    region: v.parse(v.picklist(["US", "EU"]), cfgNewrelic.get("region") ?? "US"),
-    apiKey: cfgNewrelic.requireSecret("apiKey"),
-    accountId: cfgNewrelic.require("accountId"),
   },
   repos: parseRepos(cfgRepos.requireObject("all")),
 };
