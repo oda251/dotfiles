@@ -10,34 +10,7 @@
     ]
   },
   "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
-    "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
-    "OTEL_METRICS_EXPORTER": "otlp",
-    "OTEL_LOGS_EXPORTER": "otlp",
-    {{- $cache := joinPath .chezmoi.homeDir ".cache/otlp-credentials" }}
-    {{- $endpoint := "" }}
-    {{- $header := "" }}
-    {{- if stat $cache }}
-    {{-   $lines := splitList "\n" (include $cache | trim) }}
-    {{-   if ge (len $lines) 2 }}
-    {{-     $endpoint = index $lines 0 }}
-    {{-     $header = index $lines 1 }}
-    {{-   end }}
-    {{- end }}
-    {{- if and (eq $endpoint "") (lookPath "pulumi") }}
-    {{-   $endpoint = output "bash" "-c" "pulumi env open oda251/dotfiles/prod environmentVariables.NEWRELIC_OTLP_ENDPOINT 2>/dev/null | tr -d '\"' || true" | trim }}
-    {{-   $key := output "bash" "-c" "pulumi env open oda251/dotfiles/prod environmentVariables.NEWRELIC_LICENSE_KEY 2>/dev/null | tr -d '\"' || true" | trim }}
-    {{-   if ne $key "" }}
-    {{-     $header = printf "Api-Key=%s" $key }}
-    {{-   end }}
-    {{- end }}
-    "OTEL_EXPORTER_OTLP_ENDPOINT": "{{ $endpoint }}",
-    "OTEL_EXPORTER_OTLP_HEADERS": "{{ $header }}",
-    "OTEL_EXPORTER_OTLP_PROTOCOL": "http/protobuf",
-    "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE": "delta",
-    "OTEL_LOG_USER_PROMPTS": "1",
-    "OTEL_LOG_TOOL_DETAILS": "1",
-    "OTEL_METRICS_INCLUDE_VERSION": "true"
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "enabledPlugins": {
     "skill-creator@claude-plugins-official": true
@@ -55,11 +28,6 @@
             "type": "command",
             "command": "\"$HOME/.claude/hooks/session-start\"",
             "async": false
-          },
-          {
-            "type": "command",
-            "command": "bash \"$HOME/.claude/hooks/refresh-otlp-key\"",
-            "async": true
           }
         ]
       }
