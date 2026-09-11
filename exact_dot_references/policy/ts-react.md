@@ -1,4 +1,4 @@
-# TypeScript + React ガイドライン
+# TypeScript + React ポリシー
 
 React プロジェクト固有のルール。ts.md と併せて適用する。
 
