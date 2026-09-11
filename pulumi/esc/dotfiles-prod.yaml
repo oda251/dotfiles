@@ -6,18 +6,6 @@ values:
   secrets:
     githubToken:
       fn::secret: PLACEHOLDER_GITHUB_PAT
-    newrelicApiKey:
-      fn::secret: PLACEHOLDER_NEWRELIC_API_KEY
-
-  newrelic:
-    accountId: "7893158"
-    region: US
-
-  stackRefs:
-    fn::open::pulumi-stacks:
-      stacks:
-        dotfilesProd:
-          stack: dotfiles/prod
 
   repos:
     all:
@@ -46,15 +34,7 @@ values:
   pulumiConfig:
     github:owner: oda251
     github:token: ${secrets.githubToken}
-    newrelic:apiKey: ${secrets.newrelicApiKey}
-    newrelic:accountId: ${newrelic.accountId}
-    newrelic:region: ${newrelic.region}
     repos:all: ${repos.all}
 
   environmentVariables:
     GITHUB_TOKEN: ${secrets.githubToken}
-    NEW_RELIC_API_KEY: ${secrets.newrelicApiKey}
-    NEW_RELIC_ACCOUNT_ID: ${newrelic.accountId}
-    NEW_RELIC_REGION: ${newrelic.region}
-    NEWRELIC_LICENSE_KEY: ${stackRefs.dotfilesProd.newrelicLicenseKey}
-    NEWRELIC_OTLP_ENDPOINT: ${stackRefs.dotfilesProd.otlpEndpoint}

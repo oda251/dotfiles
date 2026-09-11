@@ -1,4 +1,0 @@
-#!/bin/bash
-{{ if lookPath "pulumi" -}}
-bash "{{ .chezmoi.homeDir }}/.claude/hooks/refresh-otlp-key" || true
-{{ end -}}
