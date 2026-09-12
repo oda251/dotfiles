@@ -1,7 +1,10 @@
 # 常時適用ポリシー
 
 * 常にプロセスの改善点がないか意識しながら進める
-* 大きなタスクに取り掛かる前に `~/.references/` から関連するドキュメントを参照する
+* 大きなタスクに取り掛かる前に `~/.references/` の関連ドキュメントを参照する:
+  * `policy/` — コーディング規約。`common.md` は常時読む。ほかは対象に応じて: TypeScript → `ts.md`（React はさらに `ts-react.md`）、Python → `python.md`、バックエンド → `backend.md`、テスト → `testing.md`、インフラ → `infra.md`、skill 作成 → `skill.md`、ドキュメント作成 → `documentation.md`
+  * `stack/` — 技術選定とアーキテクチャ（`architecture-backend.md` = FC/IS、`architecture-frontend.md` = FSD）。技術選定・設計判断を伴うときに読む
+  * `taxonomy/` — docs skill のタグ語彙（`ndc.md` / `ccs.md`）
 
 ## 引用・参照
 
