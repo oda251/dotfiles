@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+source_dir="${CHEZMOI_SOURCE_DIR:-$HOME/.local/share/chezmoi}"
+
+# run_onchange_ だと lefthook.yml が変わらない限り再実行されないため、フックが
+# 無い状態（新規 clone、hooks ディレクトリの消失等）から復旧できない。毎回の
+# apply で走らせ、既に入っていれば即抜けることで自己修復させる。
+hooks_dir=$(git -C "$source_dir" rev-parse --path-format=absolute --git-common-dir 2>/dev/null) \
+  || hooks_dir="$source_dir/.git"
+if [[ -x "$hooks_dir/hooks/pre-commit" ]] && grep -q lefthook "$hooks_dir/hooks/pre-commit"; then
+  exit 0
+fi
+
+{{ template "setup-mise-env.sh" . }}
+
+if ! command -v lefthook >/dev/null 2>&1; then
+  echo "lefthook not found; run mise install first" >&2
+  exit 0
+fi
+
+cd "$source_dir"
+lefthook install --force

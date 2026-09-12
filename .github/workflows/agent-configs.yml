@@ -1,0 +1,47 @@
+name: Agent configs
+
+# ai-agent-configs/ から dot_claude/ dot_codex/ への配布は pre-commit hook が
+# 担うが、hook が入っていない環境では黙って配布漏れのまま commit できてしまう。
+# ここで配布の再実行結果と commit 内容が一致するかを検証し、漏れを main に
+# 入れないようにする。
+
+on:
+  pull_request:
+    paths:
+      - ai-agent-configs/**
+      - dot_claude/**
+      - dot_codex/**
+      - scripts/distribute_ai_agent_configs.sh
+      - .github/workflows/agent-configs.yml
+  push:
+    branches: [main]
+    paths:
+      - ai-agent-configs/**
+      - dot_claude/**
+      - dot_codex/**
+      - scripts/distribute_ai_agent_configs.sh
+      - .github/workflows/agent-configs.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agent-configs-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 'main' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  distribution:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: 配布が最新か検証
+        run: |
+          scripts/distribute_ai_agent_configs.sh
+          # 未追跡ファイルも拾うため porcelain で判定する
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::ai-agent-configs/ の配布先が古い。scripts/distribute_ai_agent_configs.sh を実行して同じ commit に含めてください"
+            git status --porcelain
+            exit 1
+          fi
+          echo "配布先は最新"
