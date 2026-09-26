@@ -132,9 +132,6 @@ getg() {
   builtin cd -- "$(ghq root)/$rel"
 }
 
-# worktree 一覧を "owner/repo<TAB>branch<TAB>path" の TSV で出力する内部ヘルパ
-# メイン worktree の branch は (main) にする。-g で ghq 管理下の全 repo を対象
-# gwq list -g は遅いため git worktree list --porcelain を直接読む
 __wt_rows() {
   local repos=()
   if [[ "${1:-}" == "-g" ]]; then
@@ -156,7 +153,6 @@ __wt_rows() {
   done
 }
 
-# __wt_rows の TSV を見やすい3カラム整列に揃える
 __wt_align() {
   awk -F'\t' '
     { rec[NR]=$0; if(length($1)>m1)m1=length($1); if(length($2)>m2)m2=length($2) }
@@ -170,6 +166,7 @@ __wt_align() {
 
 # worktree へ fzf で cd
 # 既定: cwd が属する repo の worktree のみ。-g で ghq 管理下の全 repo を対象。
+# gwq list -g は遅いため git worktree list --porcelain を直接読む
 # 表示は "owner/repo  branch  path" の3カラム整列、検索対象は 1,2 カラムのみ。
 cdw() {
   command -v ghq >/dev/null 2>&1 || { echo "ghq not found" >&2; return 1; }
@@ -183,11 +180,6 @@ cdw() {
   [[ -d "$target" ]] && builtin cd -- "$target"
 }
 
-# worktree を fzf で選んで削除（複数可）
-# 既定: cwd が属する repo のみ。-g で ghq 管理下の全 repo を対象。
-# メイン worktree と cwd を含む worktree は候補から除外する
-#   - メインを消すとリポジトリ本体が失われる
-#   - cwd を消すとシェルが削除済みディレクトリに留まったままになる
 rmw() {
   command -v gwq >/dev/null 2>&1 || { echo "gwq not found" >&2; return 1; }
   local rows paths wt_path
@@ -202,7 +194,6 @@ rmw() {
   [[ -z "$paths" ]] && return
   while IFS= read -r wt_path; do
     [[ -z "$wt_path" ]] && continue
-    # path は zsh で PATH と連動する特殊変数。局部化すると PATH が壊れるため使わない
     gwq remove -- "$wt_path" < /dev/tty
   done <<< "$paths"
 }

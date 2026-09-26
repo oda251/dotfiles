@@ -3,8 +3,6 @@ name: semble
 description: "Code search for exploring any codebase. Use for finding code by intent, locating implementations, understanding how something works, or discovering related code. Prefer over Grep/Glob/Read for any semantic or exploratory question."
 ---
 
-出典（公式ディストリビューション）: <https://github.com/MinishLab/semble/blob/main/src/semble/agents/claude.md>
-
 Use `semble search` to find code by describing what it does or naming a symbol/identifier, instead of grep:
 
 ```bash
