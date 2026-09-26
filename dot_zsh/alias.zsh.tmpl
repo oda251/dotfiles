@@ -62,6 +62,10 @@ codex() {
   command codex --ask-for-approval never --sandbox danger-full-access "$@"
 }
 
+opencode() {
+  command opencode --auto "$@"
+}
+
 function y() {
 	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
 	yazi "$@" --cwd-file="$tmp"
@@ -128,46 +132,79 @@ getg() {
   builtin cd -- "$(ghq root)/$rel"
 }
 
-# worktree へ fzf で cd
-# 既定: cwd が属する repo の worktree のみ。-g で ghq 管理下の全 repo を対象。
+# worktree 一覧を "owner/repo<TAB>branch<TAB>path" の TSV で出力する内部ヘルパ
+# メイン worktree の branch は (main) にする。-g で ghq 管理下の全 repo を対象
 # gwq list -g は遅いため git worktree list --porcelain を直接読む
-# 表示は "owner/repo  branch  path" の3カラム整列、検索対象は 1,2 カラムのみ。
-cdw() {
-  command -v ghq >/dev/null 2>&1 || { echo "ghq not found" >&2; return 1; }
+__wt_rows() {
   local repos=()
-  if [[ "$1" == "-g" ]]; then
+  if [[ "${1:-}" == "-g" ]]; then
     repos=("${(@f)$(ghq list -p)}")
   else
     local gitdir
-    gitdir=$(git rev-parse --git-common-dir 2>/dev/null) || {
-      echo "cdw: not in a git repository (use -g for all ghq repos)" >&2
-      return 1
-    }
+    gitdir=$(git rev-parse --git-common-dir 2>/dev/null) || return 1
     repos=("${${gitdir:A}:h}")
   fi
-  local target
-  target=$(
-    for repo in "${repos[@]}"; do
-      short="${${repo:h}:t}/${repo:t}"
-      git -C "$repo" worktree list --porcelain 2>/dev/null \
-        | awk -v r="$short" '
-          /^worktree /{wt=$2; next}
-          /^branch /{sub(/^refs\/heads\//,"",$2); print r"\t"$2"\t"wt}
-          /^detached$/{print r"\t(detached)\t"wt}
-        '
-    done \
-    | awk -F'\t' '
-      { rec[NR]=$0; if(length($1)>m1)m1=length($1); if(length($2)>m2)m2=length($2) }
-      END {
-        for(i=1;i<=NR;i++) {
-          split(rec[i],f,"\t")
-          printf "%-*s  %-*s  %s\n", m1, f[1], m2, f[2], f[3]
-        }
-      }' \
-    | fzf --nth=1,2 \
-    | awk '{print $NF}'
-  ) || return
+  local repo short
+  for repo in "${repos[@]}"; do
+    short="${${repo:h}:t}/${repo:t}"
+    git -C "$repo" worktree list --porcelain 2>/dev/null \
+      | awk -v r="$short" '
+        /^worktree /{wt=$2; ismain=(++n==1); next}
+        /^branch /{sub(/^refs\/heads\//,"",$2); print r"\t"(ismain?"(main)":$2)"\t"wt}
+        /^detached$/{print r"\t"(ismain?"(main)":"(detached)")"\t"wt}
+      '
+  done
+}
+
+# __wt_rows の TSV を見やすい3カラム整列に揃える
+__wt_align() {
+  awk -F'\t' '
+    { rec[NR]=$0; if(length($1)>m1)m1=length($1); if(length($2)>m2)m2=length($2) }
+    END {
+      for(i=1;i<=NR;i++) {
+        split(rec[i],f,"\t")
+        printf "%-*s  %-*s  %s\n", m1, f[1], m2, f[2], f[3]
+      }
+    }'
+}
+
+# worktree へ fzf で cd
+# 既定: cwd が属する repo の worktree のみ。-g で ghq 管理下の全 repo を対象。
+# 表示は "owner/repo  branch  path" の3カラム整列、検索対象は 1,2 カラムのみ。
+cdw() {
+  command -v ghq >/dev/null 2>&1 || { echo "ghq not found" >&2; return 1; }
+  local rows target
+  rows=$(__wt_rows "${1:-}") || {
+    echo "cdw: not in a git repository (use -g for all ghq repos)" >&2
+    return 1
+  }
+  [[ -n "$rows" ]] || return
+  target=$(print -r -- "$rows" | __wt_align | fzf --nth=1,2 | awk '{print $NF}') || return
   [[ -d "$target" ]] && builtin cd -- "$target"
+}
+
+# worktree を fzf で選んで削除（複数可）
+# 既定: cwd が属する repo のみ。-g で ghq 管理下の全 repo を対象。
+# メイン worktree と cwd を含む worktree は候補から除外する
+#   - メインを消すとリポジトリ本体が失われる
+#   - cwd を消すとシェルが削除済みディレクトリに留まったままになる
+rmw() {
+  command -v gwq >/dev/null 2>&1 || { echo "gwq not found" >&2; return 1; }
+  local rows paths wt_path
+  rows=$(__wt_rows "${1:-}") || {
+    echo "rmw: not in a git repository (use -g for all ghq repos)" >&2
+    return 1
+  }
+  rows=$(print -r -- "$rows" | awk -F'\t' -v p="$PWD" \
+    '$2 != "(main)" && $3 != p && index($3, p"/") != 1')
+  [[ -n "$rows" ]] || { echo "rmw: no removable worktree" >&2; return 1; }
+  paths=$(print -r -- "$rows" | __wt_align | fzf -m --nth=1,2 | awk '{print $NF}') || return
+  [[ -z "$paths" ]] && return
+  while IFS= read -r wt_path; do
+    [[ -z "$wt_path" ]] && continue
+    # path は zsh で PATH と連動する特殊変数。局部化すると PATH が壊れるため使わない
+    gwq remove -- "$wt_path" < /dev/tty
+  done <<< "$paths"
 }
 
 # just のラッパ: 引数あれば素通し、無ければカレント justfile から fzf で recipe を選んで実行
