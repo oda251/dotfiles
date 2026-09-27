@@ -16,68 +16,42 @@ if ! ya --help 2>/dev/null | grep -q '\bpkg\b'; then
   exit 0
 fi
 
-# package.toml は `ya pkg install` が rev/hash を書き戻すロックファイルなので
-# chezmoi では create_ 扱い（初回のみ生成）にしている。
-# ソース側の宣言が正、実体との差分だけを ya pkg add/delete で同期する。
-extract_uses() {
-  sed -n 's/^[[:space:]]*use[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p'
-}
+sync_yazi_plugins() {
+  local package_toml="${HOME}/.config/yazi/package.toml"
+  local desired current missing extra
 
-desired="$(extract_uses <<'YAZI_PACKAGE_TOML'
+  # TOMLから利用パッケージを抽出し、一意にソートする関数
+  extract_uses() {
+    sed -n 's/^[[:space:]]*use[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' | sort -u
+  }
+
+  desired="$(extract_uses <<'YAZI_PACKAGE_TOML'
 {{ include "dot_config/yazi/create_package.toml.tmpl" }}
 YAZI_PACKAGE_TOML
 )"
 
-package_toml="${HOME}/.config/yazi/package.toml"
-current=""
-if [[ -f "${package_toml}" ]]; then
-  current="$(extract_uses <"${package_toml}")"
-fi
+  current=""
+  if [[ -f "${package_toml}" ]]; then
+    current="$(extract_uses <"${package_toml}")"
+  fi
 
-mapfile -t missing < <(comm -23 <(sort -u <<<"${desired}") <(sort -u <<<"${current}") | grep -v '^$' || true)
-mapfile -t extra < <(comm -13 <(sort -u <<<"${desired}") <(sort -u <<<"${current}") | grep -v '^$' || true)
+  # grep . で確実に空行を排除し、差分を取得
+  mapfile -t missing < <(comm -23 <(printf "%s\n" "${desired}" | grep .) <(printf "%s\n" "${current}" | grep .) || true)
+  mapfile -t extra < <(comm -13 <(printf "%s\n" "${desired}" | grep .) <(printf "%s\n" "${current}" | grep .) || true)
 
-if (( ${#missing[@]} > 0 )); then
-  echo "Adding yazi packages: ${missing[*]}" >&2
-  ya pkg add "${missing[@]}"
-fi
+  # mapfileが空入力を受け取った場合でも誤作動しないよう、要素自体が存在するかチェック
+  if [[ ${#missing[@]} -gt 0 && -n "${missing[0]:-}" ]]; then
+    echo "Adding yazi packages: ${missing[*]}" >&2
+    ya pkg add "${missing[@]}"
+  fi
 
-if (( ${#extra[@]} > 0 )); then
-  echo "Deleting yazi packages: ${extra[*]}" >&2
-  ya pkg delete "${extra[@]}" || echo "failed to delete: ${extra[*]}" >&2
-fi
+  if [[ ${#extra[@]} -gt 0 && -n "${extra[0]:-}" ]]; then
+    echo "Deleting yazi packages: ${extra[*]}" >&2
+    ya pkg delete "${extra[@]}" || echo "failed to delete: ${extra[*]}" >&2
+  fi
 
-run_install() {
-  ya pkg install
+  # ローカルの変更を破棄して強制インストール
+  ya pkg install --discard
 }
 
-plugins_root="${HOME}/.config/yazi/plugins/"
-max_retries=10
-attempt=0
-
-while true; do
-  if output="$(run_install 2>&1)"; then
-    printf '%s\n' "$output"
-    exit 0
-  fi
-
-  printf '%s\n' "$output" >&2
-
-  plugin_name="$(printf '%s\n' "$output" | sed -n 's/.*You have modified the contents of the `\([^`]*\)` plugin.*/\1/p' | head -n1)"
-  plugin_path="$(printf '%s\n' "$output" | sed -n 's#.*Please manually delete it from `\([^`]*\)` and re-run the command\..*#\1#p' | head -n1)"
-
-  if [[ -n "${plugin_name}" && -n "${plugin_path}" && "${plugin_path}" == "${plugins_root}"* ]]; then
-    attempt=$((attempt + 1))
-    if (( attempt > max_retries )); then
-      echo "Exceeded retry limit (${max_retries}) while repairing yazi plugins." >&2
-      exit 1
-    fi
-
-    echo "Detected locally modified yazi plugin: ${plugin_name}" >&2
-    echo "Removing ${plugin_path} and retrying (${attempt}/${max_retries})..." >&2
-    rm -rf -- "${plugin_path}"
-    continue
-  fi
-
-  exit 1
-done
+sync_yazi_plugins
