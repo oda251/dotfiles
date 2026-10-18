@@ -3,4 +3,5 @@
 {{ template "setup-brew-env.sh" . }}
 {{ template "setup-mise-env.sh" . }}
 
-uv tool install atcoder-tools --force
+source_dir="${CHEZMOI_SOURCE_DIR:-$HOME/.local/share/chezmoi}"
+mise -C "$source_dir" run setup-uv-tools
