@@ -1,5 +1,4 @@
+# Git hooks configuration via Lefthook
+# https://github.com/evilmartians/lefthook
 pre-commit:
-  commands:
-    distribute-ai-agent-configs:
-      run: scripts/distribute_ai_agent_configs.sh
-      stage_fixed: true
+  commands: {}

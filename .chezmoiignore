@@ -4,7 +4,6 @@ LICENSE
 CLAUDE.md
 lefthook.yml
 mise.toml
-ai-agent-configs
 scripts
 docs
 terraform
