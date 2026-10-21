@@ -11,6 +11,6 @@ alias = ["setup:uv", "uv-tools"]
 description = "Install tools via uv tool (atcoder-tools, semble)"
 run = [
   "uv tool install atcoder-tools --force",
-  "uv tool install git+https://github.com/MinishLab/semble --force",
+  'uv tool install "semble[mcp] @ git+https://github.com/MinishLab/semble" --force',
 ]
 
