@@ -4,7 +4,7 @@ ratio = [ 0, 1, 2 ]
 [opener]
 # エディタ（Neovim）: block = true でターミナルを占有
 edit = [
-	{ run = 'nvim "$@"', block = true, desc = "Neovim" }
+	{ run = 'nvim %s', block = true, desc = "Neovim" }
 ]
 # 画像ビューア: MacOSなら 'open'、Linuxなら 'xdg-open' や 'imv' など
 image = [
@@ -16,7 +16,7 @@ sops = [
 ]
 # WSLからホストWindowsの既定ブラウザで開く
 web = [
-	{ run = 'cmd.exe /c start "" "$(wslpath -w "$1")"', desc = "Open in Windows Browser" }
+	{ run = 'cmd.exe /c start "" "$(wslpath -w %s1)"', desc = "Open in Windows Browser" }
 ]
 
 [open]
