@@ -31,3 +31,5 @@
 - ローカルのGit Worktreeをまとめて管理するツール
 
 * 作成は `gwq add -b <branch>`、一覧は `gwq list -g`（クロスリポ、`--json` でスクリプト連携）
+
+@RTK.md
