@@ -1,14 +1,17 @@
 {{- if ne .chezmoi.os "windows" -}}
 #!/bin/bash
 
-# RTK configuration hash: {{ include "dot_agents/RTK.md" | sha256sum }} {{ include "dot_codex/hooks.json" | sha256sum }}
+# RTK configuration hash: {{ include "dot_agents/RTK.md" | sha256sum }} {{ include "dot_claude/settings.json" | sha256sum }} {{ include "dot_codex/hooks.json" | sha256sum }}
 
 if ! command -v rtk >/dev/null 2>&1; then
   exit 0
 fi
 
-rtk init -g --hook-only --auto-patch
+rtk init -g --auto-patch
 rtk init -g --codex
+rtk init -g --copilot --auto-patch
+rtk init -g --opencode --auto-patch
+rtk init -g --agent antigravity --auto-patch
 
 source_dir="${CHEZMOI_SOURCE_DIR:-$HOME/.local/share/chezmoi}"
 cp "$source_dir/dot_agents/AGENTS.md" "$HOME/.agents/AGENTS.md"
