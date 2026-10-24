@@ -14,9 +14,9 @@ image = [
 sops = [
 	{ run = 'sops "$@"', block = true, desc = "SOPS Edit" }
 ]
-# ブラウザ（HTMLなど）
+# WSLからホストWindowsの既定ブラウザで開く
 web = [
-	{ run = 'open "$@"', desc = "Open in Browser" }
+	{ run = 'cmd.exe /c start "" "$(wslpath -w "$1")"', desc = "Open in Windows Browser" }
 ]
 
 [open]
