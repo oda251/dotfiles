@@ -108,7 +108,22 @@ return {
         function(cmp)
           local selected
           if cmp.is_menu_visible() then
-            if cmp.get_selected_item() then
+            local items = cmp.get_items()
+            local selected_idx = cmp.get_selected_item_idx()
+            local copilot_idx
+            for index, item in ipairs(items) do
+              if item.source_id == "copilot" then
+                copilot_idx = index
+                break
+              end
+            end
+
+            if copilot_idx and (selected_idx == nil or selected_idx == 1) then
+              if selected_idx ~= copilot_idx then
+                require("blink.cmp.completion.list").select(copilot_idx, { auto_insert = false })
+              end
+              selected = true
+            elseif cmp.get_selected_item() then
               selected = cmp.select_prev()
             else
               selected = cmp.select_next()
