@@ -1,5 +1,6 @@
 return {
   "petertriho/nvim-scrollbar",
+  branch = "v1",
   event = "BufReadPost",
   dependencies = {
     "kevinhwang91/nvim-hlslens",

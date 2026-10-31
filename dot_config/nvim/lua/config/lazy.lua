@@ -48,7 +48,14 @@ vim.api.nvim_create_autocmd("VimEnter", {
       local state_dir = vim.fn.stdpath("state")
       vim.fn.mkdir(state_dir, "p")
       local stamp = state_dir .. "/lazy-auto-update"
-      local last_update = tonumber((vim.fn.readfile(stamp)[1] or ""))
+      local function last_update_time()
+        if vim.fn.filereadable(stamp) ~= 1 then
+          return nil
+        end
+        return tonumber(vim.fn.readfile(stamp)[1] or "")
+      end
+
+      local last_update = last_update_time()
       if last_update and os.time() - last_update < 86400 then
         return
       end
@@ -71,7 +78,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
           end
           acquired = true
 
-          local current_update = tonumber((vim.fn.readfile(stamp)[1] or ""))
+          local current_update = last_update_time()
           if current_update and os.time() - current_update < 86400 then
             vim.fn.chanclose(job, "stdin")
             return
