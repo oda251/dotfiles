@@ -1,0 +1,26 @@
+{
+  "AtCoder C++ template": {
+    "prefix": "atcoder",
+    "body": [
+      "# pragma GCC target(\"avx2\")",
+      "# pragma GCC optimize(\"O3\")",
+      "# pragma GCC optimize(\"unroll-loops\")",
+      "# include <bits/stdc++.h>",
+      "# include <atcoder/all>",
+      "using namespace std;",
+      "using ll = long long;",
+      "using ull = unsigned long long;",
+      "",
+      "const auto io_setup = [] {",
+      "    ios::sync_with_stdio(false);",
+      "    cin.tie(nullptr);",
+      "    return 0;",
+      "}();",
+      "",
+      "int main() {",
+      "    ${0}",
+      "}"
+    ],
+    "description": "AtCoder C++ template with fast I/O setup"
+  }
+}
