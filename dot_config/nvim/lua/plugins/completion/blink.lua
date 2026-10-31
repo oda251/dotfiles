@@ -28,7 +28,7 @@ return {
       preset = "default",
       ["<C-l>"] = {
         function(cmp)
-          if cmp.is_visible() then
+          if cmp.get_selected_item() then
             return cmp.accept()
           elseif require("copilot.suggestion").is_visible() then
             require("copilot.suggestion").accept()
@@ -39,12 +39,47 @@ return {
       },
       ["<M-l>"] = {
         function(cmp)
-          if cmp.is_visible() then
+          if cmp.get_selected_item() then
             return cmp.accept()
           elseif require("copilot.suggestion").is_visible() then
             require("copilot.suggestion").accept()
             return true
           end
+        end,
+        "fallback",
+      },
+      ["<Tab>"] = {
+        function(cmp)
+          if cmp.get_selected_item() then return cmp.select_next() end
+        end,
+        "fallback",
+      },
+      ["<S-Tab>"] = {
+        function(cmp)
+          if cmp.is_menu_visible() then
+            if cmp.get_selected_item() then return cmp.select_prev() end
+            return cmp.select_next()
+          end
+          return cmp.show({ initial_selected_item_idx = -1 })
+        end,
+        "snippet_backward",
+        "fallback",
+      },
+      ["<Up>"] = {
+        function(cmp)
+          if cmp.get_selected_item() then return cmp.select_prev() end
+        end,
+        "fallback",
+      },
+      ["<Down>"] = {
+        function(cmp)
+          if cmp.get_selected_item() then return cmp.select_next() end
+        end,
+        "fallback",
+      },
+      ["<CR>"] = {
+        function(cmp)
+          if cmp.get_selected_item() then return cmp.accept() end
         end,
         "fallback",
       },
@@ -60,6 +95,10 @@ return {
       menu = { auto_show = true },
       ghost_text = { enabled = false },
       documentation = { auto_show = false },
+      list = {
+        cycle = { from_top = true, from_bottom = true },
+        selection = { preselect = false, auto_insert = false },
+      },
     },
 
     -- Default list of enabled providers defined so that you can extend it

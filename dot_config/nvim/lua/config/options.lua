@@ -10,6 +10,11 @@ vim.opt.relativenumber = true -- カーソル位置からの相対行番号
 vim.opt.cursorline = true -- 現在の行をハイライト
 vim.opt.termguicolors = true -- 真の色（24-bit color）を有効化
 vim.opt.laststatus = 3 -- ステータスラインを一本化
+vim.opt.mouse = "a" -- マウス操作を有効化
+vim.opt.foldcolumn = "1" -- 折りたたみ列を表示
+vim.opt.foldlevel = 99
+vim.opt.foldlevelstart = 99
+vim.opt.foldenable = true
 
 -- 編集補助
 vim.opt.expandtab = true -- タブをスペースに変換

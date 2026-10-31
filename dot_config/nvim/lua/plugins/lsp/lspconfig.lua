@@ -10,6 +10,14 @@ return {
           vim.lsp.config("*", { capabilities = caps })
         end,
       })
+      vim.api.nvim_create_autocmd("LspAttach", {
+        callback = function(args)
+          vim.keymap.set("n", "<C-LeftMouse>", "<LeftMouse><cmd>lua vim.lsp.buf.definition()<CR>", {
+            buffer = args.buf,
+            desc = "Go to definition",
+          })
+        end,
+      })
       local servers = { "lua_ls", "vtsls", "tailwindcss", "clangd", "rust_analyzer", "pyright" }
       for _, server in ipairs(servers) do
         vim.lsp.enable(server)
