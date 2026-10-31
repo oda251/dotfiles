@@ -1,3 +1,49 @@
+local manual_selection = false
+
+local function accept_and_replay(cmp, key)
+  if not manual_selection or not cmp.get_selected_item() then
+    return
+  end
+
+  local accepted = cmp.accept({
+    callback = function()
+      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(key, true, false, true), "i", false)
+    end,
+  })
+
+  if accepted then
+    manual_selection = false
+    return true
+  end
+end
+
+vim.api.nvim_create_autocmd("InsertCharPre", {
+  callback = function()
+    local char = vim.v.char
+    if not manual_selection or char == "" or char:find("%c") then
+      return
+    end
+
+    local ok, cmp = pcall(require, "blink.cmp")
+    if ok and accept_and_replay(cmp, char) then
+      vim.v.char = ""
+    end
+  end,
+})
+
+vim.api.nvim_create_autocmd("InsertLeave", {
+  callback = function()
+    manual_selection = false
+  end,
+})
+
+local escape = vim.api.nvim_replace_termcodes("<Esc>", true, true, true)
+vim.on_key(function(key)
+  if key == escape then
+    manual_selection = false
+  end
+end, vim.api.nvim_create_namespace("blink_completion_manual_selection"))
+
 return {
   "saghen/blink.cmp",
   event = "InsertEnter",
@@ -28,6 +74,7 @@ return {
       preset = "default",
       ["<C-l>"] = {
         function(cmp)
+          manual_selection = false
           if cmp.get_selected_item() then
             return cmp.accept()
           elseif require("copilot.suggestion").is_visible() then
@@ -39,6 +86,7 @@ return {
       },
       ["<M-l>"] = {
         function(cmp)
+          manual_selection = false
           if cmp.get_selected_item() then
             return cmp.accept()
           elseif require("copilot.suggestion").is_visible() then
@@ -50,36 +98,77 @@ return {
       },
       ["<Tab>"] = {
         function(cmp)
-          if cmp.get_selected_item() then return cmp.select_next() end
+          if cmp.get_selected_item() then
+            return cmp.select_next()
+          end
         end,
         "fallback",
       },
       ["<S-Tab>"] = {
         function(cmp)
+          local selected
           if cmp.is_menu_visible() then
-            if cmp.get_selected_item() then return cmp.select_prev() end
-            return cmp.select_next()
+            if cmp.get_selected_item() then
+              selected = cmp.select_prev()
+            else
+              selected = cmp.select_next()
+            end
+          else
+            selected = cmp.show({ initial_selected_item_idx = -1 })
           end
-          return cmp.show({ initial_selected_item_idx = -1 })
+
+          manual_selection = selected ~= nil
+          return selected
         end,
         "snippet_backward",
         "fallback",
       },
       ["<Up>"] = {
         function(cmp)
-          if cmp.get_selected_item() then return cmp.select_prev() end
+          if cmp.get_selected_item() then
+            return cmp.select_prev()
+          end
         end,
         "fallback",
       },
       ["<Down>"] = {
         function(cmp)
-          if cmp.get_selected_item() then return cmp.select_next() end
+          if cmp.get_selected_item() then
+            return cmp.select_next()
+          end
+        end,
+        "fallback",
+      },
+      ["<BS>"] = {
+        function(cmp)
+          return accept_and_replay(cmp, "<BS>")
+        end,
+        "fallback",
+      },
+      ["<Del>"] = {
+        function(cmp)
+          return accept_and_replay(cmp, "<Del>")
+        end,
+        "fallback",
+      },
+      ["<C-w>"] = {
+        function(cmp)
+          return accept_and_replay(cmp, "<C-w>")
+        end,
+        "fallback",
+      },
+      ["<C-u>"] = {
+        function(cmp)
+          return accept_and_replay(cmp, "<C-u>")
         end,
         "fallback",
       },
       ["<CR>"] = {
         function(cmp)
-          if cmp.get_selected_item() then return cmp.accept() end
+          manual_selection = false
+          if cmp.get_selected_item() then
+            return cmp.accept()
+          end
         end,
         "fallback",
       },
