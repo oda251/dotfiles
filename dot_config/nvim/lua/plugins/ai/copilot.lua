@@ -12,7 +12,7 @@ return {
         debounce = 50,
       },
       nes = {
-        enabled = true,
+        enabled = false,
         auto_trigger = true,
         keymap = {
           accept_and_goto = "<leader>p",
