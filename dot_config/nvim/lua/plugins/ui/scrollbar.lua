@@ -1,16 +1,16 @@
 return {
   "petertriho/nvim-scrollbar",
-  branch = "v1",
+  branch = "refactor/v2",
   event = "BufReadPost",
   dependencies = {
-    "kevinhwang91/nvim-hlslens",
+    "lewis6991/gitsigns.nvim",
   },
   opts = {
-    show_in_active_only = true,
+    providers = {
+      gitsigns = true,
+    },
+    scrollbar = {
+      visibility = "active",
+    },
   },
-  config = function(_, opts)
-    local scrollbar = require("scrollbar")
-    scrollbar.setup(opts)
-    pcall(require("scrollbar.handlers.gitsigns").setup)
-  end,
 }
