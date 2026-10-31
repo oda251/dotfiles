@@ -5,6 +5,16 @@ export XDG_CONFIG_HOME="$HOME/.config"
 # ネストシェルで継承された PATH/FPATH の重複を除去（compdump の無効化を防ぐ）
 typeset -gU path fpath
 
+# g++/clang++ が AtCoder Library のヘッダーを見つけられるようにする
+_ac_library_include="$HOME/atcoder/ac-library"
+if [[ -d "$_ac_library_include" ]]; then
+  case ":${CPATH:-}:" in
+    *":${_ac_library_include}:"*) ;;
+    *) export CPATH="${CPATH:+$CPATH:}${_ac_library_include}" ;;
+  esac
+fi
+unset _ac_library_include
+
 {{- if ne .chezmoi.os "windows" }}
 # brew shellenv のキャッシュ
 _brew_shellenv_cache() {
