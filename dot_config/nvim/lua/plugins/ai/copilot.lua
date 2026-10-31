@@ -1,5 +1,6 @@
 return {
   "zbirenbaum/copilot.lua",
+  dependencies = { "copilotlsp-nvim/copilot-lsp" },
   cmd = "Copilot",
   event = "InsertEnter",
   config = function()
@@ -9,6 +10,15 @@ return {
         enabled = true,
         auto_trigger = true,
         debounce = 50,
+      },
+      nes = {
+        enabled = true,
+        auto_trigger = true,
+        keymap = {
+          accept_and_goto = "<leader>p",
+          accept = false,
+          dismiss = "<Esc>",
+        },
       },
       panel = { enabled = false },
       filetypes = {
