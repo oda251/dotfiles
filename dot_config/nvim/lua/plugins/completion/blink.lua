@@ -125,17 +125,29 @@ return {
       },
       ["<Up>"] = {
         function(cmp)
-          if cmp.get_selected_item() then
-            return cmp.select_prev()
+          if not cmp.is_menu_visible() then
+            return
           end
+          local index = cmp.get_selected_item_idx()
+          if index == 1 then
+            require("blink.cmp.completion.list").select(#cmp.get_items(), { auto_insert = false })
+            return true
+          end
+          return cmp.select_prev()
         end,
         "fallback",
       },
       ["<Down>"] = {
         function(cmp)
-          if cmp.get_selected_item() then
-            return cmp.select_next()
+          if not cmp.is_menu_visible() then
+            return
           end
+          local index = cmp.get_selected_item_idx()
+          if index == #cmp.get_items() then
+            require("blink.cmp.completion.list").select(1, { auto_insert = false })
+            return true
+          end
+          return cmp.select_next()
         end,
         "fallback",
       },
