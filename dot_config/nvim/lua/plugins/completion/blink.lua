@@ -130,7 +130,7 @@ return {
               selected = cmp.select_next()
             end
           else
-            selected = cmp.show({ initial_selected_item_idx = -1 })
+            selected = cmp.show({ initial_selected_item_idx = 1 })
           end
 
           manual_selection = selected ~= nil
