@@ -1,6 +1,6 @@
 return {
   "stevearc/conform.nvim",
-  event = { "BufWritePre" },
+  event = { "BufWritePre", "InsertEnter" },
   cmd = { "ConformInfo" },
   keys = {
     {
@@ -36,9 +36,27 @@ return {
 
     -- oxfmt は conform 組み込みの定義を使う。node_modules/.bin を優先解決し
     -- .oxfmtrc.json を cwd の基準にするため、プロジェクト固定版と揃う
+    local format_on_insert_leave = {
+      cpp = true,
+      python = true,
+      typescript = true,
+      typescriptreact = true,
+    }
+
+    vim.api.nvim_create_autocmd("InsertLeave", {
+      callback = function(args)
+        if not format_on_insert_leave[vim.bo[args.buf].filetype] then
+          return
+        end
+        require("conform").format({ bufnr = args.buf, async = false, lsp_fallback = true })
+      end,
+    })
+
     return {
       formatters_by_ft = {
+        cpp = {},
         lua = { "stylua" },
+        python = { "ruff_format" },
         javascript = get_web_formatter,
         typescript = get_web_formatter,
         javascriptreact = get_web_formatter,
