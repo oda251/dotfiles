@@ -3,6 +3,44 @@
 local augroup = vim.api.nvim_create_augroup
 local autocmd = vim.api.nvim_create_autocmd
 
+vim.opt.viewoptions:append("folds")
+
+augroup("PersistViews", { clear = true })
+autocmd("BufWinLeave", {
+  group = "PersistViews",
+  pattern = "*",
+  callback = function(args)
+    if vim.bo[args.buf].buftype == "" and vim.api.nvim_buf_get_name(args.buf) ~= "" then
+      vim.cmd("silent! mkview")
+    end
+  end,
+})
+autocmd("BufWinEnter", {
+  group = "PersistViews",
+  pattern = "*",
+  callback = function(args)
+    if vim.bo[args.buf].buftype == "" and vim.api.nvim_buf_get_name(args.buf) ~= "" then
+      vim.cmd("silent! loadview")
+    end
+  end,
+})
+
+augroup("CopilotBlinkMenu", { clear = true })
+autocmd("User", {
+  group = "CopilotBlinkMenu",
+  pattern = "BlinkCmpMenuOpen",
+  callback = function()
+    vim.b.copilot_suggestion_hidden = true
+  end,
+})
+autocmd("User", {
+  group = "CopilotBlinkMenu",
+  pattern = "BlinkCmpMenuClose",
+  callback = function()
+    vim.b.copilot_suggestion_hidden = false
+  end,
+})
+
 -- ファイルが外部で変更されたら自動でリロード
 augroup("AutoReload", { clear = true })
 autocmd({ "BufEnter", "CursorHold", "CursorHoldI", "FocusGained" }, {
