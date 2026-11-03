@@ -48,7 +48,13 @@ return {
         if not format_on_insert_leave[vim.bo[args.buf].filetype] then
           return
         end
-        require("conform").format({ bufnr = args.buf, async = false, lsp_fallback = true })
+        local format_opts = { bufnr = args.buf, async = false }
+        if vim.bo[args.buf].filetype == "cpp" then
+          format_opts.lsp_format = "prefer"
+        else
+          format_opts.lsp_fallback = true
+        end
+        require("conform").format(format_opts)
       end,
     })
 

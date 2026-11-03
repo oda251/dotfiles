@@ -10,6 +10,10 @@ return {
       gitsigns = true,
     },
     scrollbar = {
+      placement = {
+        anchor = "NW",
+        gutter = "inner",
+      },
       visibility = "active",
     },
   },

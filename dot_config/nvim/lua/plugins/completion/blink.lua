@@ -96,15 +96,23 @@ return {
         end,
         "fallback",
       },
-      ["<Tab>"] = {
+      ["<Tab>"] = { "fallback" },
+      ["<S-Tab>"] = { "fallback" },
+      ["<M-Tab>"] = {
         function(cmp)
-          if cmp.get_selected_item() then
-            return cmp.select_next()
+          local selected
+          if cmp.is_menu_visible() then
+            selected = cmp.select_next()
+          else
+            selected = cmp.show({ initial_selected_item_idx = 1 })
           end
+
+          manual_selection = selected ~= nil
+          return selected
         end,
         "fallback",
       },
-      ["<S-Tab>"] = {
+      ["<M-S-Tab>"] = {
         function(cmp)
           local selected
           if cmp.is_menu_visible() then

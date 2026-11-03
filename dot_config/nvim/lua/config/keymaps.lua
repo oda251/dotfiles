@@ -9,6 +9,9 @@ keymap("n", "<C-j>", "<C-w>j", opts)
 keymap("n", "<C-k>", "<C-w>k", opts)
 keymap("n", "<C-l>", "<C-w>l", opts)
 
+keymap("i", "<Tab>", "<C-t>", opts)
+keymap("i", "<S-Tab>", "<C-d>", opts)
+
 -- バッファ操作
 keymap("n", "<leader>bd", ":bdelete<CR>", { desc = "Delete buffer" })
 keymap("n", "<S-l>", ":bnext<CR>", opts)
