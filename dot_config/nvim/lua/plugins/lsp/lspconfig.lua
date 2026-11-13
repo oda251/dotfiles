@@ -2,6 +2,7 @@ return {
   {
     "neovim/nvim-lspconfig",
     event = { "BufReadPre", "BufNewFile" },
+    dependencies = { "mason-org/mason-lspconfig.nvim" },
     config = function()
       vim.api.nvim_create_autocmd("LspAttach", {
         once = true,
@@ -18,7 +19,7 @@ return {
           })
         end,
       })
-      local servers = { "lua_ls", "vtsls", "tailwindcss", "clangd", "rust_analyzer", "pyright" }
+      local servers = { "lua_ls", "vtsls", "clangd", "rust_analyzer", "pyright" }
       for _, server in ipairs(servers) do
         vim.lsp.enable(server)
       end
