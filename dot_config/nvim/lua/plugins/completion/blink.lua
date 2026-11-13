@@ -97,22 +97,7 @@ return {
         "fallback",
       },
       ["<Tab>"] = { "fallback" },
-      ["<S-Tab>"] = { "fallback" },
-      ["<M-Tab>"] = {
-        function(cmp)
-          local selected
-          if cmp.is_menu_visible() then
-            selected = cmp.select_next()
-          else
-            selected = cmp.show({ initial_selected_item_idx = 1 })
-          end
-
-          manual_selection = selected ~= nil
-          return selected
-        end,
-        "fallback",
-      },
-      ["<M-S-Tab>"] = {
+      ["<S-Tab>"] = {
         function(cmp)
           local selected
           if cmp.is_menu_visible() then
@@ -147,34 +132,10 @@ return {
         "snippet_backward",
         "fallback",
       },
-      ["<Up>"] = {
-        function(cmp)
-          if not cmp.is_menu_visible() then
-            return
-          end
-          local index = cmp.get_selected_item_idx()
-          if index == 1 then
-            require("blink.cmp.completion.list").select(#cmp.get_items(), { auto_insert = false })
-            return true
-          end
-          return cmp.select_prev()
-        end,
-        "fallback",
-      },
-      ["<Down>"] = {
-        function(cmp)
-          if not cmp.is_menu_visible() then
-            return
-          end
-          local index = cmp.get_selected_item_idx()
-          if index == #cmp.get_items() then
-            require("blink.cmp.completion.list").select(1, { auto_insert = false })
-            return true
-          end
-          return cmp.select_next()
-        end,
-        "fallback",
-      },
+      ["<M-Tab>"] = { "fallback" },
+      ["<M-S-Tab>"] = { "fallback" },
+      ["<Up>"] = { "fallback" },
+      ["<Down>"] = { "fallback" },
       ["<BS>"] = {
         function(cmp)
           return accept_and_replay(cmp, "<BS>")
