@@ -2,27 +2,15 @@
 
 React プロジェクト固有のルール。ts.md と併せて適用する。
 
-## useEffect を使わない
-
-useEffect はほぼ全てのケースで別の手段に置き換えられる。
-
-| やりたいこと | useEffect の代わりに |
-|-------------|-------------------|
-| データ取得 | TanStack Query / SWR |
-| URL 同期 | ルーターの searchParams |
-| 派生値の計算 | useMemo またはレンダー中に直接計算 |
-| イベント購読 | useSyncExternalStore |
-
 ## コンポーネント設計
 
-- **Compound Pattern**: 関連するコンポーネントを親に紐付けてまとめる
+- Compound Pattern: 高凝集なコンポーネントを親に紐付ける
 
-## 状態管理の優先順位
+## 状態管理
 
-上から順に検討し、上で解決できないときだけ下に進む。
+安易にuseState等を使わない。下記場面を代表に、より適切な管理方法を検討する
 
-1. **サーバー状態** → TanStack Query / SWR
-2. **URL 状態** → クエリパラメータ / パスパラメータ
-3. **永続化が必要な状態** → Cookie / IndexedDB
-4. **クライアント共有状態** → zustand
-5. **コンポーネントローカル状態** → useState（やむを得ない場合のみ）
+1. サーバー状態 → TanStack Query / SWR
+2. 一覧のフィルタ → クエリパラメータ
+3. ユーザ設定 → Cookie / IndexedDB
+4. 入力フォーム → react-hook-form
