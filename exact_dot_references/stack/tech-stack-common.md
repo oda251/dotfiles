@@ -4,7 +4,7 @@
 
 ## ツールバージョン管理 / 環境変数: mise
 
-- asdf/direnv ではなく mise を使う
+- mise を使う
 - `mise.toml` でツールバージョンと `.env` 読み込みを一元管理する
 
 ## Git Hooks: Lefthook
