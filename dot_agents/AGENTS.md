@@ -18,7 +18,7 @@
 
 ## openurl
 
-- `openurl <http(s)-URL>` はOS既定のブラウザーを開く（WSLではホストWindows）
+- `openurl <http(s)-URL>` : ブラウザでURLを開くコマンド。 ユーザにURLを提示する際、このコマンドで直接開く
 
 ## ghq
 
