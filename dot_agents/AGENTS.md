@@ -24,6 +24,10 @@
 
 - WSLのエージェントからホストWindowsの既定ブラウザーを開くときは `$HOME/.local/bin/open-url <http(s)-URL>` を使う
 
+## Playwright CLI
+
+- ブラウザー操作には `playwright-cli` を使う。詳細が必要なら `playwright-cli --help` に表示される同梱スキルを参照する
+
 ## ghq
 
 - ローカルのGitリポジトリをまとめて管理するツール
