@@ -11,3 +11,7 @@ AI コーディングツール（Claude Code, Codex 等）の共通設定マス�
 
 各エージェント（`dot_claude/`, `dot_codex/`）はこれらに対してシンボリックリンクを張る構成になっており、エージェント共通の指示やスキルを追加・変更する場合は `dot_agents/` 配下で行う。
 Claude Code 固有の設定（hooks, settings.json, statusline 等）は `dot_claude/` 直下で管理する。
+
+## WSLでURLを開く
+
+対話シェルでは `openurl <http(s)-URL>` でホストWindowsの既定ブラウザーを開く。D2 devserverのプレビューを表示するときにも使う。エージェントなど非対話シェルでは `$HOME/.local/bin/open-url <http(s)-URL>` を実行する。

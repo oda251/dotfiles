@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# -ne 1 || -z "${1:-}" ]]; then
+  printf 'Usage: open-url <http(s)-URL>\n' >&2
+  exit 2
+fi
+
+url=$1
+case "$url" in
+  http://*|https://*) ;;
+  *)
+    printf 'open-url: only http:// and https:// URLs are supported\n' >&2
+    exit 2
+    ;;
+esac
+
+if [[ "$url" == *$'\r'* || "$url" == *$'\n'* ]]; then
+  printf 'open-url: URL must not contain line breaks\n' >&2
+  exit 2
+fi
+
+if command -v powershell.exe >/dev/null 2>&1; then
+  powershell="$(command -v powershell.exe)"
+elif [[ -x /mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe ]]; then
+  powershell=/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe
+else
+  printf 'open-url: powershell.exe is unavailable; run this from WSL with Windows interop enabled\n' >&2
+  exit 1
+fi
+
+printf '%s' "$url" | "$powershell" -NoProfile -NonInteractive -Command '
+$url = [Console]::In.ReadToEnd()
+Start-Process -FilePath $url
+'

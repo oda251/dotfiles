@@ -20,6 +20,10 @@
 
 - dotfiles管理。使用ツールやツール設定、AIエージェント設定など環境全般を管理する（`~/.local/share/chezmoi`）
 
+## open-url
+
+- WSLのエージェントからホストWindowsの既定ブラウザーを開くときは `$HOME/.local/bin/open-url <http(s)-URL>` を使う
+
 ## ghq
 
 - ローカルのGitリポジトリをまとめて管理するツール
