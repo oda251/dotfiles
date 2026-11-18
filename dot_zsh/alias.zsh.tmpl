@@ -7,7 +7,6 @@ alias pwb="git rev-parse --abbrev-ref HEAD | pbcopy"
 copy() { pbcopy "$@" }
 {{- else if eq .chezmoi.os "linux" }}
 if [[ -n "${WSL_DISTRO_NAME:-}" ]]; then
-    alias openurl='open-url'
     # clip.exe は stdin をコンソールのコードページで解釈するため非 ASCII が化ける。
     # PowerShell に UTF-8 で読ませ、改行は Windows 側の CRLF に揃えて渡す
     copy() {

@@ -14,4 +14,4 @@ Claude Code 固有の設定（hooks, settings.json, statusline 等）は `dot_cl
 
 ## WSLでURLを開く
 
-対話シェルでは `openurl <http(s)-URL>` でホストWindowsの既定ブラウザーを開く。D2 devserverのプレビューを表示するときにも使う。エージェントなど非対話シェルでは `$HOME/.local/bin/open-url <http(s)-URL>` を実行する。
+`openurl <http(s)-URL>` でホストWindowsの既定ブラウザーを開く。対話シェルでもエージェントなどの非対話シェルでも使え、D2 devserverのプレビュー表示にも利用する。
