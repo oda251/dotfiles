@@ -33,3 +33,7 @@
 * 作成は `gwq add -b <branch>`、一覧は `gwq list -g`（クロスリポ、`--json` でスクリプト連携）
 
 @RTK.md
+
+## Skillの作成・更新
+
+- スキルを作成・更新するときは [`references/skill-authoring.md`](references/skill-authoring.md) を参照する
