@@ -1,6 +1,6 @@
 # 常時適用ポリシー
 
-- タスクに取り掛かる前に `~/.references/` の関連ドキュメントを参照する:
+- タスクに取り掛かる前に `~/.references/` の関連ドキュメントを参照する
   - `policy/` — 常に参照する規約。`common.md` は常時読む。その他、タスクに関連し得るものは必ず読む
   - `stack/` — 技術選定。プロジェクト構築時に読む
 
@@ -12,21 +12,13 @@
 
 # 汎用CLIツール
 
-## obsidian
-
-- 作業記録・知見、その他ドキュメント全般を管理する（`~/obsidian-vault`）
-
 ## chezmoi
 
 - dotfiles管理。使用ツールやツール設定、AIエージェント設定など環境全般を管理する（`~/.local/share/chezmoi`）
 
 ## openurl
 
-- WSLのエージェントからホストWindowsの既定ブラウザーを開くときは `openurl <http(s)-URL>` を使う
-
-## Playwright CLI
-
-- ブラウザー操作には `playwright-cli` を使う。詳細が必要なら `playwright-cli --help` に表示される同梱スキルを参照する
+- ユーザにURLを提示するときは `openurl <http(s)-URL>` を使う
 
 ## ghq
 
