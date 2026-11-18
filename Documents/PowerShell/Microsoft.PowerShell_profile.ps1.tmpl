@@ -58,6 +58,20 @@ function copy {
     Write-Warning "No input to copy"
 }
 
+function openurl {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true, Position = 0)]
+        [string]$Url
+    )
+
+    if ($Url -notmatch '^https?://' -or $Url -match "[`r`n]") {
+        throw "Usage: openurl <http(s)-URL>"
+    }
+
+    Start-Process -FilePath $Url
+}
+
 function y {
     $tmp = New-TemporaryFile
     try {

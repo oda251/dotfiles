@@ -18,7 +18,7 @@
 
 ## openurl
 
-- ユーザにURLを提示するときは `openurl <http(s)-URL>` を使う
+- `openurl <http(s)-URL>` はOS既定のブラウザーを開く（WSLではホストWindows）
 
 ## ghq
 
