@@ -1,6 +1,6 @@
 # 常時適用ポリシー
 
-- タスクに取り掛かる前に `~/.references/` の関連ドキュメントを参照する:
+- タスクに取り掛かる前に `~/.references/` の関連ドキュメントを参照する
   - `policy/` — 常に参照する規約。`common.md` は常時読む。その他、タスクに関連し得るものは必ず読む
   - `stack/` — 技術選定。プロジェクト構築時に読む
 
@@ -12,13 +12,13 @@
 
 # 汎用CLIツール
 
-## obsidian
-
-- 作業記録・知見、その他ドキュメント全般を管理する（`~/obsidian-vault`）
-
 ## chezmoi
 
 - dotfiles管理。使用ツールやツール設定、AIエージェント設定など環境全般を管理する（`~/.local/share/chezmoi`）
+
+## openurl
+
+- `openurl <http(s)-URL>` : ブラウザでURLを開くコマンド。 ユーザにURLを提示する際、このコマンドで直接開く
 
 ## ghq
 
@@ -33,3 +33,7 @@
 * 作成は `gwq add -b <branch>`、一覧は `gwq list -g`（クロスリポ、`--json` でスクリプト連携）
 
 @RTK.md
+
+## Skillの作成・更新
+
+- スキルを作成・更新するときは [`references/skill-authoring.md`](references/skill-authoring.md) を参照する

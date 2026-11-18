@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# -ne 1 || -z "${1:-}" ]]; then
+  printf 'Usage: openurl <http(s)-URL>\n' >&2
+  exit 2
+fi
+
+url=$1
+case "$url" in
+  http://*|https://*) ;;
+  *)
+    printf 'openurl: only http:// and https:// URLs are supported\n' >&2
+    exit 2
+    ;;
+esac
+
+if [[ "$url" == *$'\r'* || "$url" == *$'\n'* ]]; then
+  printf 'openurl: URL must not contain line breaks\n' >&2
+  exit 2
+fi
+
+is_wsl() {
+  [[ -n "${WSL_DISTRO_NAME:-}" || -n "${WSL_INTEROP:-}" ]] && return 0
+  [[ -r /proc/sys/kernel/osrelease ]] && grep -qi microsoft /proc/sys/kernel/osrelease
+}
+
+open_windows() {
+  local candidate powershell=
+  for candidate in powershell.exe pwsh.exe pwsh; do
+    if command -v "$candidate" >/dev/null 2>&1; then
+      powershell="$(command -v "$candidate")"
+      break
+    fi
+  done
+
+  if [[ -z "$powershell" && -x /mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe ]]; then
+    powershell=/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe
+  fi
+  if [[ -z "$powershell" ]]; then
+    printf 'openurl: PowerShell is unavailable for opening a Windows URL\n' >&2
+    return 1
+  fi
+
+  printf '%s' "$url" | "$powershell" -NoProfile -NonInteractive -Command '
+$url = [Console]::In.ReadToEnd()
+Start-Process -FilePath $url
+'
+}
+
+platform="$(uname -s)"
+case "$platform" in
+  Darwin)
+    if ! command -v open >/dev/null 2>&1; then
+      printf 'openurl: macOS open command is unavailable\n' >&2
+      exit 1
+    fi
+    open "$url"
+    ;;
+  Linux)
+    if is_wsl; then
+      open_windows
+    elif command -v xdg-open >/dev/null 2>&1; then
+      xdg-open "$url"
+    elif command -v gio >/dev/null 2>&1; then
+      gio open "$url"
+    else
+      printf 'openurl: neither xdg-open nor gio is available\n' >&2
+      exit 1
+    fi
+    ;;
+  MINGW*|MSYS*|CYGWIN*|Windows_NT)
+    open_windows
+    ;;
+  *)
+    printf 'openurl: unsupported operating system: %s\n' "$platform" >&2
+    exit 1
+    ;;
+esac
